@@ -333,7 +333,7 @@ body = index_tpl.replace("__HEADER__", header("index.html", INDEX_ACTIONS)).repl
 body = body.replace("__SCENE_JSON__", scene_json())
 body = fill(body)
 if SITE_URL:
-    body = body.replace('content="assets/og-image.png"', f'content="{SITE_URL}/assets/og-image.png"')
+    body = body.replace('content="assets/og-image-v2.png"', f'content="{SITE_URL}/assets/og-image-v2.png"')
     body = body.replace('<meta property="og:type" content="website">',
                         f'<meta property="og:type" content="website">\n<meta property="og:url" content="{SITE_URL}/">')
 body = body + f"\n<script>{MOTION_JS}</script>\n<script>{I18N_JS}</script>"
