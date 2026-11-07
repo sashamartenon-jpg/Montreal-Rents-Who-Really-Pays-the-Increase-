@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1f5fa8">
+<title>SQL · Loyers Montréal</title>
+<meta name="description" content="Base SQLite en modèle en étoile (12 tables, 5 vues) et 12 requêtes analytiques sur les loyers, exécutables dans le navigateur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout : une colonne éditoriale de 1080 px ; chaque constat = texte court + graphique ; outils (simulateur) en grille tableur */
+:root {
+  /* Palette : bleu ciel #0593C6 (données, marque), rose #D83995 (accent unique), blanc #FCFFFF (surfaces) */
+  --bg: #f1f6f9;
+  --surface: #fcffff;
+  --ink: #0f1b26;
+  --ink-2: #44546a;
+  --ink-3: #607286;
+  --line: #d6e2ea;
+  --grid: #e6eef3;
+  --mtl: #0593c6;
+  --mtl-soft: #e0f2fa;
+  --link: #04739b;
+  --warm: #d83995;
+  --warm-ink: #b12a7a;
+  --warm-soft: #fbe5f1;
+  --other: #a5b3c1;
+  --u-studio: #c98500;
+  --u-1ch: #0593c6;
+  --u-2ch: #d83995;
+  --u-3ch: #6250d6;
+  --map-0: #eaf5fa; --map-1: #b9e0f1; --map-2: #7cc6e5; --map-3: #2fa6d6; --map-4: #0583b2; --map-5: #04557a;
+  --map-na: #e3e8ec;
+  --cell-in: #fff6c2;
+  --cell-sel: #0593c6;
+  --code-bg: #f4f9fb; --code-fg: #1b2733; --code-kw: #04739b; --code-str: #0d7a52; --code-com: #55687c; --code-num: #b12a7a; --code-fn: #5a46c9;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.2rem;
+  --step-4: clamp(2.3rem, 5.2vw, 3.8rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+    --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+    --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+    --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+    --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+    --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+  --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+  --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+  --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+  --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+  --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--mtl); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* barre du haut */
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.brand { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: .01em; }
+.brand span { color: var(--ink-3); font-weight: 500; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.btn { font: 500 .85rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--warm); border-color: var(--warm); color: #fff; }
+.btn.primary:hover { filter: brightness(1.06); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: 500 .8rem var(--font-body); background: var(--surface); color: var(--ink-2); border: 0; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* hero */
+.hero { padding-block: 40px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: end; }
+.eyebrow { font: 500 .75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--step-4); line-height: 1.02; margin: 0 0 16px; text-wrap: balance; letter-spacing: -.01em; }
+.hero h1 em { font-style: normal; color: var(--warm-ink); }
+.hero p.lede { font-size: 1.1rem; color: var(--ink-2); margin: 0 0 16px; max-width: 34em; }
+.pace { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.pace div { border-top: 3px solid var(--other); padding-top: 8px; }
+.pace div.now { border-top-color: var(--warm); }
+.pace b { display: block; font: 600 1.5rem var(--font-display); }
+.pace small { color: var(--ink-3); font-size: .82rem; line-height: 1.35; display: block; }
+
+/* sections */
+section.block { padding-block: 36px; border-top: 1px solid var(--line); }
+.block h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--step-3); line-height: 1.1; margin: 0 0 10px; text-wrap: balance; max-width: 22em; }
+.block .intro { color: var(--ink-2); max-width: 44em; margin: 0 0 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+.controls label.small { font-size: .78rem; color: var(--ink-3); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 .82rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 4px 10px 4px 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip .sw { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .5; }
+.chip[aria-pressed="false"] .sw { background: transparent; border: 1.5px solid var(--c); }
+.two { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font: 600 .95rem var(--font-body); margin: 0 0 2px; }
+.chart-sub { font-size: .8rem; color: var(--ink-3); margin: 0 0 8px; }
+.note { font-size: .8rem; color: var(--ink-3); margin: 10px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--ink-2); margin: 0 0 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.callout { border-left: 3px solid var(--warm); background: var(--warm-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 14px 0 0; max-width: 46em; font-size: .95rem; }
+
+/* svg */
+.axis text { fill: var(--ink-3); font: 11px var(--font-mono); }
+.axis line, .axis path { stroke: var(--line); }
+.gridline { stroke: var(--grid); }
+.lbl { fill: var(--ink-2); font: 500 11.5px var(--font-body); }
+.lbl.strong { fill: var(--ink); font-weight: 600; }
+.ann { fill: var(--ink-2); font: 12px var(--font-body); }
+.ann.big { fill: var(--ink); font: 600 15px var(--font-display); }
+.cross { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 8px 10px; font-size: .8rem; min-width: 150px; z-index: 5; }
+.tip .t { font: 600 .8rem var(--font-mono); margin-bottom: 4px; }
+.tip .r { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.tip .r b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .r i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--c); margin-right: 6px; }
+
+/* tableau / données */
+.tablewrap { overflow-x: auto; margin-top: 10px; }
+table.data { border-collapse: collapse; font-size: .82rem; width: 100%; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 5px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th { font-weight: 600; color: var(--ink-2); }
+details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); margin-top: 10px; }
+
+/* simulateur tableur */
+.sim { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.verdict { font-size: 1.05rem; }
+.verdict p { margin: 0 0 12px; }
+.verdict b { font-family: var(--font-display); font-size: 1.25rem; }
+.sheet { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); font-family: var(--font-mono); font-size: .8rem; }
+.fbar { display: flex; border-bottom: 1px solid var(--line); background: var(--bg); }
+.fbar .ref { width: 64px; flex: none; padding: 6px 8px; border-right: 1px solid var(--line); color: var(--ink-2); text-align: center; }
+.fbar .fx { padding: 6px 8px; color: var(--ink-3); border-right: 1px solid var(--line); font-style: italic; }
+.fbar .formula { padding: 6px 8px; overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; color: var(--ink); }
+.grid { overflow-x: auto; }
+.grid table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.grid col.c-rh { width: 36px; } .grid col.c-b { width: 42%; }
+.grid td .c { overflow-wrap: anywhere; }
+.grid th { background: var(--bg); color: var(--ink-3); font-weight: 400; border: 1px solid var(--line); padding: 3px 6px; text-align: center; }
+.grid td { border: 1px solid var(--grid); padding: 0; height: 30px; }
+.grid td.rh { background: var(--bg); color: var(--ink-3); text-align: center; width: 36px; border-color: var(--line); }
+.grid td .c { padding: 4px 8px; display: block; cursor: cell; font-family: var(--font-body); font-size: .84rem; }
+.grid td .c.v { text-align: right; font-family: var(--font-mono); }
+.grid td.sel { outline: 2px solid var(--cell-sel); outline-offset: -2px; }
+.grid td.in { background: var(--cell-in); }
+.grid td.in input, .grid td.in select { width: 100%; border: 0; background: transparent; color: var(--link); font: 500 .84rem var(--font-mono); padding: 4px 8px; text-align: right; }
+.grid td.sec .c { font-weight: 600; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; color: var(--ink-3); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+
+/* navigation */
+.topbar { flex-wrap: wrap; }
+.brand { color: var(--ink); text-decoration: none; }
+.nav { display: flex; gap: 2px; }
+.nav a { font: 500 .88rem var(--font-body); color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
+.nav a:hover { color: var(--ink); background: var(--bg); }
+.nav a[aria-current="page"] { background: var(--ink); color: var(--bg); }
+@media (max-width: 760px) {
+  .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
+}
+/* bandeau compétences (accueil) */
+.skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
+.skill { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--ink); transition: border-color .15s; }
+.skill:hover { border-color: var(--mtl); }
+.skill .tool { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); }
+.skill b { font: 600 1.05rem var(--font-display); }
+.skill small { color: var(--ink-3); font-size: .82rem; line-height: 1.4; }
+.skill .go { margin-top: auto; padding-top: 6px; font-size: .82rem; color: var(--link); }
+@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* pages compétences */
+.phero { padding-block: 40px 24px; max-width: 760px; }
+.phero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
+.phero p { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 16px; }
+.proves { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.proves li { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
+.figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 0; }
+.figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+.figure figcaption { font-size: .82rem; color: var(--ink-3); margin-top: 8px; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stepc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.stepc .n { font: 500 .72rem var(--font-mono); color: var(--ink-3); letter-spacing: .06em; }
+.stepc h3 { font: 600 1.05rem var(--font-display); margin: 4px 0 6px; }
+.stepc p { margin: 0; color: var(--ink-2); font-size: .9rem; }
+.code { background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 0; overflow-x: auto; font: 12.5px/1.55 var(--font-mono); tab-size: 4; }
+.code .k { color: var(--code-kw); font-weight: 500; }
+.code .s { color: var(--code-str); }
+.code .c { color: var(--code-com); font-style: italic; }
+.code .n { color: var(--code-num); }
+.code .f { color: var(--code-fn); }
+.code[data-lang="xl"] { white-space: pre-wrap; overflow-wrap: anywhere; }
+.qcard.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+.qcard { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.qcard h3 { font: 600 1.1rem var(--font-display); margin: 0 0 4px; }
+.qcard .why { color: var(--ink-2); font-size: .9rem; margin: 6px 0 10px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 10px; }
+.tags span { font: 500 .72rem var(--font-mono); background: var(--mtl-soft); color: var(--link); border-radius: 4px; padding: 2px 7px; }
+.status-banner { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-left: 4px solid var(--warm); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 8px; }
+.status-banner b { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+.status-banner p { margin: 4px 0 0; color: var(--ink-2); font-size: .92rem; }
+.pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 28px; border-top: 1px solid var(--line); }
+.pager a { text-decoration: none; font-weight: 500; }
+.erd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.erd .t { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font: .8rem/1.6 var(--font-mono); min-width: 0; }
+.erd .t.fact { border: 2px solid var(--mtl); }
+.erd .t h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); background: var(--bg); border-bottom: 1px solid var(--line); }
+.erd .t.fact h4 { background: var(--mtl-soft); color: var(--link); }
+.erd .t ul { list-style: none; margin: 0; padding: 6px 10px; color: var(--ink-2); }
+.erd .t li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+.gallery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 820px) {
+  .steps, .qcard, .qcard.wide, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* hero note */
+.hero-note { font-size: .8rem; color: var(--ink-3); margin: 12px 0 0; max-width: 40em; }
+/* relocation */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.kpi b { display: block; font: 600 1.7rem var(--font-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--ink-3); font-size: .8rem; line-height: 1.35; display: block; margin-top: 4px; }
+.kpi.hot b { color: var(--warm-ink); }
+/* implications */
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card .who { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.card h3 { font: 600 1.15rem var(--font-display); margin: 0; text-wrap: balance; }
+.card p { margin: 0; color: var(--ink-2); font-size: .92rem; }
+.card .dec { margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; font-size: .9rem; }
+.card .dec b { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--warm-ink); display: block; margin-bottom: 2px; }
+/* console SQL */
+.sqlbox { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; align-items: start; }
+.qtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.qtabs button { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.qtabs button[aria-pressed="true"] { border-color: var(--mtl); color: var(--link); background: var(--mtl-soft); }
+.qtitle { font-size: .9rem; color: var(--ink-2); margin: 0 0 8px; }
+textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 var(--font-mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; tab-size: 2; white-space: pre; overflow: auto; }
+.sqlbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+.sqlstat { font: .78rem var(--font-mono); color: var(--ink-3); }
+.sqlerr { color: #d03b3b; font: .82rem var(--font-mono); white-space: pre-wrap; }
+.schema { font: .76rem/1.5 var(--font-mono); color: var(--ink-2); }
+.schema b { color: var(--ink); display: block; margin-top: 8px; }
+.schema b:first-child { margin-top: 0; }
+/* fabrication */
+
+/* méthode */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow > * { text-decoration: none; color: var(--ink); }
+.flow a.flowlink:hover { border-color: var(--mtl); }
+.flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
+.flow b { display: block; font-family: var(--font-display); font-size: 1rem; }
+.flow small { color: var(--ink-3); display: block; line-height: 1.35; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.cols h3 { font: 600 1.05rem var(--font-display); margin: 0 0 8px; }
+.cols ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: .92rem; }
+.cols li { margin-bottom: 6px; }
+.star { font-family: var(--font-mono); font-size: .78rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
+.star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
+.star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* pied de page */
+footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: .85rem; z-index: 20; }
+
+@media (max-width: 820px) {
+  .hero, .two, .sim, .cols, .cards3, .sqlbox { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .flow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero { padding-block: 28px 20px; }
+}
+@media (max-width: 420px) { .brand span { display: none; } }
+
+/* ===================== identité visuelle : dégradé flou bleu, rose et corail, verre dépoli ===================== */
+:root {
+  --bg: #f3f6fb; --surface: #ffffff; --glass: rgba(255, 255, 255, .72); --glass-line: rgba(255, 255, 255, .85);
+  --ink: #13233a; --ink-2: #44546a; --ink-3: #5b6b82; --line: #dbe4ef; --grid: #e8eef6;
+  --mtl: #2f86d6; --mtl-soft: #e8f2fc; --link: #1f6fc0; --warm: #e0457b; --warm-ink: #b8285e; --warm-soft: #fdeaf1;
+  --coral: #f2876b; --other: #a9b6c6; --u-1ch: #2f86d6; --u-2ch: #e0457b; --u-3ch: #7b6cd9;
+  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0;
+  --cell-sel: #2f86d6; --warm-btn: #c9336b;
+  --font-display: "Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(19, 35, 58, .05), 0 12px 32px rgba(19, 35, 58, .07);
+  --mesh: radial-gradient(42% 60% at 34% 62%, rgba(242, 135, 107, .95) 0%, rgba(242, 135, 107, 0) 70%),
+          radial-gradient(38% 55% at 46% 48%, rgba(224, 69, 123, .95) 0%, rgba(224, 69, 123, 0) 70%),
+          radial-gradient(30% 70% at 60% 40%, rgba(30, 47, 92, .85) 0%, rgba(30, 47, 92, 0) 70%),
+          radial-gradient(45% 50% at 80% 75%, rgba(123, 108, 217, .55) 0%, rgba(123, 108, 217, 0) 70%),
+          linear-gradient(115deg, #2a78c8 0%, #3f93da 35%, #6fb0e6 70%, #a9d2f2 100%);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); } }
+:root[data-theme="dark"] {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+.skip { position: absolute; left: 12px; top: -48px; z-index: 60; background: #fff; color: #13233a; font: 600 .9rem var(--font-body); padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none; transition: top .2s; }
+.skip:focus { top: 0; }
+:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; border-radius: 4px; }
+.heroband :focus-visible, .top :focus-visible { outline-color: #fff; }
+body { background: var(--bg); font-family: var(--font-body); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(40% 35% at 95% 20%, rgba(224, 69, 123, .07), transparent 70%),
+              radial-gradient(45% 40% at 0% 70%, rgba(47, 134, 214, .08), transparent 70%); }
+h1, h2, h3 { font-family: var(--font-display); }
+.block h2 { font-weight: 400; letter-spacing: -.02em; font-size: clamp(1.9rem, 3.6vw, 2.7rem); line-height: 1.08; }
+.block h2::before { content: ""; display: block; width: 44px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--warm), var(--coral)); margin-bottom: 16px; }
+.kicker { font: 600 .74rem var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--warm-ink); margin: 0 0 8px; }
+
+/* en-tête flottant en verre */
+.top { position: sticky; top: 0; z-index: 30; background: rgba(18, 40, 78, .38); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.top .wrap { padding-block: 10px; }
+.top { transition: background .3s; }
+.top.solid { background: rgba(19, 35, 58, .88); }
+@media (max-width: 760px) { .top { position: relative; } .top .btn#share { display: none; } }
+.top .brand { color: #fff; font: 600 1.08rem var(--font-display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
+.top .brand::before { content: ""; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, #8ec2ea, var(--warm) 60%, var(--coral)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.top .brand span { color: rgba(255, 255, 255, .78); font-weight: 400; }
+.top .nav { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; padding: 4px; }
+.top .nav a { color: rgba(255, 255, 255, .92); border-radius: 999px; padding: 6px 14px; }
+.top .nav a:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+.top .nav a[aria-current="page"] { background: rgba(255, 255, 255, .95); color: #17325e; font-weight: 600; }
+.top .nav a[aria-current="page"]::before { content: "• "; color: var(--warm); }
+.top .btn { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .btn:hover { background: rgba(255, 255, 255, .24); border-color: rgba(255, 255, 255, .6); }
+.top .seg { border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .seg button { background: transparent; color: rgba(255, 255, 255, .85); }
+.top .seg button[aria-pressed="true"] { background: #fff; color: #17325e; }
+
+/* bandeau : maillage de dégradés flous et verre cannelé */
+.heroband { position: relative; isolation: isolate; color: #fff; background: var(--mesh); background-color: #2a78c8; overflow: hidden; margin-top: -60px; padding-top: 60px; border-bottom: 0; }
+.heroband::before { content: ""; position: absolute; inset: -10%; z-index: -1; background: var(--mesh); filter: blur(24px) saturate(115%); animation: drift 22s ease-in-out infinite alternate; }
+.heroband::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 1px, rgba(255,255,255,.03) 1px 9px, rgba(10,20,45,.07) 9px 10px, rgba(255,255,255,0) 10px 14px),
+              linear-gradient(90deg, rgba(9, 24, 52, .42) 0%, rgba(9, 24, 52, .18) 55%, rgba(9, 24, 52, .05) 100%); }
+@keyframes drift { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(-3%, 2%, 0) scale(1.06); } }
+.heroband .eyebrow { color: rgba(255, 255, 255, .92); font: 500 .8rem var(--font-body); letter-spacing: .14em; }
+.heroband h1, .heroband .phero h1 { color: #fff; font-family: var(--font-display); font-weight: 300; letter-spacing: -.035em; text-shadow: 0 2px 30px rgba(9, 24, 52, .25); }
+.heroband h1 em, .heroband h1 mark { font-style: normal; background: none; color: #fff; font-weight: 500; padding: 0; -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; }
+.heroband .phero { max-width: 1080px; padding-block: 64px 48px; }
+.heroband .phero h1 { font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.02; max-width: 14em; }
+.heroband .phero > p { color: rgba(255, 255, 255, .92); max-width: 44em; font-size: 1.08rem; }
+.heroband .phero p b { color: #fff; }
+.heroband .proves li { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .35); color: #fff; font-family: var(--font-body); border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.heroband .proves li.ai { background: #fff; color: #13233a; border-color: #fff; font-weight: 600; }
+.heroband a:not(.btn):not(.pill) { color: #fff; }
+.heroband .btn:not(.primary) { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .45); border-radius: 999px; }
+.heroband .btn.primary, .pill { background: #fff; color: #13233a; border: 0; border-radius: 999px; padding: 10px 18px; font: 600 .92rem var(--font-body); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; box-shadow: 0 8px 24px rgba(9, 24, 52, .2); }
+.heroband .btn.primary:hover, .pill:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--warm-btn); border-color: var(--warm-btn); color: #fff; font-weight: 600; border-radius: 999px; }
+.btn.primary:hover { background: var(--warm); border-color: var(--warm); filter: none; }
+
+/* accueil */
+.hero2 { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: center; min-height: min(72vh, 680px); padding-block: 36px 70px; }
+.hero2 h1 { font-size: clamp(2.6rem, 5.2vw, 4.5rem); line-height: 1; margin: 0 0 20px; max-width: 12.5em; }
+.hero2 .lede { color: rgba(255, 255, 255, .94); font-size: 1.12rem; max-width: 34em; margin: 0 0 26px; }
+.hero2 .lede b { color: #fff; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.cta .ghost { color: #fff; font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .5); padding-bottom: 2px; }
+.glass-stack { background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .35); border-radius: 26px; padding: 14px; -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); box-shadow: 0 20px 60px rgba(9, 24, 52, .25); }
+.glass-stack .handle { width: 46px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .8); margin: 2px auto 12px; }
+.glass-stack .where { font-size: .82rem; color: rgba(255, 255, 255, .92); margin: 0 6px 12px; display: flex; gap: 8px; align-items: center; }
+.gcard { background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .3); border-radius: 18px; padding: 14px 16px 10px; margin-top: 10px; position: relative; overflow: hidden; }
+.gcard .h { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.02rem; font-weight: 500; }
+.gcard .h small { font-size: .74rem; color: rgba(255, 255, 255, .88); }
+.gcard .row { display: flex; justify-content: space-between; align-items: end; margin-top: 10px; gap: 10px; }
+.gcard .row span { display: block; font-size: .74rem; color: rgba(255, 255, 255, .85); }
+.gcard .row b { font: 400 1.75rem/1.05 var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gcard .row .r { text-align: right; }
+.gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
+.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
+.hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
+.hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.hero-strip b { color: #fff; font-weight: 600; }
+@media (max-width: 900px) {
+  .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
+  .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+  .hero-strip a:last-child { grid-column: 1 / -1; }
+}
+
+/* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
+.hero-stage { position: relative; }
+.hero-stage > .wrap, .heroband.home > nav { position: relative; z-index: 1; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.heroband::before { animation: bloom 2s cubic-bezier(.2, .7, .2, 1) both, drift 22s ease-in-out 2s infinite alternate; }
+@keyframes bloom { from { opacity: .35; transform: translate3d(0, 0, 0) scale(1.22); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+#hero-curve { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+#hero-curve .area { fill: url(#hc-grad); opacity: 0; animation: hcFade 1.6s ease-out 2.1s both; }
+#hero-curve .line { fill: none; stroke: rgba(255, 255, 255, .62); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 12px rgba(255, 255, 255, .45)); }
+#hero-curve .line.go { animation: draw 2.7s cubic-bezier(.45, 0, .2, 1) .35s forwards; }
+#hero-curve .brk { stroke: rgba(255, 255, 255, .7); stroke-width: 1; stroke-dasharray: 3 7; opacity: 0; animation: hcFade .9s ease-out 2.2s both; }
+#hero-curve .dot { fill: #ffd9cc; opacity: 0; transform-box: fill-box; transform-origin: center; animation: hcPop .7s cubic-bezier(.2, .7, .2, 1) 2.55s both; }
+#hero-curve .halo { fill: none; stroke: #ffd9cc; stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: halo 2.6s ease-out 2.9s infinite; }
+#hero-curve .yr { fill: rgba(255, 255, 255, .7); font: 500 11px var(--font-body); letter-spacing: .1em; opacity: 0; animation: hcFade .8s ease-out both; }
+#hero-curve .yr.hot { fill: #ffd9cc; }
+#hero-curve .tag { fill: #fff; font: 500 13px var(--font-body); opacity: 0; animation: hcFade .8s ease-out 2.8s both; }
+.hero-year { position: absolute; right: 2%; top: 46%; transform: translateY(-50%); font: 300 clamp(8rem, 22vw, 20rem)/1 var(--font-display); letter-spacing: -.05em; color: rgba(255, 255, 255, .1); transition: opacity .5s; font-variant-numeric: tabular-nums; white-space: nowrap; user-select: none; }
+@keyframes hcFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hcPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes halo { 0% { opacity: .9; transform: scale(.6); } 70%, 100% { opacity: 0; transform: scale(3.2); } }
+.hero2 h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .14em; margin-bottom: -.14em; }
+.hero2 h1 .wi { display: inline-block; transform: translateY(112%); animation: wordUp 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.15s + var(--i, 0) * .065s); }
+.heroband h1 em:has(.wi) { background-image: none; }
+.heroband h1 em .wi { background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes wordUp { from { transform: translateY(112%); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
+@media (max-width: 900px) {
+  #hero-curve { opacity: .75; }
+  .hero-year { font-size: clamp(6rem, 34vw, 12rem); top: 12%; transform: none; right: -2%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroband::before { animation: none; }
+  #hero-curve .area, #hero-curve .brk, #hero-curve .dot, #hero-curve .yr, #hero-curve .tag { animation: none; opacity: 1; }
+  #hero-curve .halo { display: none; }
+  #hero-curve .line.go { animation: none; stroke-dashoffset: 0 !important; }
+  .hero2 h1 .wi { animation: none; transform: none; }
+}
+
+/* contexte */
+.ctx { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.ctxcard { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.ctxcard .n { font: 300 2.4rem/1 var(--font-display); color: var(--warm); }
+.ctxcard h3 { font: 500 1.18rem var(--font-display); margin: 10px 0 8px; letter-spacing: -.01em; }
+.ctxcard p { margin: 0 0 8px; color: var(--ink-2); font-size: .93rem; }
+.ctxcard .src { font-size: .78rem; color: var(--ink-3); }
+.question { margin-top: 22px; border-radius: 20px; padding: 22px 24px; color: #fff; background: var(--mesh); position: relative; overflow: hidden; isolation: isolate; }
+.question::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(9,24,52,.5), rgba(9,24,52,.15)); }
+.question b { font: 400 1.4rem/1.25 var(--font-display); display: block; margin-bottom: 6px; }
+.question p { margin: 0; color: rgba(255,255,255,.92); }
+@media (max-width: 900px) { .ctx { grid-template-columns: minmax(0, 1fr); } }
+.chow { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 14px; font-size: .88rem; color: var(--ink-2); }
+.chow b { font-family: var(--font-display); color: var(--ink); }
+.chow .tagp { background: var(--warm-soft); color: var(--warm-ink); border-radius: 999px; padding: 3px 10px; font-weight: 600; font-size: .8rem; }
+
+/* cartes et panneaux : verre clair */
+.panel, .qcard, .card, .figure, .stepc, .kpi, .skill { border-radius: 18px; box-shadow: var(--shadow); border-color: var(--line); }
+.kpi { border-top: 3px solid var(--mtl); }
+.kpi.hot { border-top-color: var(--warm); }
+.kpi b { font-family: var(--font-display); font-weight: 400; letter-spacing: -.02em; }
+.card .who { color: var(--warm-ink); }
+.skills { padding-block: 8px 36px; }
+.skill { border-top: 3px solid transparent; border-image: linear-gradient(90deg, var(--mtl), var(--warm)) 1; border-image-slice: 1; transition: transform .2s, box-shadow .2s; }
+.skill:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(19, 35, 58, .12); }
+.pager a { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 16px; }
+.pager a:hover { border-color: var(--mtl); }
+footer { background: #13233a; color: #c9d6e6; border-top: 0; position: relative; }
+footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+footer a { color: #fff; }
+
+/* animations : respiration du bandeau-question, pastilles du bandeau, cartes D3 */
+.question { background-size: 150% 150%; animation: qpan 16s ease-in-out infinite alternate; }
+@keyframes qpan { from { background-position: 0% 40%; } to { background-position: 100% 60%; } }
+.heroband .proves li { opacity: 0; animation: heroIn .7s cubic-bezier(.2, .7, .2, 1) both; }
+.heroband .proves li:nth-child(1) { animation-delay: .32s } .heroband .proves li:nth-child(2) { animation-delay: .38s }
+.heroband .proves li:nth-child(3) { animation-delay: .44s } .heroband .proves li:nth-child(4) { animation-delay: .5s }
+.heroband .proves li:nth-child(5) { animation-delay: .56s } .heroband .proves li:nth-child(6) { animation-delay: .62s }
+.heroband .proves li:nth-child(7) { animation-delay: .68s } .heroband .proves li:nth-child(8) { animation-delay: .74s }
+.heroband .proves li:nth-child(n+9) { animation-delay: .8s }
+.mapwrap svg path, .mapwrap svg circle { transition: fill .45s ease, r .3s ease, opacity .3s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .question, .heroband .proves li { animation: none; opacity: 1; }
+  .mapwrap svg path, .mapwrap svg circle { transition: none; }
+}
+/* animations au défilement */
+.progress { position: fixed; left: 0; top: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 40; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.rv.in { opacity: 1; transform: none; }
+.hero-in { animation: heroIn 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d, 0s); }
+@keyframes heroIn { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.chart.drawn path.draw { animation: draw 1.6s cubic-bezier(.3, .6, .2, 1) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.chart.drawn rect.grow { animation: grow .9s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; }
+@keyframes grow { from { transform: scaleX(0); opacity: .2; } }
+.chart.drawn circle.pop { animation: pop .6s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { transform: scale(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1; transform: none; transition: none; }
+  .heroband::before, .hero-in { animation: none; }
+  .chart.drawn path.draw, .chart.drawn rect.grow, .chart.drawn circle.pop { animation: none; stroke-dashoffset: 0; }
+}
+
+/* page SQL : modèles, vues, schéma, dictionnaire */
+.lvl { display: inline-block; font: 600 .68rem var(--font-body); letter-spacing: .04em; border-radius: 999px; padding: 2px 9px; vertical-align: 1px; }
+.lvl.D { background: #e0f2e6; color: #1a6b3c; }
+.lvl.I { background: var(--mtl-soft); color: var(--link); }
+.lvl.A { background: var(--warm-soft); color: var(--warm-ink); }
+:root[data-theme="dark"] .lvl.D { background: #143526; color: #7fd6a4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lvl.D { background: #143526; color: #7fd6a4; } }
+.mtabs { margin: 4px 0 14px; }
+.models img { background: #fff; border-radius: 10px; }
+.figure a img { cursor: zoom-in; }
+.keyfig { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+@media (max-width: 820px) { .keyfig { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.t.views { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warm); border-radius: 8px; font: .8rem/1.6 var(--font-mono); box-shadow: var(--shadow); }
+.t.views h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); color: var(--warm-ink); border-bottom: 1px solid var(--line); }
+.t.views ul { list-style: none; margin: 0; padding: 6px 10px; columns: 2 300px; color: var(--ink-2); }
+.t.views li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+details.ddl { margin-top: 12px; }
+details.ddl summary { font-weight: 600; color: var(--ink); font-size: .92rem; }
+details.ddl pre { margin-top: 8px; max-height: 560px; overflow: auto; }
+.dico { max-height: 540px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 0; }
+.dico table.data td, .dico table.data th { text-align: left; }
+.dico table.data td.desc { white-space: normal; min-width: 280px; }
+.dico table.data th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.dico code { font-size: .78rem; }
+.dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }
+select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; max-width: 100%; }
+/* --------- scène de défilement : du graphique à la carte, puis l'analyse */
+.scene { position: relative; height: 330vh; background: var(--bg); }
+.scene-pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+.scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
+.scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
+#sc-map { opacity: 0; }
+#sc-map .ring { fill: var(--mtl-soft); stroke: var(--surface); stroke-width: 1; }
+#sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
+#sc-map circle.on { opacity: 1; transform: scale(1); }
+#sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
+#sc-map .sclbl.on { opacity: 1; }
+.scene-cap { position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%); width: min(92vw, 34em); margin: 0; text-align: center; font: 300 clamp(1.25rem, 2.5vw, 1.9rem)/1.3 var(--font-display); letter-spacing: -.015em; color: var(--ink); opacity: 0; transition: opacity .35s; pointer-events: none; }
+.scene-cap b { font-weight: 600; }
+.scene-cap.on { opacity: 1; }
+.scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+#sc-chart .scax { font: 12px var(--font-mono); fill: var(--ink-3); }
+#sc-chart .scbreak { font: 600 13px var(--font-mono); fill: var(--warm-ink); }
+@media (prefers-reduced-motion: reduce) { .scene { display: none; } }
+@media (max-height: 500px) { .scene { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<script>window.LANG=(function(){try{var q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="fr"){localStorage.setItem("loyers.lang",q);return q}return localStorage.getItem("loyers.lang")==="en"?"en":"fr"}catch(e){return"fr"}})();</script>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+  <div class="wrap topbar">
+    <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
+    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html" aria-current="page">SQL</a><a href="python.html">Python</a></nav>
+    <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </div>
+</header>
+<main id="main">
+  <div class="heroband"><div class="wrap phero">
+    <p class="eyebrow hero-in" data-i18n="ey">Compétence · SQL</p>
+    <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>12 requêtes</mark>, zéro chiffre non vérifié</h1>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, 12 tables avec clés et contraintes, 5 vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et comparé au résultat Python : au moindre écart, la construction du site s'arrête.</p>
+    <ul class="proves" data-i18n="chips">
+      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
+    </ul>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl1">Télécharger la base et les modèles ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL</a></p>
+  </div></div>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="mK">Modélisation</p>
+      <h2 data-i18n="mT">Du modèle conceptuel à la base</h2>
+      <p class="intro" data-i18n="mI">J'ai modélisé les données avant de les coder : un modèle conceptuel (Merise) pour les objets et leurs liens, puis un modèle logique relationnel. Le modèle logique est dessiné à partir de la base elle-même, et le modèle conceptuel est confronté à la base à chaque construction : ils ne peuvent pas diverger du code.</p>
+      <div class="seg mtabs" role="group" aria-label="Modèle / Model">
+        <button type="button" data-m="mcd" aria-pressed="true" data-i18n="mTabC">Modèle conceptuel (MCD)</button>
+        <button type="button" data-m="mld" aria-pressed="false" data-i18n="mTabL">Modèle logique (MLD)</button>
+      </div>
+      <figure class="figure models" id="m-mcd"><a href="assets/sql/mcd.svg" target="_blank" rel="noopener"><img src="assets/sql/mcd.png" alt="Modèle conceptuel de données : entités Type de logement, Grande ville, Indicateur SCHL, Année, Province, Région métropolitaine, Trimestre, Estimation, reliées par sept associations avec leurs cardinalités" loading="lazy" width="2540" height="1660" decoding="async"></a>
+        <figcaption data-i18n="mCapC">Sept associations. Exemple : une région métropolitaine appartient à exactement une province (1,1), une province contient zéro ou plusieurs régions (0,n). ANNÉE et TRIMESTRE sont des entités temporelles, non traduites en tables.</figcaption></figure>
+      <figure class="figure models" id="m-mld" hidden><a href="assets/sql/mld.svg" target="_blank" rel="noopener"><img src="assets/sql/mld.png" alt="Modèle logique : 6 tables de faits et 6 dimensions, clés primaires soulignées, clés étrangères reliées à leur table de référence" loading="lazy" width="2660" height="1400" decoding="async"></a>
+        <figcaption data-i18n="mCapL">Six tables de faits (rose) et six dimensions (bleu). Chaque association porteuse de données du MCD devient une table de faits dont la clé primaire composée réunit les identifiants des entités liées.</figcaption></figure>
+      <div class="cols" style="margin-top:16px">
+        <div>
+          <h3 data-i18n="mc1T">Choix de modélisation</h3>
+          <ul>
+            <li data-i18n="mc11"><b>Troisième forme normale</b> : l'unité d'un indicateur SCHL dépend de l'indicateur seul ; elle vit dans <code>dim_indicateur</code>, pas dans la table de faits.</li>
+            <li data-i18n="mc12"><b>Dimensions de référence</b> : provinces et types d'estimation sont des tables, avec clés étrangères, plutôt que des codes libres.</li>
+            <li data-i18n="mc13"><b>Grain explicite</b> : chaque table de faits a une clé primaire composée et un commentaire qui décrit une ligne.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="mc2T">Limite assumée</h3>
+          <ul>
+            <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
+          </ul>
+          <p style="margin-top:14px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl3">Télécharger la base complète (.zip) ↗</a></p>
+          <p class="note" data-i18n="mN">Base SQLite, script SQL complet, schéma, 12 requêtes, dictionnaire, MCD et MLD (PNG et SVG).</p>
+        </div>
+      </div>
+      <p class="note" data-i18n="mVol">Volumes : 306 loyers annuels, 298 loyers trimestriels (43 régions), 198 taux d'inoccupation, 111 valeurs d'IPC, 10 indicateurs SCHL.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="dT">Le schéma, en SQL</h2>
+      <p class="intro" data-i18n="dI">La base est reconstruite à chaque exécution à partir de ces deux scripts, puis contrôlée : <code>PRAGMA foreign_key_check</code> doit être vide et chaque contrainte CHECK rejette les valeurs impossibles avant qu'elles n'atteignent une analyse.</p>
+      <details class="more ddl"><summary data-i18n="dS1">Script de création des 12 tables (<code>sql/schema/01_tables.sql</code>)</summary>
+<pre class="code" data-lang="sql">-- =====================================================================
+-- Base de données « Loyers à Montréal » : modèle en étoile
+-- Moteur : SQLite (compatible PostgreSQL / DuckDB avec ajustements mineurs)
+-- Grain de chaque table de faits indiqué en commentaire.
+-- =====================================================================
+PRAGMA foreign_keys = ON;
+
+-- ---------------------------------------------------------------- dimensions
+CREATE TABLE dim_logement (
+  unit_id     TEXT    PRIMARY KEY,                       -- studio, 1ch, 2ch, 3ch
+  libelle_fr  TEXT    NOT NULL UNIQUE,
+  libelle_en  TEXT    NOT NULL,
+  chambres    INTEGER NOT NULL CHECK (chambres BETWEEN 0 AND 3)
+);
+
+CREATE TABLE dim_geo (                                   -- six grandes RMR (séries annuelles SCHL)
+  geo_id      TEXT PRIMARY KEY,
+  libelle_fr  TEXT NOT NULL,
+  libelle_en  TEXT NOT NULL
+);
+
+CREATE TABLE dim_province (                              -- 10 provinces, 3 territoires et le Canada (agrégat)
+  code        TEXT PRIMARY KEY CHECK (length(code) = 2),
+  nom         TEXT NOT NULL UNIQUE,
+  niveau      TEXT NOT NULL CHECK (niveau IN ('province', 'territoire', 'pays'))
+);
+
+CREATE TABLE dim_estimation (                            -- type d'estimation du tableau 46-10-0092
+  code        TEXT PRIMARY KEY CHECK (code IN ('A', 'P')),
+  libelle     TEXT NOT NULL UNIQUE                       -- A = loyer demandé, P = loyer payé
+);
+
+CREATE TABLE dim_indicateur (                            -- indicateurs du rapport SCHL ; l'unité dépend de l'indicateur seul (3FN)
+  code        TEXT PRIMARY KEY,
+  libelle     TEXT NOT NULL,
+  unite       TEXT NOT NULL CHECK (unite IN ('dollars', 'pct'))
+);
+
+CREATE TABLE dim_rmr (                                   -- 42 RMR du tableau 46-10-0092 (+ ensemble)
+  geo_id      INTEGER PRIMARY KEY,
+  nom         TEXT    NOT NULL,
+  province    TEXT    NOT NULL REFERENCES dim_province (code),
+  lat         REAL    CHECK (lat IS NULL OR lat BETWEEN 41 AND 84),
+  lon         REAL    CHECK (lon IS NULL OR lon BETWEEN -142 AND -52)
+);
+
+-- ---------------------------------------------------------------- faits
+-- Grain : une année × une RMR × un type de logement (loyer moyen d'octobre, $ courants)
+CREATE TABLE fait_loyer (
+  annee    INTEGER NOT NULL CHECK (annee BETWEEN 1987 AND 2100),
+  geo_id   TEXT    NOT NULL REFERENCES dim_geo (geo_id),
+  unit_id  TEXT    NOT NULL REFERENCES dim_logement (unit_id),
+  loyer    INTEGER NOT NULL CHECK (loyer &gt; 0),
+  PRIMARY KEY (annee, geo_id, unit_id)
+);
+
+-- Grain : une année × une RMR (taux d'inoccupation, immeubles de 6 logements et plus, %)
+CREATE TABLE fait_inoccupation (
+  annee   INTEGER NOT NULL,
+  geo_id  TEXT    NOT NULL REFERENCES dim_geo (geo_id),
+  taux    REAL    NOT NULL CHECK (taux BETWEEN 0 AND 100),
+  PRIMARY KEY (annee, geo_id)
+);
+
+-- Grain : un trimestre × une RMR × une estimation (A = loyer demandé, P = loyer payé), 2 chambres
+CREATE TABLE fait_loyer_trimestriel (
+  periode     TEXT    NOT NULL CHECK (periode GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]'),
+  geo_id      INTEGER NOT NULL REFERENCES dim_rmr (geo_id),
+  estimation  TEXT    NOT NULL REFERENCES dim_estimation (code),
+  loyer       REAL    CHECK (loyer IS NULL OR loyer &gt; 0),  -- NULL = non publié par Statistique Canada
+  cote        TEXT    CHECK (cote IS NULL OR cote IN ('E', 'F', '..')),
+  PRIMARY KEY (periode, geo_id, estimation)
+);
+
+-- Grain : une année × une grande ville (IPC d'ensemble, moyenne annuelle, 2002 = 100 ; Montréal)
+CREATE TABLE ipc (
+  annee   INTEGER NOT NULL,
+  geo_id  TEXT    NOT NULL REFERENCES dim_geo (geo_id),
+  ipc     REAL    NOT NULL CHECK (ipc &gt; 0),
+  PRIMARY KEY (annee, geo_id)
+);
+
+-- Grain : une année × une province (IPC du loyer et IPC d'ensemble, 2002 = 100)
+CREATE TABLE ipc_provinces (
+  annee         INTEGER NOT NULL,
+  code          TEXT    NOT NULL REFERENCES dim_province (code),
+  ipc_loyer     REAL    NOT NULL CHECK (ipc_loyer &gt; 0),
+  ipc_ensemble  REAL    NOT NULL CHECK (ipc_ensemble &gt; 0),
+  PRIMARY KEY (annee, code)
+);
+
+-- Grain : une année × une grande ville × un indicateur publié dans le rapport SCHL 2025
+CREATE TABLE schl_roulement (
+  annee       INTEGER NOT NULL,
+  geo_id      TEXT    NOT NULL REFERENCES dim_geo (geo_id),
+  indicateur  TEXT    NOT NULL REFERENCES dim_indicateur (code),
+  valeur      REAL    NOT NULL,
+  PRIMARY KEY (annee, geo_id, indicateur)
+);
+
+-- ---------------------------------------------------------------- index
+CREATE INDEX ix_loyer_geo_unit     ON fait_loyer (geo_id, unit_id, annee);
+CREATE INDEX ix_trim_geo_est       ON fait_loyer_trimestriel (geo_id, estimation, periode);
+CREATE INDEX ix_rmr_province       ON dim_rmr (province);
+CREATE INDEX ix_ipcp_code          ON ipc_provinces (code, annee);</pre></details>
+      <details class="more ddl" open><summary data-i18n="dS2">Les 5 vues analytiques (<code>sql/schema/02_vues.sql</code>)</summary>
+<pre class="code" data-lang="sql">-- =====================================================================
+-- Vues analytiques : la logique métier vit dans la base, pas dans chaque requête
+-- =====================================================================
+
+-- Loyers de Montréal en dollars constants de la dernière année disponible
+CREATE VIEW v_loyer_reel AS
+WITH ref AS (SELECT annee AS annee_ref, ipc AS ipc_ref FROM ipc WHERE geo_id = 'Montreal' ORDER BY annee DESC LIMIT 1)
+SELECT f.annee, f.unit_id, l.libelle_fr AS logement, f.loyer AS loyer_nominal,
+       ROUND(f.loyer * r.ipc_ref / i.ipc, 0) AS loyer_reel, r.annee_ref
+FROM fait_loyer f
+JOIN dim_logement l ON l.unit_id = f.unit_id
+JOIN ipc i          ON i.annee = f.annee AND i.geo_id = f.geo_id
+CROSS JOIN ref r
+WHERE f.geo_id = 'Montreal';
+
+-- Variation annuelle de chaque série (ville × type de logement)
+CREATE VIEW v_variation_annuelle AS
+SELECT annee, geo_id, unit_id, loyer,
+       LAG(loyer) OVER w                                      AS loyer_prec,
+       ROUND(100.0 * (loyer - LAG(loyer) OVER w) / LAG(loyer) OVER w, 1) AS variation_pct
+FROM fait_loyer
+WINDOW w AS (PARTITION BY geo_id, unit_id ORDER BY annee);
+
+-- Dernier trimestre publié de chaque série (région × estimation)
+CREATE VIEW v_dernier_trimestre AS
+SELECT geo_id, estimation, periode, loyer, cote
+FROM (
+  SELECT t.*, ROW_NUMBER() OVER (PARTITION BY geo_id, estimation ORDER BY periode DESC) AS rn
+  FROM fait_loyer_trimestriel t
+  WHERE loyer IS NOT NULL
+)
+WHERE rn = 1;
+
+-- Écart entre loyer demandé et loyer payé, par région
+CREATE VIEW v_ecart_demande_paye AS
+SELECT r.geo_id, r.nom, r.province,
+       MAX(CASE WHEN d.estimation = 'A' THEN d.loyer END) AS demande,
+       MAX(CASE WHEN d.estimation = 'P' THEN d.loyer END) AS paye,
+       MAX(CASE WHEN d.estimation = 'A' THEN d.periode END) AS periode
+FROM v_dernier_trimestre d
+JOIN dim_rmr r ON r.geo_id = d.geo_id
+GROUP BY r.geo_id, r.nom, r.province;
+
+-- Hausse des loyers (IPC du loyer) par province et par année
+CREATE VIEW v_ipc_provinces_variation AS
+SELECT i.annee, i.code, p.nom AS province, i.ipc_loyer, i.ipc_ensemble,
+       ROUND(100.0 * (i.ipc_loyer / LAG(i.ipc_loyer) OVER w - 1), 1)       AS hausse_loyer_pct,
+       ROUND(100.0 * (i.ipc_ensemble / LAG(i.ipc_ensemble) OVER w - 1), 1) AS inflation_pct
+FROM ipc_provinces i
+JOIN dim_province p ON p.code = i.code
+WINDOW w AS (PARTITION BY i.code ORDER BY i.annee);</pre></details>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="diT">Dictionnaire de données</h2>
+      <p class="intro" data-i18n="diI">Chaque colonne de chaque table et vue, avec son type, sa clé, sa définition et sa source. Le même dictionnaire est une feuille du classeur Excel.</p>
+      <div class="controls"><label class="small" for="dico-f" data-i18n="diF">Filtrer</label><select class="sel" id="dico-f"></select></div>
+      <div class="tablewrap dico" id="dico"></div>
+    </div>
+  </section>
+
+  <section class="block" id="console">
+    <div class="wrap">
+      <h2 data-i18n="coT">Console : exécute les requêtes toi-même</h2>
+      <p class="intro" data-i18n="coI">SQLite tourne dans ton navigateur (sql.js). Choisis une requête, modifie-la ou écris la tienne, puis exécute-la. Raccourci : Ctrl+Entrée.</p>
+      <div class="sqlbox">
+        <div class="panel" style="min-width:0">
+          <div class="qtabs" id="qtabs" role="group" aria-label="Requêtes / Queries"></div>
+          <label for="sql-editor" style="position:absolute;left:-9999px" data-i18n="edL">Requête SQL</label>
+          <textarea class="sql" id="sql-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+          <div class="sqlbar">
+            <button type="button" class="btn primary" id="sql-run" data-i18n="run">Exécuter</button>
+            <span class="sqlstat" id="sql-stat" role="status" aria-live="polite"></span>
+          </div>
+          <div class="sqlerr" id="sql-err" hidden></div>
+          <div class="tablewrap" id="sql-out"></div>
+        </div>
+        <div class="panel schema" id="schema"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="qlT">Les requêtes, une par une</h2>
+      <p class="intro" data-i18n="qlI">Pour chaque requête : la question posée, les techniques utilisées, le code et le résultat.</p>
+      <p class="note" style="margin-bottom:10px" data-i18n="qlN">Chaque requête porte son niveau : <span class="lvl D">Débutant</span> agrégats, jointures et règles de trois · <span class="lvl I">Intermédiaire</span> CTE, pivots, classements · <span class="lvl A">Avancé</span> fonctions de fenêtre (LAG, ROW_NUMBER, cadres ROWS).</p>
+      <div id="qlist"></div>
+    </div>
+  </section>
+
+  <section class="block" id="moteur">
+    <div class="wrap">
+      <p class="kicker" data-i18n="ixK">Avancé · moteur</p>
+      <h2 data-i18n="ixT">Lire un plan d'exécution, et porter la base sur PostgreSQL</h2>
+      <p class="intro" data-i18n="ixI">Deux gestes qu'on attend d'un analyste qui écrit du SQL en entreprise : savoir pourquoi une requête est rapide, et savoir déplacer une base d'un moteur à un autre sans en changer le sens.</p>
+      <div class="gallery">
+        <div class="stepc"><h3 data-i18n="ix1T">Avec et sans index : le même résultat, deux chemins</h3>
+          <p data-i18n="ix1P">La requête lit la série d'une région (Montréal, loyer demandé). La clé primaire de la table commence par le trimestre : elle ne sert à rien pour filtrer sur la région. L'index <code>ix_trim_geo_est</code> commence par la région et l'estimation, puis le trimestre : le moteur va droit aux lignes, déjà dans l'ordre demandé.</p>
+<pre class="code" data-lang="sql">SELECT periode, loyer
+FROM fait_loyer_trimestriel
+WHERE geo_id = 7 AND estimation = 'A'
+ORDER BY periode DESC;</pre>
+          <p style="margin-top:10px" data-i18n="ix1a"><b>Avec l'index</b> · <code>EXPLAIN QUERY PLAN</code></p>
+<pre class="code" data-lang="txt" style="white-space:pre-wrap">SEARCH fait_loyer_trimestriel USING INDEX ix_trim_geo_est (geo_id=? AND estimation=?)</pre>
+          <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
+<pre class="code" data-lang="txt" style="white-space:pre-wrap">SCAN fait_loyer_trimestriel USING INDEX sqlite_autoindex_fait_loyer_trimestriel_1</pre>
+          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 6 µs par exécution avec l'index, 17 µs sans (× 2,7). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
+<pre class="code" data-lang="sql" style="white-space:pre-wrap">CREATE INDEX ix_trim_geo_est ON fait_loyer_trimestriel (geo_id, estimation, periode);</pre>
+        </div>
+        <div class="stepc"><h3 data-i18n="ix2T">La même base pour PostgreSQL</h3>
+          <p data-i18n="ix2P">Le script <code>loyers_postgres.sql</code> (schéma, vues, données) est dérivé automatiquement des scripts SQLite du projet, pour que les deux versions ne divergent jamais, puis validé par la grammaire de PostgreSQL elle-même (<code>pglast</code>) : une erreur de syntaxe arrête la construction. Cinq écarts de dialecte, et seulement ceux-là :</p>
+          <ul>
+            <li data-i18n="ix21"><code>PRAGMA foreign_keys</code> retiré : les clés étrangères sont toujours actives dans PostgreSQL.</li>
+            <li data-i18n="ix22"><code>GLOB</code> remplacé par une expression régulière : <code>periode ~ '^\d{4}-[01]\d$'</code>.</li>
+            <li data-i18n="ix23"><code>REAL</code> devient <code>DOUBLE PRECISION</code>.</li>
+            <li data-i18n="ix24"><code>ROUND(x, n)</code> n'accepte qu'un <code>numeric</code> : <code>ROUND((x)::numeric, n)</code> dans les vues.</li>
+            <li data-i18n="ix25">Une sous-requête dans <code>FROM</code> doit porter un alias.</li>
+          </ul>
+          <p style="margin-top:12px"><a class="btn" href="assets/loyers_postgres.sql" download data-i18n="ix2Dl">Télécharger loyers_postgres.sql</a></p>
+          <p class="note" data-i18n="ix2N">Chargement : <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Le script est aussi dans le paquet de la base. Validation : syntaxe PostgreSQL complète ; l'exécution sur un serveur PostgreSQL n'a pas encore été faite dans ce projet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="chT">Choix techniques</h2>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="ch1T">Pourquoi SQLite</h3>
+          <ul>
+            <li data-i18n="ch11">La base tient en un fichier versionné dans le dépôt et s'ouvre dans le navigateur, sans serveur.</li>
+            <li data-i18n="ch12">Les requêtes restent en SQL standard : elles tournent aussi sur DuckDB, PostgreSQL ou SQL Server avec des ajustements mineurs (POWER, concaténation).</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="ch2T">Comment les résultats sont vérifiés</h3>
+          <ul>
+            <li data-i18n="ch21"><code>src/build_db.py</code> reconstruit la base, exécute les 12 fichiers <code>sql/*.sql</code> et compare les résultats clés au pipeline Python, ainsi que deux requêtes entre elles.</li>
+            <li data-i18n="ch22">Un écart (même de 0,05 point) interrompt la construction : aucun chiffre non vérifié ne peut être publié.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap pager"><a href="excel.html" data-i18n="pgL">← Excel</a><a href="python.html" data-i18n="pgR">Python →</a></div>
+</main>
+<footer><div class="wrap">Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.</div></footer>
+<script id="sqlres" type="application/json">[{"file": "01_controle_qualite.sql", "title": "Contrôle qualité : couverture, valeurs manquantes et cotes de fiabilité de chaque table de faits", "sql": "-- Contrôle qualité : couverture, valeurs manquantes et cotes de fiabilité de chaque table de faits\n-- Niveau : Débutant\nSELECT 'fait_loyer' AS source, COUNT(*) AS lignes, MIN(annee) || '-' || MAX(annee) AS periode,\n       COUNT(DISTINCT geo_id || unit_id) AS series,\n       SUM(CASE WHEN loyer IS NULL THEN 1 ELSE 0 END) AS manquantes, 0 AS cote_E\nFROM fait_loyer\nUNION ALL\nSELECT 'fait_inoccupation', COUNT(*), MIN(annee) || '-' || MAX(annee), COUNT(DISTINCT geo_id),\n       SUM(CASE WHEN taux IS NULL THEN 1 ELSE 0 END), 0\nFROM fait_inoccupation\nUNION ALL\nSELECT 'fait_loyer_trimestriel', COUNT(*), MIN(periode) || ' à ' || MAX(periode), COUNT(DISTINCT geo_id || estimation),\n       SUM(CASE WHEN loyer IS NULL THEN 1 ELSE 0 END), SUM(CASE WHEN cote = 'E' THEN 1 ELSE 0 END)\nFROM fait_loyer_trimestriel\nUNION ALL\nSELECT 'ipc_provinces', COUNT(*), MIN(annee) || '-' || MAX(annee), COUNT(DISTINCT code),\n       SUM(CASE WHEN ipc_loyer IS NULL THEN 1 ELSE 0 END), 0\nFROM ipc_provinces;", "columns": ["source", "lignes", "periode", "series", "manquantes", "cote_E"], "rows": [["fait_loyer", 306, "1992-2025", 9, 0, 0], ["fait_inoccupation", 198, "1992-2025", 6, 0, 0], ["fait_loyer_trimestriel", 298, "2025-04 à 2026-04", 60, 12, 53], ["ipc_provinces", 77, "2019-2025", 11, 0, 0]]}, {"file": "02_variation_par_type.sql", "title": "Variation annuelle du loyer à Montréal, pour chaque type de logement (LAG avec PARTITION BY)", "sql": "-- Variation annuelle du loyer à Montréal, pour chaque type de logement (LAG avec PARTITION BY)\n-- Niveau : Intermédiaire\nWITH v AS (\n  SELECT f.annee, l.libelle_fr AS logement, l.chambres, f.loyer,\n         ROUND(100.0 * (f.loyer - LAG(f.loyer) OVER (PARTITION BY f.unit_id ORDER BY f.annee))\n               / LAG(f.loyer) OVER (PARTITION BY f.unit_id ORDER BY f.annee), 1) AS variation_pct\n  FROM fait_loyer f\n  JOIN dim_logement l ON l.unit_id = f.unit_id\n  WHERE f.geo_id = 'Montreal'\n)\nSELECT annee, logement, loyer, variation_pct\nFROM v\nWHERE annee >= 2023\nORDER BY chambres, annee;", "columns": ["annee", "logement", "loyer", "variation_pct"], "rows": [[2023, "Studio", 809, 3.1], [2024, "Studio", 892, 10.3], [2025, "Studio", 1005, 12.7], [2023, "1 chambre", 960, 5.3], [2024, "1 chambre", 1051, 9.5], [2025, "1 chambre", 1131, 7.6], [2023, "2 chambres", 1096, 7.2], [2024, "2 chambres", 1176, 7.3], [2025, "2 chambres", 1346, 14.5], [2023, "3 chambres", 1323, 7.6], [2024, "3 chambres", 1488, 12.5], [2025, "3 chambres", 1626, 9.3]]}, {"file": "03_moyenne_mobile.sql", "title": "Tendance lissée : moyenne mobile sur 3 ans de la hausse annuelle (2 chambres, Montréal)", "sql": "-- Tendance lissée : moyenne mobile sur 3 ans de la hausse annuelle (2 chambres, Montréal)\n-- Niveau : Avancé\nWITH v AS (\n  SELECT annee, loyer,\n         100.0 * loyer / LAG(loyer) OVER (ORDER BY annee) - 100 AS variation_pct\n  FROM fait_loyer\n  WHERE geo_id = 'Montreal' AND unit_id = '2ch'\n),\nm AS (\n  SELECT annee, loyer, variation_pct,\n         AVG(variation_pct) OVER (ORDER BY annee ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS mm3\n  FROM v\n)\nSELECT annee, loyer, ROUND(variation_pct, 1) AS variation_pct, ROUND(mm3, 1) AS moyenne_mobile_3_ans\nFROM m\nWHERE annee >= 2015\nORDER BY annee;", "columns": ["annee", "loyer", "variation_pct", "moyenne_mobile_3_ans"], "rows": [[2015, 760, 2.8, 2.2], [2016, 791, 4.1, 2.7], [2017, 782, -1.1, 1.9], [2018, 809, 3.5, 2.1], [2019, 855, 5.7, 2.7], [2020, 903, 5.6, 4.9], [2021, 932, 3.2, 4.8], [2022, 1022, 9.7, 6.2], [2023, 1096, 7.2, 6.7], [2024, 1176, 7.3, 8.1], [2025, 1346, 14.5, 9.7]]}, {"file": "04_loyer_reel.sql", "title": "Loyer réel (dollars de 2025) : jointure avec l'IPC de Montréal", "sql": "-- Loyer réel (dollars de 2025) : jointure avec l'IPC de Montréal\n-- Niveau : Débutant\nWITH base AS (SELECT ipc AS ipc_2025 FROM ipc WHERE annee = 2025 AND geo_id = 'Montreal')\nSELECT f.annee,\n       l.libelle_fr                                AS logement,\n       f.loyer                                     AS loyer_nominal,\n       ROUND(f.loyer * b.ipc_2025 / i.ipc, 0)      AS loyer_reel_2025\nFROM fait_loyer f\nJOIN ipc i           ON i.annee = f.annee AND i.geo_id = f.geo_id\nJOIN dim_logement l  ON l.unit_id = f.unit_id\nCROSS JOIN base b\nWHERE f.geo_id = 'Montreal' AND f.annee IN (1992, 2019, 2025)\nORDER BY l.chambres, f.annee;", "columns": ["annee", "logement", "loyer_nominal", "loyer_reel_2025"], "rows": [[1992, "Studio", 347, 658.0], [2019, "Studio", 655, 811.0], [2025, "Studio", 1005, 1005.0], [1992, "1 chambre", 428, 812.0], [2019, "1 chambre", 754, 933.0], [2025, "1 chambre", 1131, 1131.0], [1992, "2 chambres", 488, 926.0], [2019, "2 chambres", 855, 1058.0], [2025, "2 chambres", 1346, 1346.0], [1992, "3 chambres", 583, 1106.0], [2019, "3 chambres", 1070, 1325.0], [2025, "3 chambres", 1626, 1626.0]]}, {"file": "05_rythme_par_periode.sql", "title": "Hausse réelle et taux de croissance annuel composé, 1992-2019 vs 2019-2025 (2 chambres)", "sql": "-- Hausse réelle et taux de croissance annuel composé, 1992-2019 vs 2019-2025 (2 chambres)\n-- Niveau : Intermédiaire\nWITH reel AS (\n  SELECT f.annee, f.loyer * (SELECT ipc FROM ipc WHERE annee = 2025 AND geo_id = 'Montreal') / i.ipc AS loyer_reel\n  FROM fait_loyer f JOIN ipc i ON i.annee = f.annee AND i.geo_id = f.geo_id\n  WHERE f.geo_id = 'Montreal' AND f.unit_id = '2ch'\n),\nperiodes(debut, fin) AS (VALUES (1992, 2019), (2019, 2025))\nSELECT p.debut || '-' || p.fin                                        AS periode,\n       ROUND(100.0 * (b.loyer_reel / a.loyer_reel - 1), 1)            AS hausse_reelle_pct,\n       ROUND(100.0 * (POWER(b.loyer_reel / a.loyer_reel,\n                            1.0 / (p.fin - p.debut)) - 1), 2)         AS rythme_annuel_pct\nFROM periodes p\nJOIN reel a ON a.annee = p.debut\nJOIN reel b ON b.annee = p.fin;", "columns": ["periode", "hausse_reelle_pct", "rythme_annuel_pct"], "rows": [["1992-2019", 14.3, 0.5], ["2019-2025", 27.2, 4.09]]}, {"file": "06_classement_villes.sql", "title": "Classement des six grandes villes selon la hausse du 2 chambres, 2019 -> 2025", "sql": "-- Classement des six grandes villes selon la hausse du 2 chambres, 2019 -> 2025\n-- Niveau : Intermédiaire\nWITH h AS (\n  SELECT g.libelle_fr AS ville,\n         MAX(CASE WHEN f.annee = 2019 THEN f.loyer END) AS loyer_2019,\n         MAX(CASE WHEN f.annee = 2025 THEN f.loyer END) AS loyer_2025\n  FROM fait_loyer f JOIN dim_geo g ON g.geo_id = f.geo_id\n  WHERE f.unit_id = '2ch'\n  GROUP BY g.libelle_fr\n)\nSELECT RANK() OVER (ORDER BY 1.0 * loyer_2025 / loyer_2019 DESC)  AS rang,\n       ville, loyer_2019, loyer_2025,\n       ROUND(100.0 * (1.0 * loyer_2025 / loyer_2019 - 1), 1)       AS hausse_pct\nFROM h\nORDER BY rang;", "columns": ["rang", "ville", "loyer_2019", "loyer_2025", "hausse_pct"], "rows": [[1, "Montréal", 855, 1346, 57.4], [2, "Québec", 862, 1277, 48.1], [3, "Calgary", 1305, 1914, 46.7], [4, "Ottawa-Gatineau", 1236, 1764, 42.7], [5, "Vancouver", 1748, 2363, 35.2], [6, "Toronto", 1562, 2046, 31.0]]}, {"file": "07_rang_montreal_par_annee.sql", "title": "Montréal reste-t-elle la moins chère ? Rang et niveau relatif chaque année (RANK et MAX ... PARTITION BY)", "sql": "-- Montréal reste-t-elle la moins chère ? Rang et niveau relatif chaque année (RANK et MAX ... PARTITION BY)\n-- Niveau : Avancé\nWITH r AS (\n  SELECT annee, geo_id, loyer,\n         RANK() OVER (PARTITION BY annee ORDER BY loyer)                 AS rang_moins_cher,\n         ROUND(100.0 * loyer / MAX(loyer) OVER (PARTITION BY annee), 1) AS pct_du_plus_cher\n  FROM fait_loyer\n  WHERE unit_id = '2ch'\n)\nSELECT annee, loyer, rang_moins_cher, pct_du_plus_cher\nFROM r\nWHERE geo_id = 'Montreal' AND annee IN (1995, 2005, 2015, 2019, 2023, 2024, 2025)\nORDER BY annee;", "columns": ["annee", "loyer", "rang_moins_cher", "pct_du_plus_cher"], "rows": [[1995, 494, 1, 59.8], [2005, 616, 1, 58.6], [2015, 760, 1, 55.6], [2019, 855, 1, 48.9], [2023, 1096, 2, 50.3], [2024, 1176, 2, 50.8], [2025, 1346, 2, 57.0]]}, {"file": "08_prime_de_relocation.sql", "title": "Écart entre le loyer d'un 2 chambres reloué (SCHL) et le loyer moyen de tous les locataires", "sql": "-- Écart entre le loyer d'un 2 chambres reloué (SCHL) et le loyer moyen de tous les locataires\n-- Niveau : Débutant\nSELECT r.annee,\n       f.loyer                                         AS loyer_moyen_tous,\n       CAST(r.valeur AS INTEGER)                       AS loyer_moyen_reloues,\n       CAST(r.valeur - f.loyer AS INTEGER)             AS ecart_mensuel,\n       ROUND(100.0 * (r.valeur / f.loyer - 1), 1)      AS ecart_pct,\n       CAST((r.valeur - f.loyer) * 12 AS INTEGER)      AS ecart_annuel\nFROM schl_roulement r\nJOIN fait_loyer f ON f.annee = r.annee AND f.geo_id = r.geo_id AND f.unit_id = '2ch'\nWHERE r.indicateur = 'loyer_moyen_reloues_2ch' AND r.geo_id = 'Montreal'\nORDER BY r.annee;", "columns": ["annee", "loyer_moyen_tous", "loyer_moyen_reloues", "ecart_mensuel", "ecart_pct", "ecart_annuel"], "rows": [[2022, 1022, 1235, 213, 20.8, 2556], [2023, 1096, 1310, 214, 19.5, 2568], [2024, 1176, 1407, 231, 19.6, 2772], [2025, 1346, 1644, 298, 22.1, 3576]]}, {"file": "09_demande_vs_paye.sql", "title": "Loyer demandé vs loyer payé : dernier trimestre disponible de chaque région (ROW_NUMBER par groupe)", "sql": "-- Loyer demandé vs loyer payé : dernier trimestre disponible de chaque région (ROW_NUMBER par groupe)\n-- Niveau : Avancé\nWITH dernier AS (\n  SELECT geo_id, estimation, periode, loyer,\n         ROW_NUMBER() OVER (PARTITION BY geo_id, estimation ORDER BY periode DESC) AS rn\n  FROM fait_loyer_trimestriel\n  WHERE loyer IS NOT NULL\n),\npivot AS (\n  SELECT geo_id,\n         MAX(periode)                                      AS periode,\n         MAX(CASE WHEN estimation = 'A' THEN loyer END)    AS demande,\n         MAX(CASE WHEN estimation = 'P' THEN loyer END)    AS paye\n  FROM dernier\n  WHERE rn = 1\n  GROUP BY geo_id\n)\nSELECT RANK() OVER (ORDER BY demande / paye DESC)          AS rang,\n       r.nom, r.province, p.periode,\n       CAST(p.demande AS INTEGER)                          AS demande,\n       CAST(p.paye AS INTEGER)                             AS paye,\n       CAST(p.demande - p.paye AS INTEGER)                 AS ecart,\n       ROUND(100.0 * (p.demande / p.paye - 1), 1)          AS ecart_pct\nFROM pivot p\nJOIN dim_rmr r ON r.geo_id = p.geo_id\nWHERE p.demande IS NOT NULL AND p.paye IS NOT NULL\nORDER BY rang;", "columns": ["rang", "nom", "province", "periode", "demande", "paye", "ecart", "ecart_pct"], "rows": [[1, "Grand Sudbury", "ON", "2026-04", 1940, 1400, 540, 38.6], [2, "Halifax", "NS", "2026-04", 2400, 1770, 630, 35.6], [3, "Sherbrooke", "QC", "2026-04", 1300, 960, 340, 35.4], [4, "Montréal", "QC", "2026-04", 1820, 1360, 460, 33.8], [5, "Gatineau (Ottawa-Gatineau, partie québécoise)", "QC", "2026-04", 1700, 1370, 330, 24.1], [6, "Kitchener - Cambridge - Waterloo", "ON", "2026-04", 2120, 1720, 400, 23.3], [7, "London", "ON", "2026-04", 1920, 1560, 360, 23.1], [8, "Toronto", "ON", "2026-04", 2650, 2160, 490, 22.7], [9, "Vancouver", "BC", "2026-04", 3030, 2470, 560, 22.7], [10, "Québec", "QC", "2026-04", 1460, 1230, 230, 18.7], [11, "Kingston", "ON", "2026-04", 1940, 1750, 190, 10.9], [12, "Saskatoon", "SK", "2026-04", 1620, 1470, 150, 10.2], [13, "Winnipeg", "MB", "2026-04", 1660, 1550, 110, 7.1], [14, "Edmonton", "AB", "2026-04", 1570, 1570, 0, 0.0], [15, "Calgary", "AB", "2026-04", 1890, 1930, -40, -2.1], [16, "Regina", "SK", "2026-04", 1480, 1580, -100, -6.3]]}, {"file": "10_provinces_loyer_inflation.sql", "title": "Provinces : hausse des loyers (IPC du loyer) en 2025 et depuis 2019, comparée à l'inflation", "sql": "-- Provinces : hausse des loyers (IPC du loyer) en 2025 et depuis 2019, comparée à l'inflation\n-- Niveau : Intermédiaire\nWITH b AS (\n  SELECT i.code, p.nom AS province,\n         MAX(CASE WHEN i.annee = 2019 THEN i.ipc_loyer END)    AS loyer_2019,\n         MAX(CASE WHEN i.annee = 2024 THEN i.ipc_loyer END)    AS loyer_2024,\n         MAX(CASE WHEN i.annee = 2025 THEN i.ipc_loyer END)    AS loyer_2025,\n         MAX(CASE WHEN i.annee = 2019 THEN i.ipc_ensemble END) AS ens_2019,\n         MAX(CASE WHEN i.annee = 2025 THEN i.ipc_ensemble END) AS ens_2025\n  FROM ipc_provinces i\n  JOIN dim_province p ON p.code = i.code\n  WHERE p.niveau = 'province'\n  GROUP BY i.code, p.nom\n)\nSELECT RANK() OVER (ORDER BY loyer_2025 / loyer_2024 DESC)                     AS rang_2025,\n       province,\n       ROUND(100.0 * (loyer_2025 / loyer_2024 - 1), 1)                         AS hausse_2025_pct,\n       ROUND(100.0 * (loyer_2025 / loyer_2019 - 1), 1)                         AS hausse_2019_2025_pct,\n       ROUND(100.0 * ((loyer_2025 / loyer_2019) / (ens_2025 / ens_2019) - 1), 1) AS hausse_reelle_pct\nFROM b\nORDER BY rang_2025;", "columns": ["rang_2025", "province", "hausse_2025_pct", "hausse_2019_2025_pct", "hausse_reelle_pct"], "rows": [[1, "Québec", 7.8, 33.8, 9.5], [2, "Nouvelle-Écosse", 7.2, 42.8, 17.2], [3, "Nouveau-Brunswick", 6.7, 46.5, 22.0], [4, "Saskatchewan", 5.7, 21.5, 2.5], [5, "Terre-Neuve-et-Labrador", 4.5, 32.2, 12.1], [6, "Manitoba", 4.4, 28.1, 6.5], [7, "Ontario", 4.3, 29.1, 7.2], [8, "Alberta", 3.8, 28.1, 6.5], [9, "Colombie-Britannique", 3.5, 30.4, 8.1], [10, "Île-du-Prince-Édouard", 3.4, 40.7, 15.8]]}, {"file": "11_inoccupation_vs_loyer.sql", "title": "Années où l'inoccupation a augmenté ET le loyer a monté de plus de 5 % (Montréal, 2 chambres)", "sql": "-- Années où l'inoccupation a augmenté ET le loyer a monté de plus de 5 % (Montréal, 2 chambres)\n-- Niveau : Avancé\nWITH s AS (\n  SELECT f.annee, f.loyer, v.taux,\n         LAG(f.loyer) OVER (ORDER BY f.annee) AS loyer_prec,\n         LAG(v.taux)  OVER (ORDER BY f.annee) AS taux_prec\n  FROM fait_loyer f\n  JOIN fait_inoccupation v ON v.annee = f.annee AND v.geo_id = f.geo_id\n  WHERE f.geo_id = 'Montreal' AND f.unit_id = '2ch'\n)\nSELECT annee,\n       taux_prec || ' -> ' || taux                          AS inoccupation_pct,\n       ROUND(100.0 * (1.0 * loyer / loyer_prec - 1), 1)     AS hausse_loyer_pct\nFROM s\nWHERE taux > taux_prec AND 1.0 * loyer / loyer_prec - 1 > 0.05\nORDER BY annee;", "columns": ["annee", "inoccupation_pct", "hausse_loyer_pct"], "rows": [[2020, "1.6 -> 3.3", 5.6], [2024, "1.9 -> 2.5", 7.3], [2025, "2.5 -> 3.3", 14.5]]}, {"file": "12_vues_quebec.sql", "title": "Requête sur les vues : régions du Québec, écart demandé / payé et hausse provinciale des loyers en 2025", "sql": "-- Requête sur les vues : régions du Québec, écart demandé / payé et hausse provinciale des loyers en 2025\n-- Niveau : Intermédiaire\nSELECT e.nom,\n       CAST(e.demande AS INTEGER)                  AS demande,\n       CAST(e.paye AS INTEGER)                     AS paye,\n       ROUND(100.0 * (e.demande / e.paye - 1), 1)  AS ecart_pct,\n       p.hausse_loyer_pct                          AS hausse_ipc_loyer_qc_2025\nFROM v_ecart_demande_paye e\nJOIN v_ipc_provinces_variation p ON p.code = e.province AND p.annee = 2025\nWHERE e.province = 'QC'\nORDER BY ecart_pct DESC NULLS LAST;", "columns": ["nom", "demande", "paye", "ecart_pct", "hausse_ipc_loyer_qc_2025"], "rows": [["Sherbrooke", 1300, 960, 35.4, 7.8], ["Montréal", 1820, 1360, 33.8, 7.8], ["Gatineau (Ottawa-Gatineau, partie québécoise)", 1700, 1370, 24.1, 7.8], ["Québec", 1460, 1230, 18.7, 7.8], ["Drummondville", 1200, null, null, 7.8], ["Saguenay", null, 880, null, 7.8]]}]</script>
+<script>/* Code commun aux pages de compétences : coloration syntaxique légère (SQL, Python, DAX, Excel). */
+const KW = {
+  sql: "SELECT FROM WHERE JOIN LEFT INNER CROSS ON AND OR NOT AS WITH ORDER BY GROUP HAVING LIMIT CASE WHEN THEN ELSE END IN IS NULL DESC ASC OVER PARTITION VALUES DISTINCT USING UNION ALL CAST INTEGER CREATE TABLE VIEW INDEX PRIMARY KEY FOREIGN REFERENCES CHECK UNIQUE TEXT REAL PRAGMA WINDOW ROWS BETWEEN PRECEDING CURRENT ROW GLOB DEFAULT NULLS LAST",
+  py: "def return if elif else for in import from as with assert not and or is None True False lambda class try except raise while",
+  dax: "VAR RETURN IF NOT TRUE FALSE",
+  xl: ""
+};
+function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function highlight(code, lang) {
+  const kws = new Set((KW[lang] || "").split(" ").filter(Boolean));
+  const ci = lang === "sql" || lang === "dax";
+  const com = lang === "py" ? "#" : (lang === "sql" ? "--" : "//");
+  const re = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(--[^\n]*|#[^\n]*|\/\/[^\n]*)|(\b\d+(?:\.\d+)?\b)|([A-Za-zÀ-ÿ_][\w.À-ÿ]*)(\s*\()?/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index));
+    last = re.lastIndex;
+    if (m[1]) out += `<span class="s">${esc(m[1])}</span>`;
+    else if (m[2]) {
+      if (m[2].startsWith(com)) out += `<span class="c">${esc(m[2])}</span>`;
+      else { out += esc(m[2][0]); re.lastIndex = m.index + 1; last = re.lastIndex; }
+    }
+    else if (m[3]) out += `<span class="n">${m[3]}</span>`;
+    else if (m[4]) {
+      const w = m[4], paren = m[5] || "";
+      if (kws.has(ci ? w.toUpperCase() : w)) out += `<span class="k">${esc(w)}</span>${esc(paren)}`;
+      else if (paren) out += `<span class="f">${esc(w)}</span>${esc(paren)}`;
+      else out += esc(w);
+    }
+  }
+  return out + esc(code.slice(last));
+}
+document.querySelectorAll("pre.code[data-lang]").forEach(el => { el.innerHTML = highlight(el.textContent, el.dataset.lang); });
+const fmtFR = v => v == null ? "NULL" : (typeof v === "number" ? new Intl.NumberFormat(window.LANG === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(v) : String(v));
+function resultTable(cols, rows) {
+  const isYear = cols.map(c => /annee|year/i.test(c));
+  return `<table class="data"><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+</script>
+<script>
+window.PAGE_EN = {
+  "@title": `SQL · Montreal Rents`,
+  ey: `Skill · SQL`,
+  h1: `A modelled database, <mark>12 queries</mark>, zero unverified figures`,
+  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, 12 tables with keys and constraints, 5 analytical views and a data dictionary. Every figure on this site is recomputed in SQL and compared to the Python result: the slightest gap stops the site build.`,
+  ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to PostgreSQL`,
+  ixI: `Two things expected from an analyst who writes SQL at work: knowing why a query is fast, and moving a database from one engine to another without changing its meaning.`,
+  ix1T: `With and without an index: same result, two paths`,
+  ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
+  ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
+  ix1N: `Measured at site build time on the table's 298 rows: 6 µs per run with the index, 17 µs without (× 2.7). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
+  ix2T: `The same database for PostgreSQL`,
+  ix2P: `The <code>loyers_postgres.sql</code> script (schema, views, data) is derived automatically from the project's SQLite scripts, so the two versions can never drift apart, then validated by PostgreSQL's own grammar (<code>pglast</code>): a syntax error stops the build. Five dialect differences, and only those:`,
+  ix21: `<code>PRAGMA foreign_keys</code> removed: foreign keys are always enforced in PostgreSQL.`,
+  ix22: `<code>GLOB</code> replaced by a regular expression: <code>periode ~ '^\\d{4}-[01]\\d$'</code>.`,
+  ix23: `<code>REAL</code> becomes <code>DOUBLE PRECISION</code>.`,
+  ix24: `<code>ROUND(x, n)</code> only accepts a <code>numeric</code>: <code>ROUND((x)::numeric, n)</code> in the views.`,
+  ix25: `A subquery in <code>FROM</code> must carry an alias.`,
+  ix2Dl: `Download loyers_postgres.sql`,
+  ix2N: `Loading: <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. The script also ships in the database package. Validation: full PostgreSQL syntax; execution on a PostgreSQL server has not yet been done in this project.`,
+  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
+  dl1: `Download the database and models ↗`, dl2: `SQL script`,
+  mK: `Modelling`,
+  mT: `From conceptual model to database`,
+  mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
+  mTabC: `Conceptual model (MCD)`, mTabL: `Logical model (MLD)`,
+  mCapC: `Seven associations. Example: a metro area belongs to exactly one province (1,1); a province holds zero or more metro areas (0,n). ANNÉE (year) and TRIMESTRE (quarter) are temporal entities, not turned into tables.`,
+  mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities.`,
+  mc1T: `Modelling choices`,
+  mc11: `<b>Third normal form</b>: a CMHC indicator's unit depends on the indicator alone; it lives in <code>dim_indicateur</code>, not in the fact table.`,
+  mc12: `<b>Reference dimensions</b>: provinces and estimate types are tables, with foreign keys, rather than free-form codes.`,
+  mc13: `<b>Explicit grain</b>: every fact table has a composite primary key and a comment describing one row.`,
+  mc2T: `Acknowledged limit`,
+  mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
+  dl3: `Download the full database (.zip) ↗`,
+  mN: `SQLite database, full SQL script, schema, 12 queries, dictionary, conceptual and logical models (PNG and SVG).`,
+  mVol: `Volumes: 306 annual rents, 298 quarterly rents (43 metro areas), 198 vacancy rates, 111 CPI values, 10 CMHC indicators.`,
+  dT: `The schema, in SQL`,
+  dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,
+  dS1: `Creation script for the 12 tables (<code>sql/schema/01_tables.sql</code>)`,
+  dS2: `The 5 analytical views (<code>sql/schema/02_vues.sql</code>)`,
+  diT: `Data dictionary`,
+  diI: `Every column of every table and view, with its type, key, definition and source. The same dictionary is a sheet of the Excel workbook. Definitions are kept in French, as shipped in the database package.`,
+  diF: `Filter`,
+  coT: `Console: run the queries yourself`,
+  coI: `SQLite runs in your browser (sql.js). Pick a query, edit it or write your own, then run it. Shortcut: Ctrl+Enter.`,
+  run: `Run`, edL: `SQL query`,
+  qlT: `The queries, one by one`,
+  qlI: `For each query: the question asked, the techniques used, the code and the result.`,
+  qlN: `Each query carries its level: <span class="lvl D">Beginner</span> aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> CTEs, pivots, rankings · <span class="lvl A">Advanced</span> window functions (LAG, ROW_NUMBER, ROWS frames).`,
+  chT: `Technical choices`,
+  ch1T: `Why SQLite`,
+  ch11: `The database fits in one file versioned in the repository and opens in the browser, no server.`,
+  ch12: `The queries stay in standard SQL: they also run on DuckDB, PostgreSQL or SQL Server with minor adjustments (POWER, concatenation).`,
+  ch2T: `How the results are verified`,
+  ch21: `<code>src/build_db.py</code> rebuilds the database, runs the 12 <code>sql/*.sql</code> files and compares the key results to the Python pipeline, as well as two queries against each other.`,
+  ch22: `Any gap (even 0.05 of a point) stops the build: no unverified figure can get published.`,
+  pgL: `← Excel`, pgR: `Python →`
+};
+const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
+const LVL = { "Débutant": "Beginner", "Intermédiaire": "Intermediate", "Avancé": "Advanced" };
+const tr = (fr, en) => window.LANG === "en" ? en : fr;
+const NOTES = {
+  "01_controle_qualite.sql": { niv: "Débutant", q: "Les données sont-elles complètes et fiables ?", tags: ["UNION ALL", "COUNT DISTINCT", "CASE WHEN"], why: "Avant toute analyse : couverture, nombre de séries, valeurs manquantes et estimations cotées E (à utiliser avec prudence) dans chaque table de faits. Les 12 valeurs manquantes sont des estimations que Statistique Canada n'a pas publiées.",
+    q_en: "Is the data complete and reliable?", why_en: "Before any analysis: coverage, number of series, missing values and E-rated estimates (use with caution) in each fact table. The 12 missing values are estimates Statistics Canada did not publish." },
+  "02_variation_par_type.sql": { niv: "Intermédiaire", q: "Quels types de logement ont le plus augmenté ces dernières années ?", tags: ["LAG", "PARTITION BY", "JOIN"], why: "PARTITION BY relance le calcul de LAG pour chaque type de logement : la variation du studio ne se compare jamais au 3 chambres. En 2025, le 2 chambres (+14,5 %) et le studio (+12,7 %) mènent.",
+    q_en: "Which unit types rose the most in recent years?", why_en: "PARTITION BY restarts the LAG computation for each unit type: a bachelor's change is never compared to a three-bedroom's. In 2025, two-bedrooms (+14.5%) and bachelors (+12.7%) lead." },
+  "03_moyenne_mobile.sql": { niv: "Avancé", q: "La hausse est-elle un pic isolé ou une tendance ?", tags: ["AVG OVER", "ROWS BETWEEN", "CTE en chaîne"], tags_en: ["AVG OVER", "ROWS BETWEEN", "Chained CTEs"], why: "La moyenne mobile sur 3 ans lisse les variations ponctuelles. Elle passe de 2 % avant 2019 à 9,7 % en 2025 : la hausse est durable. Le filtre sur les années est appliqué après le calcul de la fenêtre, pour ne pas tronquer les premières moyennes.",
+    q_en: "Is the increase a one-off spike or a trend?", why_en: "The 3-year moving average smooths one-off swings. It goes from 2% before 2019 to 9.7% in 2025: the increase is durable. The year filter is applied after the window computation, so the first averages are not truncated." },
+  "04_loyer_reel.sql": { niv: "Débutant", q: "Que valent les loyers une fois l'inflation retirée ?", tags: ["CTE", "JOIN", "CROSS JOIN"], why: "La CTE isole l'IPC de 2025, réutilisé comme base pour toutes les lignes. Chaque loyer est ramené en dollars de 2025.",
+    q_en: "What are rents worth once inflation is removed?", why_en: "The CTE isolates the 2025 CPI, reused as the base for every row. Each rent is restated in 2025 dollars." },
+  "05_rythme_par_periode.sql": { niv: "Intermédiaire", q: "Le rythme de hausse réelle a-t-il changé après 2019 ?", tags: ["VALUES", "POWER", "CTE multiples"], tags_en: ["VALUES", "POWER", "Multiple CTEs"], why: "Une table de périodes construite avec VALUES évite de dupliquer le calcul. Le taux de croissance annuel composé passe de 0,50 % à 4,09 %.",
+    q_en: "Did the pace of real increases change after 2019?", why_en: "A period table built with VALUES avoids duplicating the computation. The compound annual growth rate goes from 0.50% to 4.09%." },
+  "06_classement_villes.sql": { niv: "Intermédiaire", q: "Où les loyers ont-ils le plus augmenté depuis 2019 ?", tags: ["Agrégation conditionnelle", "RANK"], tags_en: ["Conditional aggregation", "RANK"], why: "MAX(CASE WHEN ...) pivote 2019 et 2025 sur une seule ligne par ville ; RANK classe les hausses. Montréal est première, avec +57 %.",
+    q_en: "Where did rents rise the most since 2019?", why_en: "MAX(CASE WHEN ...) pivots 2019 and 2025 onto a single row per city; RANK orders the increases. Montreal comes first, at +57%." },
+  "07_rang_montreal_par_annee.sql": { niv: "Avancé", q: "Montréal est-elle toujours la grande ville la moins chère ?", tags: ["RANK", "MAX OVER", "PARTITION BY année"], tags_en: ["RANK", "MAX OVER", "PARTITION BY year"], why: "Non : première jusqu'en 2019, elle passe deuxième derrière Québec à partir de 2020. Le contrôle automatique compare ce rang aux loyers de la requête 06.",
+    q_en: "Is Montreal still the cheapest large city?", why_en: "No: first until 2019, it drops to second behind Quebec City from 2020 on. The automatic check compares this rank to the rents of query 06." },
+  "08_prime_de_relocation.sql": { niv: "Débutant", q: "Combien coûte un logement qui change de locataire ?", tags: ["JOIN entre sources", "CAST"], tags_en: ["JOIN across sources", "CAST"], why: "Jointure entre la série de Statistique Canada et les indicateurs du rapport SCHL. En 2025, l'écart atteint 298 $ par mois.",
+    q_en: "What does a unit cost when it changes tenant?", why_en: "A join between the Statistics Canada series and the CMHC report indicators. In 2025, the gap reaches $298 per month." },
+  "09_demande_vs_paye.sql": { niv: "Avancé", q: "Dans quelles villes déménager coûte-t-il le plus cher ?", tags: ["ROW_NUMBER", "Dernier enregistrement par groupe", "Pivot", "RANK"], tags_en: ["ROW_NUMBER", "Latest record per group", "Pivot", "RANK"], why: "ROW_NUMBER isole le dernier trimestre publié de chaque série (motif classique en BI), puis un pivot met loyer demandé et loyer payé côte à côte. Montréal est 4e sur 16, avec un écart de 460 $.",
+    q_en: "In which cities does moving cost the most?", why_en: "ROW_NUMBER isolates the latest published quarter of each series (a classic BI pattern), then a pivot puts asking rent and paid rent side by side. Montreal is 4th of 16, with a $460 gap." },
+  "10_provinces_loyer_inflation.sql": { niv: "Intermédiaire", q: "Quelle province a connu la plus forte hausse des loyers en 2025 ?", tags: ["Pivot", "RANK", "Ratio de ratios"], tags_en: ["Pivot", "RANK", "Ratio of ratios"], why: "Le Québec arrive premier en 2025 (+7,8 %), mais seulement 4e sur 2019-2025 : la hausse québécoise est récente et s'est concentrée en 2024 et 2025.",
+    q_en: "Which province saw the strongest rent increase in 2025?", why_en: "Quebec comes first in 2025 (+7.8%) but only 4th over 2019-2025: the Quebec surge is recent and concentrated in 2024 and 2025." },
+  "12_vues_quebec.sql": { niv: "Intermédiaire", q: "Au Québec, où l'écart entre annonce et loyer payé est-il le plus fort ?", tags: ["Requête sur des vues", "JOIN sur 2 clés", "NULLS LAST"], tags_en: ["Query over views", "JOIN on 2 keys", "NULLS LAST"], why: "La logique (dernier trimestre publié, pivot, variation de l'IPC) vit dans les vues ; la requête finale tient en dix lignes. Sherbrooke (+35,4 %) devance Montréal (+33,8 %). Les régions sans loyer payé publié restent visibles en fin de liste.",
+    q_en: "In Quebec, where is the gap between listings and rent paid the widest?", why_en: "The logic (latest published quarter, pivot, CPI change) lives in the views; the final query fits in ten lines. Sherbrooke (+35.4%) edges out Montreal (+33.8%). Areas without a published paid rent stay visible at the end of the list." },
+  "11_inoccupation_vs_loyer.sql": { niv: "Avancé", q: "Quand les loyers ont-ils monté malgré plus de logements vacants ?", tags: ["JOIN sur 2 clés", "LAG", "Filtre sur valeurs calculées"], tags_en: ["JOIN on 2 keys", "LAG", "Filter on computed values"], why: "Les deux séries sont alignées par année, puis LAG compare chaque année à la précédente. Trois années répondent au critère, dont 2025.",
+    q_en: "When did rents rise despite more vacant units?", why_en: "The two series are aligned by year, then LAG compares each year to the previous one. Three years meet the criterion, 2025 among them." }
+};
+const SCHEMA_TXT = [["fait_loyer", "annee, geo_id, unit_id, loyer"], ["fait_loyer_trimestriel", "periode, geo_id, estimation (A/P), loyer, cote"],
+  ["fait_inoccupation", "annee, geo_id, taux"], ["ipc_provinces", "annee, code, ipc_loyer, ipc_ensemble"], ["ipc", "annee, geo_id, ipc"],
+  ["schl_roulement", "annee, geo_id, indicateur, valeur"], ["dim_logement", "unit_id, libelle_fr, chambres"], ["dim_geo", "geo_id, libelle_fr"], ["dim_rmr", "geo_id, nom, province, lat, lon"],
+  ["dim_province", "code, nom, niveau"], ["dim_estimation", "code, libelle"], ["dim_indicateur", "code, libelle, unite"],
+  ["Vues", "v_loyer_reel, v_variation_annuelle, v_dernier_trimestre, v_ecart_demande_paye, v_ipc_provinces_variation"]];
+document.querySelectorAll(".mtabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".mtabs button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  document.getElementById("m-mcd").hidden = b.dataset.m !== "mcd";
+  document.getElementById("m-mld").hidden = b.dataset.m !== "mld";
+});
+const DICO = [{"table": "dim_logement", "colonne": "unit_id", "type": "TEXT", "cle": "PK", "description": "Identifiant du type de logement : studio, 1ch, 2ch, 3ch", "source": "Projet"}, {"table": "dim_logement", "colonne": "libelle_fr", "type": "TEXT", "cle": "", "description": "Libellé en français, unique", "source": "Projet"}, {"table": "dim_logement", "colonne": "libelle_en", "type": "TEXT", "cle": "", "description": "Libellé en anglais", "source": "Projet"}, {"table": "dim_logement", "colonne": "chambres", "type": "INTEGER", "cle": "", "description": "Nombre de chambres (0 à 3), sert à l'ordre de tri", "source": "Projet"}, {"table": "dim_geo", "colonne": "geo_id", "type": "TEXT", "cle": "PK", "description": "Identifiant de la grande RMR suivie depuis 1992 (six villes)", "source": "Projet"}, {"table": "dim_geo", "colonne": "libelle_fr", "type": "TEXT", "cle": "", "description": "Nom de la ville en français", "source": "Projet"}, {"table": "dim_geo", "colonne": "libelle_en", "type": "TEXT", "cle": "", "description": "Nom de la ville en anglais", "source": "Projet"}, {"table": "dim_province", "colonne": "code", "type": "TEXT", "cle": "PK", "description": "Code à deux lettres (CA pour l'ensemble du Canada)", "source": "Projet"}, {"table": "dim_province", "colonne": "nom", "type": "TEXT", "cle": "", "description": "Nom en français, unique", "source": "Projet"}, {"table": "dim_province", "colonne": "niveau", "type": "TEXT", "cle": "", "description": "province, territoire ou pays (contrainte CHECK)", "source": "Projet"}, {"table": "dim_estimation", "colonne": "code", "type": "TEXT", "cle": "PK", "description": "A ou P", "source": "StatCan 46-10-0092-01"}, {"table": "dim_estimation", "colonne": "libelle", "type": "TEXT", "cle": "", "description": "Loyer demandé ou loyer payé", "source": "Projet"}, {"table": "dim_indicateur", "colonne": "code", "type": "TEXT", "cle": "PK", "description": "Code de l'indicateur SCHL", "source": "Projet"}, {"table": "dim_indicateur", "colonne": "libelle", "type": "TEXT", "cle": "", "description": "Définition de l'indicateur", "source": "SCHL, Rapport sur le marché locatif 2025"}, {"table": "dim_indicateur", "colonne": "unite", "type": "TEXT", "cle": "", "description": "dollars ou pct : dépend de l'indicateur seul (3e forme normale)", "source": "Projet"}, {"table": "dim_rmr", "colonne": "geo_id", "type": "INTEGER", "cle": "PK", "description": "Identifiant de la région métropolitaine dans le tableau 46-10-0092-01", "source": "Statistique Canada"}, {"table": "dim_rmr", "colonne": "nom", "type": "TEXT", "cle": "", "description": "Nom de la région métropolitaine", "source": "Statistique Canada"}, {"table": "dim_rmr", "colonne": "province", "type": "TEXT", "cle": "FK", "description": "Province de la région (dim_province)", "source": "Projet"}, {"table": "dim_rmr", "colonne": "lat", "type": "REAL", "cle": "", "description": "Latitude du centre de la ville principale, bornée au territoire canadien", "source": "Projet"}, {"table": "dim_rmr", "colonne": "lon", "type": "REAL", "cle": "", "description": "Longitude du centre de la ville principale, bornée au territoire canadien", "source": "Projet"}, {"table": "fait_loyer", "colonne": "annee", "type": "INTEGER", "cle": "PK", "description": "Année de l'enquête (octobre)", "source": "SCHL via StatCan 34-10-0133-01"}, {"table": "fait_loyer", "colonne": "geo_id", "type": "TEXT", "cle": "PK, FK", "description": "Ville (dim_geo)", "source": "SCHL via StatCan 34-10-0133-01"}, {"table": "fait_loyer", "colonne": "unit_id", "type": "TEXT", "cle": "PK, FK", "description": "Type de logement (dim_logement)", "source": "SCHL via StatCan 34-10-0133-01"}, {"table": "fait_loyer", "colonne": "loyer", "type": "INTEGER", "cle": "", "description": "Loyer mensuel moyen en dollars courants, immeubles de 3 logements et plus (strictement positif)", "source": "SCHL via StatCan 34-10-0133-01"}, {"table": "fait_inoccupation", "colonne": "annee", "type": "INTEGER", "cle": "PK", "description": "Année de l'enquête (octobre)", "source": "SCHL via StatCan 34-10-0127-01"}, {"table": "fait_inoccupation", "colonne": "geo_id", "type": "TEXT", "cle": "PK, FK", "description": "Ville (dim_geo)", "source": "SCHL via StatCan 34-10-0127-01"}, {"table": "fait_inoccupation", "colonne": "taux", "type": "REAL", "cle": "", "description": "Taux d'inoccupation en %, immeubles de 6 logements et plus", "source": "SCHL via StatCan 34-10-0127-01"}, {"table": "fait_loyer_trimestriel", "colonne": "periode", "type": "TEXT", "cle": "PK", "description": "Trimestre au format AAAA-MM (mois de début), vérifié par GLOB", "source": "StatCan 46-10-0092-01"}, {"table": "fait_loyer_trimestriel", "colonne": "geo_id", "type": "INTEGER", "cle": "PK, FK", "description": "Région métropolitaine (dim_rmr)", "source": "StatCan 46-10-0092-01"}, {"table": "fait_loyer_trimestriel", "colonne": "estimation", "type": "TEXT", "cle": "PK, FK", "description": "Type d'estimation (dim_estimation) : A loyer demandé, P loyer payé", "source": "StatCan 46-10-0092-01"}, {"table": "fait_loyer_trimestriel", "colonne": "loyer", "type": "REAL", "cle": "", "description": "Loyer moyen d'un appartement de 2 chambres, NULL si non publié", "source": "StatCan 46-10-0092-01"}, {"table": "fait_loyer_trimestriel", "colonne": "cote", "type": "TEXT", "cle": "", "description": "Qualité de l'estimation : E à utiliser avec prudence, F non fiable (valeur retirée), .. non disponible", "source": "StatCan 46-10-0092-01"}, {"table": "ipc", "colonne": "annee", "type": "INTEGER", "cle": "PK", "description": "Année (moyenne annuelle)", "source": "StatCan 18-10-0005-01"}, {"table": "ipc", "colonne": "geo_id", "type": "TEXT", "cle": "PK, FK", "description": "Ville de l'indice (dim_geo), Montréal", "source": "StatCan 18-10-0005-01"}, {"table": "ipc", "colonne": "ipc", "type": "REAL", "cle": "", "description": "IPC d'ensemble de Montréal, moyenne annuelle, 2002 = 100", "source": "StatCan 18-10-0005-01"}, {"table": "ipc_provinces", "colonne": "annee", "type": "INTEGER", "cle": "PK", "description": "Année", "source": "StatCan 18-10-0005-01"}, {"table": "ipc_provinces", "colonne": "code", "type": "TEXT", "cle": "PK, FK", "description": "Province ou Canada (dim_province)", "source": "StatCan 18-10-0005-01"}, {"table": "ipc_provinces", "colonne": "ipc_loyer", "type": "REAL", "cle": "", "description": "IPC du loyer, 2002 = 100 : mêmes logements d'une année à l'autre", "source": "StatCan 18-10-0005-01"}, {"table": "ipc_provinces", "colonne": "ipc_ensemble", "type": "REAL", "cle": "", "description": "IPC d'ensemble, 2002 = 100", "source": "StatCan 18-10-0005-01"}, {"table": "schl_roulement", "colonne": "annee", "type": "INTEGER", "cle": "PK", "description": "Année de l'enquête (octobre)", "source": "SCHL, Rapport sur le marché locatif 2025"}, {"table": "schl_roulement", "colonne": "geo_id", "type": "TEXT", "cle": "PK, FK", "description": "Ville (dim_geo), Montréal", "source": "SCHL, Rapport sur le marché locatif 2025"}, {"table": "schl_roulement", "colonne": "indicateur", "type": "TEXT", "cle": "PK, FK", "description": "Indicateur publié (dim_indicateur)", "source": "SCHL, Rapport sur le marché locatif 2025"}, {"table": "schl_roulement", "colonne": "valeur", "type": "REAL", "cle": "", "description": "Valeur de l'indicateur", "source": "SCHL, Rapport sur le marché locatif 2025"}, {"table": "v_loyer_reel", "colonne": "annee", "type": "INTEGER", "cle": "", "description": "Année", "source": "Vue"}, {"table": "v_loyer_reel", "colonne": "unit_id", "type": "TEXT", "cle": "", "description": "Type de logement", "source": "Vue"}, {"table": "v_loyer_reel", "colonne": "logement", "type": "TEXT", "cle": "", "description": "Libellé du type de logement", "source": "Vue"}, {"table": "v_loyer_reel", "colonne": "loyer_nominal", "type": "INTEGER", "cle": "", "description": "Loyer moyen de Montréal en dollars courants", "source": "Vue"}, {"table": "v_loyer_reel", "colonne": "loyer_reel", "type": "REAL", "cle": "", "description": "Loyer en dollars de l'année de référence : loyer × IPC référence / IPC de l'année", "source": "Vue"}, {"table": "v_loyer_reel", "colonne": "annee_ref", "type": "INTEGER", "cle": "", "description": "Dernière année d'IPC disponible, choisie par la vue", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "annee", "type": "INTEGER", "cle": "", "description": "Année", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "geo_id", "type": "TEXT", "cle": "", "description": "Ville", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "unit_id", "type": "TEXT", "cle": "", "description": "Type de logement", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "loyer", "type": "INTEGER", "cle": "", "description": "Loyer moyen de l'année", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "loyer_prec", "type": "INTEGER", "cle": "", "description": "Loyer de l'année précédente de la même série (LAG sur la fenêtre nommée w)", "source": "Vue"}, {"table": "v_variation_annuelle", "colonne": "variation_pct", "type": "REAL", "cle": "", "description": "Variation annuelle en %", "source": "Vue"}, {"table": "v_dernier_trimestre", "colonne": "geo_id", "type": "INTEGER", "cle": "", "description": "Région métropolitaine", "source": "Vue"}, {"table": "v_dernier_trimestre", "colonne": "estimation", "type": "TEXT", "cle": "", "description": "A (demandé) ou P (payé)", "source": "Vue"}, {"table": "v_dernier_trimestre", "colonne": "periode", "type": "TEXT", "cle": "", "description": "Dernier trimestre publié de la série (ROW_NUMBER = 1)", "source": "Vue"}, {"table": "v_dernier_trimestre", "colonne": "loyer", "type": "REAL", "cle": "", "description": "Loyer de ce trimestre", "source": "Vue"}, {"table": "v_dernier_trimestre", "colonne": "cote", "type": "TEXT", "cle": "", "description": "Qualité de l'estimation", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "geo_id", "type": "INTEGER", "cle": "", "description": "Région métropolitaine", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "nom", "type": "TEXT", "cle": "", "description": "Nom de la région", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "province", "type": "TEXT", "cle": "", "description": "Code de la province", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "demande", "type": "REAL", "cle": "", "description": "Dernier loyer demandé publié", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "paye", "type": "REAL", "cle": "", "description": "Dernier loyer payé publié, NULL si jamais publié", "source": "Vue"}, {"table": "v_ecart_demande_paye", "colonne": "periode", "type": "TEXT", "cle": "", "description": "Trimestre du dernier loyer demandé publié", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "annee", "type": "INTEGER", "cle": "", "description": "Année", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "code", "type": "TEXT", "cle": "", "description": "Code de la province", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "province", "type": "TEXT", "cle": "", "description": "Nom de la province", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "ipc_loyer", "type": "REAL", "cle": "", "description": "IPC du loyer", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "ipc_ensemble", "type": "REAL", "cle": "", "description": "IPC d'ensemble", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "hausse_loyer_pct", "type": "REAL", "cle": "", "description": "Hausse annuelle de l'IPC du loyer en %", "source": "Vue"}, {"table": "v_ipc_provinces_variation", "colonne": "inflation_pct", "type": "REAL", "cle": "", "description": "Hausse annuelle de l'IPC d'ensemble en %", "source": "Vue"}];
+function drawDico() {
+  const f = document.getElementById("dico-f").value;
+  const rows = DICO.filter(r => !f || r.table === f);
+  const H = tr(["Table", "Colonne", "Type", "Clé", "Description", "Source"], ["Table", "Column", "Type", "Key", "Description (FR)", "Source"]);
+  document.getElementById("dico").innerHTML = `<table class="data"><tr>${H.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(r =>
+    `<tr><td><code class="${r.table.startsWith("v_") ? "vw" : "tb"}">${esc(r.table)}</code></td><td><code>${esc(r.colonne)}</code></td><td>${esc(r.type || "")}</td><td>${esc(r.cle || "")}</td><td class="desc">${esc(r.description || "")}</td><td>${esc(r.source || "")}</td></tr>`).join("")}</table>`;
+}
+function drawDicoFilter() {
+  const cur = document.getElementById("dico-f").value;
+  document.getElementById("dico-f").innerHTML = `<option value="">${tr("Toutes les tables et vues", "All tables and views")} (${DICO.length} ${tr("colonnes", "columns")})</option>` +
+    [...new Set(DICO.map(r => r.table))].map(t => `<option value="${t}"${t === cur ? " selected" : ""}>${t}</option>`).join("");
+}
+drawDicoFilter();
+document.getElementById("dico-f").onchange = drawDico;
+drawDico();
+function drawQlist() {
+  document.getElementById("qlist").innerHTML = SQLRES.map(q => {
+    const n = NOTES[q.file] || { q: q.title, tags: [], why: "" };
+    const en = window.LANG === "en";
+    const body = q.sql.split("\n").slice(1).join("\n");
+    const tags = (en && n.tags_en) || n.tags;
+    const lvl = n.niv ? (en ? LVL[n.niv] : n.niv) : "";
+    return `<article class="qcard"><div style="min-width:0"><p class="eyebrow" style="margin:0 0 4px">${esc(q.file)} <span class="lvl ${n.niv ? n.niv[0] : ""}">${esc(lvl)}</span></p><h3>${esc((en && n.q_en) || n.q)}</h3>
+      <div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div><pre class="code">${highlight(body, "sql")}</pre></div>
+      <div style="min-width:0"><p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tablewrap">${resultTable(q.columns, q.rows)}</div></div></article>`;
+  }).join("");
+}
+drawQlist();
+
+const st = { i: 0, db: null, loading: null };
+function loadSQL() {
+  if (st.loading) return st.loading;
+  const stat = document.getElementById("sql-stat");
+  stat.textContent = tr("Chargement de SQLite…", "Loading SQLite…");
+  st.loading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); })
+    .then(() => initSqlJs({ locateFile: f => "assets/" + f }))
+    .then(SQL => fetch("assets/loyers.sqlite").then(r => { if (!r.ok) throw new Error("db"); return r.arrayBuffer(); }).then(b => { st.db = new SQL.Database(new Uint8Array(b)); }))
+    .then(() => { stat.textContent = tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run"); })
+    .catch(() => { stat.textContent = tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown."); });
+  return st.loading;
+}
+async function runSQL() {
+  const err = document.getElementById("sql-err"); err.hidden = true;
+  await loadSQL();
+  if (!st.db) { const q = SQLRES[st.i]; document.getElementById("sql-out").innerHTML = resultTable(q.columns, q.rows); return; }
+  try {
+    const t0 = performance.now();
+    const res = st.db.exec(document.getElementById("sql-editor").value);
+    const last = res[res.length - 1];
+    document.getElementById("sql-out").innerHTML = last ? resultTable(last.columns, last.values.slice(0, 500)) : "";
+    document.getElementById("sql-stat").textContent = last
+      ? `${last.values.length} ${tr("ligne(s)", "row(s)")} · ${Math.round(performance.now() - t0)} ms`
+      : tr("Requête exécutée, aucun résultat.", "Query ran, no result set.");
+  } catch (e) { err.textContent = e.message; err.hidden = false; }
+}
+function drawTabs() {
+  const tabs = document.getElementById("qtabs");
+  tabs.innerHTML = SQLRES.map((q, i) => { const n = NOTES[q.file] || {}; const lvl = n.niv ? (window.LANG === "en" ? LVL[n.niv] : n.niv) : "";
+    return `<button type="button" aria-pressed="${i === st.i}" data-i="${i}" title="${lvl}">${q.file.replace(".sql", "")}</button>`; }).join("");
+  tabs.querySelectorAll("button").forEach(b => b.onclick = () => { st.i = +b.dataset.i; drawTabs(); document.getElementById("sql-editor").value = SQLRES[st.i].sql; runSQL(); });
+}
+drawTabs();
+document.getElementById("sql-editor").value = SQLRES[st.i].sql;
+function drawSchema() {
+  document.getElementById("schema").innerHTML = `<p style='margin:0 0 6px;font-family:var(--font-body)'>${tr("Tables", "Tables")}</p>` + SCHEMA_TXT.map(([n, c]) => `<b>${n}</b>${c}`).join("<br>");
+}
+drawSchema();
+document.getElementById("sql-out").innerHTML = resultTable(SQLRES[0].columns, SQLRES[0].rows);
+document.getElementById("sql-run").onclick = runSQL;
+document.getElementById("sql-editor").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSQL(); }
+  if (e.key === "Tab") { e.preventDefault(); const el = e.target; el.setRangeText("  ", el.selectionStart, el.selectionEnd, "end"); }
+});
+document.addEventListener("langchange", () => { drawQlist(); drawDicoFilter(); drawDico(); drawTabs(); drawSchema(); });
+loadSQL();
+</script>
+
+<script>/* Animations au défilement, communes à toutes les pages : barre de progression, apparition des blocs,
+   tracé progressif des courbes, compteurs. Tout est désactivé si l'utilisateur préfère réduire les animations. */
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bar = document.createElement("div");
+  bar.className = "progress";
+  document.body.appendChild(bar);
+  const top = document.querySelector(".top");
+  const onScroll = () => {
+    const h = document.documentElement;
+    if (top) top.classList.toggle("solid", h.scrollTop > 40);
+    bar.style.transform = `scaleX(${h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)})`;
+  };
+  addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  const SEL = "section.block .wrap > h2, section.block .wrap > .intro, section.block .wrap > .panel, section.block .wrap > .figure, " +
+    ".qcard, .stepc, .card, .kpi, .skill, .ctxcard, .erd > .t, .gallery > *, .two > *, .cols > *, .flow > *, .sim > *, .models, .dico, details.ddl, .mapwrap, .yearbar";
+  const mark = root => root.querySelectorAll(SEL).forEach(el => {
+    if (el.closest(".heroband") || el.classList.contains("rv")) return;
+    el.classList.add("rv");
+    const sibs = [...el.parentElement.children].filter(x => x.matches(SEL));
+    const i = sibs.indexOf(el);
+    if (i > 0 && !el.style.getPropertyValue("--d")) el.style.setProperty("--d", `${Math.min(i, 5) * 0.08}s`);
+  });
+
+  const fmt = (v, dec, ref) => {
+    const s = v.toLocaleString("fr-CA", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    return ref.includes("\u202f") || ref.includes("\u00a0") ? s : s.replace(/\u202f|\u00a0/g, " ");
+  };
+  const count = el => {
+    const txt = el.textContent, re = /(\d{1,3}(?:[\s\u202f\u00a0]\d{3})+|\d+)(,\d+)?/g, m = [...txt.matchAll(re)];
+    if (m.length !== 1 || el.dataset.counted) return;
+    el.dataset.counted = "1";
+    const raw = m[0][0], dec = m[0][2] ? m[0][2].length - 1 : 0;
+    const target = parseFloat(raw.replace(/[\s\u202f\u00a0]/g, "").replace(",", "."));
+    const pre = txt.slice(0, m[0].index), post = txt.slice(m[0].index + raw.length), t0 = performance.now(), dur = 1100;
+    const step = now => {
+      if (el.textContent !== el.dataset.last && el.dataset.last !== undefined) return;   // texte remplacé (changement de langue)
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = el.dataset.last = pre + fmt(target * e, dec, raw) + post;
+      if (k < 1) requestAnimationFrame(step); else { el.textContent = txt; delete el.dataset.last; }
+    };
+    requestAnimationFrame(step);
+  };
+  const drawChart = el => {
+    if (el.classList.contains("drawn")) return;
+    el.querySelectorAll("path").forEach(p => {
+      if (p.closest(".axis") || p.classList.contains("domain")) return;
+      const fillNone = (p.getAttribute("fill") || getComputedStyle(p).fill) === "none";
+      if (!fillNone || !p.getTotalLength) return;
+      const L = p.getTotalLength();
+      if (L < 40) return;
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.classList.add("draw");
+      setTimeout(() => { p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; p.classList.remove("draw"); }, 2000);
+    });
+    el.querySelectorAll("rect").forEach((r, i) => { if (+r.getAttribute("width") > 2 && +r.getAttribute("height") > 2) { r.classList.add("grow"); r.style.animationDelay = `${Math.min(i, 12) * 0.04}s`; } });
+    el.querySelectorAll("circle").forEach((c, i) => { c.classList.add("pop"); c.style.animationDelay = `${0.2 + Math.min(i, 40) * 0.015}s`; });
+    el.classList.add("drawn");
+  };
+
+  // les blocs défilants (code, tableaux) doivent être atteignables au clavier
+  document.querySelectorAll("pre.code, .tablewrap, .dico").forEach(el => {
+    el.tabIndex = 0;
+    if (!el.hasAttribute("aria-label")) el.setAttribute("aria-label", el.matches("pre.code") ? "Code, défilement horizontal" : "Tableau, défilement");
+  });
+  mark(document);
+  const all = () => document.querySelectorAll(".rv:not(.in)");
+  if (reduce || !("IntersectionObserver" in window)) {
+    document.querySelectorAll(".rv").forEach(e => e.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("in");
+    e.target.querySelectorAll(".kpi b, .num").forEach(count);
+    if (e.target.matches(".kpi b, .num")) count(e.target);
+    io.unobserve(e.target);
+  }), { rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { drawChart(e.target); cio.unobserve(e.target); }
+  }), { threshold: 0.25 });
+  all().forEach(e => io.observe(e));
+  document.querySelectorAll(".chart").forEach(c => cio.observe(c));
+  document.querySelectorAll(".heroband .num").forEach(n => setTimeout(() => count(n), 500));
+  new MutationObserver(ms => {
+    ms.forEach(m => m.addedNodes.forEach(n => {
+      if (n.nodeType !== 1) return;
+      mark(n.parentElement || n);
+      if (n.classList && n.classList.contains("rv") && !n.classList.contains("in")) io.observe(n);
+      n.querySelectorAll && n.querySelectorAll(".rv:not(.in)").forEach(x => io.observe(x));
+    }));
+  }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>/* Langue du site : FR par défaut, EN au choix. Le choix est mémorisé (localStorage)
+   et suivi sur toutes les pages. Chaque page fournit ses traductions dans PAGE_EN
+   (clés data-i18n) ; la page d'accueil garde son propre moteur (table T) et n'expose
+   pas de PAGE_EN. Les éléments communs (navigation, lien d'évitement, pied de page)
+   sont traduits ici. */
+(() => {
+  const NAV = {
+    "index.html": { fr: "Analyse", en: "Analysis" },
+    "carte.html": { fr: "Carte", en: "Map" },
+    "excel.html": { fr: "Excel", en: "Excel" },
+    "sql.html": { fr: "SQL", en: "SQL" },
+    "python.html": { fr: "Python", en: "Python" }
+  };
+  const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
+  const FOOT = {
+    fr: "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.",
+    en: "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks."
+  };
+  const SCROLL = {
+    code: { fr: "Code, défilement horizontal", en: "Code, scrolls horizontally" },
+    table: { fr: "Tableau, défilement", en: "Table, scrollable" }
+  };
+  const saved = new Map();
+  let frTitle = document.title;
+
+  function apply() {
+    const L = window.LANG, en = L === "en";
+    document.documentElement.lang = L;
+    document.querySelectorAll(".nav a").forEach(a => {
+      const d = NAV[a.getAttribute("href")];
+      if (d) a.textContent = d[L];
+    });
+    const skip = document.querySelector("a.skip");
+    if (skip) skip.textContent = SKIP[L];
+    const fw = document.querySelector("footer .wrap");
+    if (fw && !fw.id) fw.textContent = FOOT[L];
+    // images et liens qui ont une variante anglaise (figures, captures, classeur)
+    document.querySelectorAll("[data-en-src]").forEach(img => {
+      if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");
+      img.setAttribute("src", en ? img.dataset.enSrc : img.dataset.frSrc);
+    });
+    document.querySelectorAll("[data-en-href]").forEach(a => {
+      if (!a.dataset.frHref) a.dataset.frHref = a.getAttribute("href");
+      a.setAttribute("href", en ? a.dataset.enHref : a.dataset.frHref);
+    });
+    const P = window.PAGE_EN;
+    if (P) {
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const v = P[el.dataset.i18n];
+        if (v == null) return;
+        if (!saved.has(el)) saved.set(el, el.innerHTML);
+        el.innerHTML = en ? v : saved.get(el);
+      });
+      if (P["@title"]) document.title = en ? P["@title"] : frTitle;
+    }
+    const bf = document.getElementById("lang-fr"), be = document.getElementById("lang-en");
+    if (bf) bf.setAttribute("aria-pressed", String(!en));
+    if (be) be.setAttribute("aria-pressed", String(en));
+    document.dispatchEvent(new CustomEvent("langchange", { detail: { lang: L } }));
+    // après les re-rendus déclenchés par langchange : les zones défilantes restent
+    // atteignables au clavier et annoncées dans la bonne langue
+    document.querySelectorAll("pre.code, .tablewrap, .dico").forEach(el => {
+      el.tabIndex = 0;
+      el.setAttribute("aria-label", el.matches("pre.code") ? SCROLL.code[L] : SCROLL.table[L]);
+    });
+  }
+
+  function set(L) {
+    window.LANG = L;
+    try { localStorage.setItem("loyers.lang", L); } catch (e) {}
+    apply();
+  }
+  const bf = document.getElementById("lang-fr"), be = document.getElementById("lang-en");
+  if (bf) bf.addEventListener("click", () => set("fr"));
+  if (be) be.addEventListener("click", () => set("en"));
+  apply();
+})();
+</script>
+</html>

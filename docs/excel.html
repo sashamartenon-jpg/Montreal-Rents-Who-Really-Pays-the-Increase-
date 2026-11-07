@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1f5fa8">
+<title>Excel · Loyers Montréal</title>
+<meta name="description" content="Classeur Excel sans macro : carte du Canada et carte des villes en graphiques Excel, tableau de bord, scénarios 2030 et simulateur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout : une colonne éditoriale de 1080 px ; chaque constat = texte court + graphique ; outils (simulateur) en grille tableur */
+:root {
+  /* Palette : bleu ciel #0593C6 (données, marque), rose #D83995 (accent unique), blanc #FCFFFF (surfaces) */
+  --bg: #f1f6f9;
+  --surface: #fcffff;
+  --ink: #0f1b26;
+  --ink-2: #44546a;
+  --ink-3: #607286;
+  --line: #d6e2ea;
+  --grid: #e6eef3;
+  --mtl: #0593c6;
+  --mtl-soft: #e0f2fa;
+  --link: #04739b;
+  --warm: #d83995;
+  --warm-ink: #b12a7a;
+  --warm-soft: #fbe5f1;
+  --other: #a5b3c1;
+  --u-studio: #c98500;
+  --u-1ch: #0593c6;
+  --u-2ch: #d83995;
+  --u-3ch: #6250d6;
+  --map-0: #eaf5fa; --map-1: #b9e0f1; --map-2: #7cc6e5; --map-3: #2fa6d6; --map-4: #0583b2; --map-5: #04557a;
+  --map-na: #e3e8ec;
+  --cell-in: #fff6c2;
+  --cell-sel: #0593c6;
+  --code-bg: #f4f9fb; --code-fg: #1b2733; --code-kw: #04739b; --code-str: #0d7a52; --code-com: #55687c; --code-num: #b12a7a; --code-fn: #5a46c9;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.2rem;
+  --step-4: clamp(2.3rem, 5.2vw, 3.8rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+    --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+    --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+    --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+    --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+    --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+  --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+  --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+  --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+  --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+  --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--mtl); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* barre du haut */
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.brand { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: .01em; }
+.brand span { color: var(--ink-3); font-weight: 500; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.btn { font: 500 .85rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--warm); border-color: var(--warm); color: #fff; }
+.btn.primary:hover { filter: brightness(1.06); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: 500 .8rem var(--font-body); background: var(--surface); color: var(--ink-2); border: 0; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* hero */
+.hero { padding-block: 40px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: end; }
+.eyebrow { font: 500 .75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--step-4); line-height: 1.02; margin: 0 0 16px; text-wrap: balance; letter-spacing: -.01em; }
+.hero h1 em { font-style: normal; color: var(--warm-ink); }
+.hero p.lede { font-size: 1.1rem; color: var(--ink-2); margin: 0 0 16px; max-width: 34em; }
+.pace { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.pace div { border-top: 3px solid var(--other); padding-top: 8px; }
+.pace div.now { border-top-color: var(--warm); }
+.pace b { display: block; font: 600 1.5rem var(--font-display); }
+.pace small { color: var(--ink-3); font-size: .82rem; line-height: 1.35; display: block; }
+
+/* sections */
+section.block { padding-block: 36px; border-top: 1px solid var(--line); }
+.block h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--step-3); line-height: 1.1; margin: 0 0 10px; text-wrap: balance; max-width: 22em; }
+.block .intro { color: var(--ink-2); max-width: 44em; margin: 0 0 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+.controls label.small { font-size: .78rem; color: var(--ink-3); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 .82rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 4px 10px 4px 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip .sw { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .5; }
+.chip[aria-pressed="false"] .sw { background: transparent; border: 1.5px solid var(--c); }
+.two { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font: 600 .95rem var(--font-body); margin: 0 0 2px; }
+.chart-sub { font-size: .8rem; color: var(--ink-3); margin: 0 0 8px; }
+.note { font-size: .8rem; color: var(--ink-3); margin: 10px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--ink-2); margin: 0 0 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.callout { border-left: 3px solid var(--warm); background: var(--warm-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 14px 0 0; max-width: 46em; font-size: .95rem; }
+
+/* svg */
+.axis text { fill: var(--ink-3); font: 11px var(--font-mono); }
+.axis line, .axis path { stroke: var(--line); }
+.gridline { stroke: var(--grid); }
+.lbl { fill: var(--ink-2); font: 500 11.5px var(--font-body); }
+.lbl.strong { fill: var(--ink); font-weight: 600; }
+.ann { fill: var(--ink-2); font: 12px var(--font-body); }
+.ann.big { fill: var(--ink); font: 600 15px var(--font-display); }
+.cross { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 8px 10px; font-size: .8rem; min-width: 150px; z-index: 5; }
+.tip .t { font: 600 .8rem var(--font-mono); margin-bottom: 4px; }
+.tip .r { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.tip .r b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .r i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--c); margin-right: 6px; }
+
+/* tableau / données */
+.tablewrap { overflow-x: auto; margin-top: 10px; }
+table.data { border-collapse: collapse; font-size: .82rem; width: 100%; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 5px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th { font-weight: 600; color: var(--ink-2); }
+details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); margin-top: 10px; }
+
+/* simulateur tableur */
+.sim { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.verdict { font-size: 1.05rem; }
+.verdict p { margin: 0 0 12px; }
+.verdict b { font-family: var(--font-display); font-size: 1.25rem; }
+.sheet { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); font-family: var(--font-mono); font-size: .8rem; }
+.fbar { display: flex; border-bottom: 1px solid var(--line); background: var(--bg); }
+.fbar .ref { width: 64px; flex: none; padding: 6px 8px; border-right: 1px solid var(--line); color: var(--ink-2); text-align: center; }
+.fbar .fx { padding: 6px 8px; color: var(--ink-3); border-right: 1px solid var(--line); font-style: italic; }
+.fbar .formula { padding: 6px 8px; overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; color: var(--ink); }
+.grid { overflow-x: auto; }
+.grid table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.grid col.c-rh { width: 36px; } .grid col.c-b { width: 42%; }
+.grid td .c { overflow-wrap: anywhere; }
+.grid th { background: var(--bg); color: var(--ink-3); font-weight: 400; border: 1px solid var(--line); padding: 3px 6px; text-align: center; }
+.grid td { border: 1px solid var(--grid); padding: 0; height: 30px; }
+.grid td.rh { background: var(--bg); color: var(--ink-3); text-align: center; width: 36px; border-color: var(--line); }
+.grid td .c { padding: 4px 8px; display: block; cursor: cell; font-family: var(--font-body); font-size: .84rem; }
+.grid td .c.v { text-align: right; font-family: var(--font-mono); }
+.grid td.sel { outline: 2px solid var(--cell-sel); outline-offset: -2px; }
+.grid td.in { background: var(--cell-in); }
+.grid td.in input, .grid td.in select { width: 100%; border: 0; background: transparent; color: var(--link); font: 500 .84rem var(--font-mono); padding: 4px 8px; text-align: right; }
+.grid td.sec .c { font-weight: 600; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; color: var(--ink-3); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+
+/* navigation */
+.topbar { flex-wrap: wrap; }
+.brand { color: var(--ink); text-decoration: none; }
+.nav { display: flex; gap: 2px; }
+.nav a { font: 500 .88rem var(--font-body); color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
+.nav a:hover { color: var(--ink); background: var(--bg); }
+.nav a[aria-current="page"] { background: var(--ink); color: var(--bg); }
+@media (max-width: 760px) {
+  .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
+}
+/* bandeau compétences (accueil) */
+.skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
+.skill { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--ink); transition: border-color .15s; }
+.skill:hover { border-color: var(--mtl); }
+.skill .tool { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); }
+.skill b { font: 600 1.05rem var(--font-display); }
+.skill small { color: var(--ink-3); font-size: .82rem; line-height: 1.4; }
+.skill .go { margin-top: auto; padding-top: 6px; font-size: .82rem; color: var(--link); }
+@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* pages compétences */
+.phero { padding-block: 40px 24px; max-width: 760px; }
+.phero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
+.phero p { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 16px; }
+.proves { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.proves li { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
+.figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 0; }
+.figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+.figure figcaption { font-size: .82rem; color: var(--ink-3); margin-top: 8px; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stepc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.stepc .n { font: 500 .72rem var(--font-mono); color: var(--ink-3); letter-spacing: .06em; }
+.stepc h3 { font: 600 1.05rem var(--font-display); margin: 4px 0 6px; }
+.stepc p { margin: 0; color: var(--ink-2); font-size: .9rem; }
+.code { background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 0; overflow-x: auto; font: 12.5px/1.55 var(--font-mono); tab-size: 4; }
+.code .k { color: var(--code-kw); font-weight: 500; }
+.code .s { color: var(--code-str); }
+.code .c { color: var(--code-com); font-style: italic; }
+.code .n { color: var(--code-num); }
+.code .f { color: var(--code-fn); }
+.code[data-lang="xl"] { white-space: pre-wrap; overflow-wrap: anywhere; }
+.qcard.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+.qcard { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.qcard h3 { font: 600 1.1rem var(--font-display); margin: 0 0 4px; }
+.qcard .why { color: var(--ink-2); font-size: .9rem; margin: 6px 0 10px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 10px; }
+.tags span { font: 500 .72rem var(--font-mono); background: var(--mtl-soft); color: var(--link); border-radius: 4px; padding: 2px 7px; }
+.status-banner { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-left: 4px solid var(--warm); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 8px; }
+.status-banner b { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+.status-banner p { margin: 4px 0 0; color: var(--ink-2); font-size: .92rem; }
+.pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 28px; border-top: 1px solid var(--line); }
+.pager a { text-decoration: none; font-weight: 500; }
+.erd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.erd .t { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font: .8rem/1.6 var(--font-mono); min-width: 0; }
+.erd .t.fact { border: 2px solid var(--mtl); }
+.erd .t h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); background: var(--bg); border-bottom: 1px solid var(--line); }
+.erd .t.fact h4 { background: var(--mtl-soft); color: var(--link); }
+.erd .t ul { list-style: none; margin: 0; padding: 6px 10px; color: var(--ink-2); }
+.erd .t li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+.gallery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 820px) {
+  .steps, .qcard, .qcard.wide, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* hero note */
+.hero-note { font-size: .8rem; color: var(--ink-3); margin: 12px 0 0; max-width: 40em; }
+/* relocation */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.kpi b { display: block; font: 600 1.7rem var(--font-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--ink-3); font-size: .8rem; line-height: 1.35; display: block; margin-top: 4px; }
+.kpi.hot b { color: var(--warm-ink); }
+/* implications */
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card .who { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.card h3 { font: 600 1.15rem var(--font-display); margin: 0; text-wrap: balance; }
+.card p { margin: 0; color: var(--ink-2); font-size: .92rem; }
+.card .dec { margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; font-size: .9rem; }
+.card .dec b { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--warm-ink); display: block; margin-bottom: 2px; }
+/* console SQL */
+.sqlbox { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; align-items: start; }
+.qtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.qtabs button { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.qtabs button[aria-pressed="true"] { border-color: var(--mtl); color: var(--link); background: var(--mtl-soft); }
+.qtitle { font-size: .9rem; color: var(--ink-2); margin: 0 0 8px; }
+textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 var(--font-mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; tab-size: 2; white-space: pre; overflow: auto; }
+.sqlbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+.sqlstat { font: .78rem var(--font-mono); color: var(--ink-3); }
+.sqlerr { color: #d03b3b; font: .82rem var(--font-mono); white-space: pre-wrap; }
+.schema { font: .76rem/1.5 var(--font-mono); color: var(--ink-2); }
+.schema b { color: var(--ink); display: block; margin-top: 8px; }
+.schema b:first-child { margin-top: 0; }
+/* fabrication */
+
+/* méthode */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow > * { text-decoration: none; color: var(--ink); }
+.flow a.flowlink:hover { border-color: var(--mtl); }
+.flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
+.flow b { display: block; font-family: var(--font-display); font-size: 1rem; }
+.flow small { color: var(--ink-3); display: block; line-height: 1.35; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.cols h3 { font: 600 1.05rem var(--font-display); margin: 0 0 8px; }
+.cols ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: .92rem; }
+.cols li { margin-bottom: 6px; }
+.star { font-family: var(--font-mono); font-size: .78rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
+.star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
+.star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* pied de page */
+footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: .85rem; z-index: 20; }
+
+@media (max-width: 820px) {
+  .hero, .two, .sim, .cols, .cards3, .sqlbox { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .flow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero { padding-block: 28px 20px; }
+}
+@media (max-width: 420px) { .brand span { display: none; } }
+
+/* ===================== identité visuelle : dégradé flou bleu, rose et corail, verre dépoli ===================== */
+:root {
+  --bg: #f3f6fb; --surface: #ffffff; --glass: rgba(255, 255, 255, .72); --glass-line: rgba(255, 255, 255, .85);
+  --ink: #13233a; --ink-2: #44546a; --ink-3: #5b6b82; --line: #dbe4ef; --grid: #e8eef6;
+  --mtl: #2f86d6; --mtl-soft: #e8f2fc; --link: #1f6fc0; --warm: #e0457b; --warm-ink: #b8285e; --warm-soft: #fdeaf1;
+  --coral: #f2876b; --other: #a9b6c6; --u-1ch: #2f86d6; --u-2ch: #e0457b; --u-3ch: #7b6cd9;
+  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0;
+  --cell-sel: #2f86d6; --warm-btn: #c9336b;
+  --font-display: "Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(19, 35, 58, .05), 0 12px 32px rgba(19, 35, 58, .07);
+  --mesh: radial-gradient(42% 60% at 34% 62%, rgba(242, 135, 107, .95) 0%, rgba(242, 135, 107, 0) 70%),
+          radial-gradient(38% 55% at 46% 48%, rgba(224, 69, 123, .95) 0%, rgba(224, 69, 123, 0) 70%),
+          radial-gradient(30% 70% at 60% 40%, rgba(30, 47, 92, .85) 0%, rgba(30, 47, 92, 0) 70%),
+          radial-gradient(45% 50% at 80% 75%, rgba(123, 108, 217, .55) 0%, rgba(123, 108, 217, 0) 70%),
+          linear-gradient(115deg, #2a78c8 0%, #3f93da 35%, #6fb0e6 70%, #a9d2f2 100%);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); } }
+:root[data-theme="dark"] {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+.skip { position: absolute; left: 12px; top: -48px; z-index: 60; background: #fff; color: #13233a; font: 600 .9rem var(--font-body); padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none; transition: top .2s; }
+.skip:focus { top: 0; }
+:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; border-radius: 4px; }
+.heroband :focus-visible, .top :focus-visible { outline-color: #fff; }
+body { background: var(--bg); font-family: var(--font-body); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(40% 35% at 95% 20%, rgba(224, 69, 123, .07), transparent 70%),
+              radial-gradient(45% 40% at 0% 70%, rgba(47, 134, 214, .08), transparent 70%); }
+h1, h2, h3 { font-family: var(--font-display); }
+.block h2 { font-weight: 400; letter-spacing: -.02em; font-size: clamp(1.9rem, 3.6vw, 2.7rem); line-height: 1.08; }
+.block h2::before { content: ""; display: block; width: 44px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--warm), var(--coral)); margin-bottom: 16px; }
+.kicker { font: 600 .74rem var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--warm-ink); margin: 0 0 8px; }
+
+/* en-tête flottant en verre */
+.top { position: sticky; top: 0; z-index: 30; background: rgba(18, 40, 78, .38); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.top .wrap { padding-block: 10px; }
+.top { transition: background .3s; }
+.top.solid { background: rgba(19, 35, 58, .88); }
+@media (max-width: 760px) { .top { position: relative; } .top .btn#share { display: none; } }
+.top .brand { color: #fff; font: 600 1.08rem var(--font-display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
+.top .brand::before { content: ""; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, #8ec2ea, var(--warm) 60%, var(--coral)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.top .brand span { color: rgba(255, 255, 255, .78); font-weight: 400; }
+.top .nav { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; padding: 4px; }
+.top .nav a { color: rgba(255, 255, 255, .92); border-radius: 999px; padding: 6px 14px; }
+.top .nav a:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+.top .nav a[aria-current="page"] { background: rgba(255, 255, 255, .95); color: #17325e; font-weight: 600; }
+.top .nav a[aria-current="page"]::before { content: "• "; color: var(--warm); }
+.top .btn { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .btn:hover { background: rgba(255, 255, 255, .24); border-color: rgba(255, 255, 255, .6); }
+.top .seg { border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .seg button { background: transparent; color: rgba(255, 255, 255, .85); }
+.top .seg button[aria-pressed="true"] { background: #fff; color: #17325e; }
+
+/* bandeau : maillage de dégradés flous et verre cannelé */
+.heroband { position: relative; isolation: isolate; color: #fff; background: var(--mesh); background-color: #2a78c8; overflow: hidden; margin-top: -60px; padding-top: 60px; border-bottom: 0; }
+.heroband::before { content: ""; position: absolute; inset: -10%; z-index: -1; background: var(--mesh); filter: blur(24px) saturate(115%); animation: drift 22s ease-in-out infinite alternate; }
+.heroband::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 1px, rgba(255,255,255,.03) 1px 9px, rgba(10,20,45,.07) 9px 10px, rgba(255,255,255,0) 10px 14px),
+              linear-gradient(90deg, rgba(9, 24, 52, .42) 0%, rgba(9, 24, 52, .18) 55%, rgba(9, 24, 52, .05) 100%); }
+@keyframes drift { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(-3%, 2%, 0) scale(1.06); } }
+.heroband .eyebrow { color: rgba(255, 255, 255, .92); font: 500 .8rem var(--font-body); letter-spacing: .14em; }
+.heroband h1, .heroband .phero h1 { color: #fff; font-family: var(--font-display); font-weight: 300; letter-spacing: -.035em; text-shadow: 0 2px 30px rgba(9, 24, 52, .25); }
+.heroband h1 em, .heroband h1 mark { font-style: normal; background: none; color: #fff; font-weight: 500; padding: 0; -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; }
+.heroband .phero { max-width: 1080px; padding-block: 64px 48px; }
+.heroband .phero h1 { font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.02; max-width: 14em; }
+.heroband .phero > p { color: rgba(255, 255, 255, .92); max-width: 44em; font-size: 1.08rem; }
+.heroband .phero p b { color: #fff; }
+.heroband .proves li { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .35); color: #fff; font-family: var(--font-body); border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.heroband .proves li.ai { background: #fff; color: #13233a; border-color: #fff; font-weight: 600; }
+.heroband a:not(.btn):not(.pill) { color: #fff; }
+.heroband .btn:not(.primary) { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .45); border-radius: 999px; }
+.heroband .btn.primary, .pill { background: #fff; color: #13233a; border: 0; border-radius: 999px; padding: 10px 18px; font: 600 .92rem var(--font-body); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; box-shadow: 0 8px 24px rgba(9, 24, 52, .2); }
+.heroband .btn.primary:hover, .pill:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--warm-btn); border-color: var(--warm-btn); color: #fff; font-weight: 600; border-radius: 999px; }
+.btn.primary:hover { background: var(--warm); border-color: var(--warm); filter: none; }
+
+/* accueil */
+.hero2 { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: center; min-height: min(72vh, 680px); padding-block: 36px 70px; }
+.hero2 h1 { font-size: clamp(2.6rem, 5.2vw, 4.5rem); line-height: 1; margin: 0 0 20px; max-width: 12.5em; }
+.hero2 .lede { color: rgba(255, 255, 255, .94); font-size: 1.12rem; max-width: 34em; margin: 0 0 26px; }
+.hero2 .lede b { color: #fff; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.cta .ghost { color: #fff; font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .5); padding-bottom: 2px; }
+.glass-stack { background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .35); border-radius: 26px; padding: 14px; -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); box-shadow: 0 20px 60px rgba(9, 24, 52, .25); }
+.glass-stack .handle { width: 46px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .8); margin: 2px auto 12px; }
+.glass-stack .where { font-size: .82rem; color: rgba(255, 255, 255, .92); margin: 0 6px 12px; display: flex; gap: 8px; align-items: center; }
+.gcard { background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .3); border-radius: 18px; padding: 14px 16px 10px; margin-top: 10px; position: relative; overflow: hidden; }
+.gcard .h { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.02rem; font-weight: 500; }
+.gcard .h small { font-size: .74rem; color: rgba(255, 255, 255, .88); }
+.gcard .row { display: flex; justify-content: space-between; align-items: end; margin-top: 10px; gap: 10px; }
+.gcard .row span { display: block; font-size: .74rem; color: rgba(255, 255, 255, .85); }
+.gcard .row b { font: 400 1.75rem/1.05 var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gcard .row .r { text-align: right; }
+.gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
+.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
+.hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
+.hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.hero-strip b { color: #fff; font-weight: 600; }
+@media (max-width: 900px) {
+  .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
+  .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+  .hero-strip a:last-child { grid-column: 1 / -1; }
+}
+
+/* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
+.hero-stage { position: relative; }
+.hero-stage > .wrap, .heroband.home > nav { position: relative; z-index: 1; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.heroband::before { animation: bloom 2s cubic-bezier(.2, .7, .2, 1) both, drift 22s ease-in-out 2s infinite alternate; }
+@keyframes bloom { from { opacity: .35; transform: translate3d(0, 0, 0) scale(1.22); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+#hero-curve { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+#hero-curve .area { fill: url(#hc-grad); opacity: 0; animation: hcFade 1.6s ease-out 2.1s both; }
+#hero-curve .line { fill: none; stroke: rgba(255, 255, 255, .62); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 12px rgba(255, 255, 255, .45)); }
+#hero-curve .line.go { animation: draw 2.7s cubic-bezier(.45, 0, .2, 1) .35s forwards; }
+#hero-curve .brk { stroke: rgba(255, 255, 255, .7); stroke-width: 1; stroke-dasharray: 3 7; opacity: 0; animation: hcFade .9s ease-out 2.2s both; }
+#hero-curve .dot { fill: #ffd9cc; opacity: 0; transform-box: fill-box; transform-origin: center; animation: hcPop .7s cubic-bezier(.2, .7, .2, 1) 2.55s both; }
+#hero-curve .halo { fill: none; stroke: #ffd9cc; stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: halo 2.6s ease-out 2.9s infinite; }
+#hero-curve .yr { fill: rgba(255, 255, 255, .7); font: 500 11px var(--font-body); letter-spacing: .1em; opacity: 0; animation: hcFade .8s ease-out both; }
+#hero-curve .yr.hot { fill: #ffd9cc; }
+#hero-curve .tag { fill: #fff; font: 500 13px var(--font-body); opacity: 0; animation: hcFade .8s ease-out 2.8s both; }
+.hero-year { position: absolute; right: 2%; top: 46%; transform: translateY(-50%); font: 300 clamp(8rem, 22vw, 20rem)/1 var(--font-display); letter-spacing: -.05em; color: rgba(255, 255, 255, .1); transition: opacity .5s; font-variant-numeric: tabular-nums; white-space: nowrap; user-select: none; }
+@keyframes hcFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hcPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes halo { 0% { opacity: .9; transform: scale(.6); } 70%, 100% { opacity: 0; transform: scale(3.2); } }
+.hero2 h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .14em; margin-bottom: -.14em; }
+.hero2 h1 .wi { display: inline-block; transform: translateY(112%); animation: wordUp 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.15s + var(--i, 0) * .065s); }
+.heroband h1 em:has(.wi) { background-image: none; }
+.heroband h1 em .wi { background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes wordUp { from { transform: translateY(112%); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
+@media (max-width: 900px) {
+  #hero-curve { opacity: .75; }
+  .hero-year { font-size: clamp(6rem, 34vw, 12rem); top: 12%; transform: none; right: -2%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroband::before { animation: none; }
+  #hero-curve .area, #hero-curve .brk, #hero-curve .dot, #hero-curve .yr, #hero-curve .tag { animation: none; opacity: 1; }
+  #hero-curve .halo { display: none; }
+  #hero-curve .line.go { animation: none; stroke-dashoffset: 0 !important; }
+  .hero2 h1 .wi { animation: none; transform: none; }
+}
+
+/* contexte */
+.ctx { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.ctxcard { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.ctxcard .n { font: 300 2.4rem/1 var(--font-display); color: var(--warm); }
+.ctxcard h3 { font: 500 1.18rem var(--font-display); margin: 10px 0 8px; letter-spacing: -.01em; }
+.ctxcard p { margin: 0 0 8px; color: var(--ink-2); font-size: .93rem; }
+.ctxcard .src { font-size: .78rem; color: var(--ink-3); }
+.question { margin-top: 22px; border-radius: 20px; padding: 22px 24px; color: #fff; background: var(--mesh); position: relative; overflow: hidden; isolation: isolate; }
+.question::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(9,24,52,.5), rgba(9,24,52,.15)); }
+.question b { font: 400 1.4rem/1.25 var(--font-display); display: block; margin-bottom: 6px; }
+.question p { margin: 0; color: rgba(255,255,255,.92); }
+@media (max-width: 900px) { .ctx { grid-template-columns: minmax(0, 1fr); } }
+.chow { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 14px; font-size: .88rem; color: var(--ink-2); }
+.chow b { font-family: var(--font-display); color: var(--ink); }
+.chow .tagp { background: var(--warm-soft); color: var(--warm-ink); border-radius: 999px; padding: 3px 10px; font-weight: 600; font-size: .8rem; }
+
+/* cartes et panneaux : verre clair */
+.panel, .qcard, .card, .figure, .stepc, .kpi, .skill { border-radius: 18px; box-shadow: var(--shadow); border-color: var(--line); }
+.kpi { border-top: 3px solid var(--mtl); }
+.kpi.hot { border-top-color: var(--warm); }
+.kpi b { font-family: var(--font-display); font-weight: 400; letter-spacing: -.02em; }
+.card .who { color: var(--warm-ink); }
+.skills { padding-block: 8px 36px; }
+.skill { border-top: 3px solid transparent; border-image: linear-gradient(90deg, var(--mtl), var(--warm)) 1; border-image-slice: 1; transition: transform .2s, box-shadow .2s; }
+.skill:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(19, 35, 58, .12); }
+.pager a { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 16px; }
+.pager a:hover { border-color: var(--mtl); }
+footer { background: #13233a; color: #c9d6e6; border-top: 0; position: relative; }
+footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+footer a { color: #fff; }
+
+/* animations : respiration du bandeau-question, pastilles du bandeau, cartes D3 */
+.question { background-size: 150% 150%; animation: qpan 16s ease-in-out infinite alternate; }
+@keyframes qpan { from { background-position: 0% 40%; } to { background-position: 100% 60%; } }
+.heroband .proves li { opacity: 0; animation: heroIn .7s cubic-bezier(.2, .7, .2, 1) both; }
+.heroband .proves li:nth-child(1) { animation-delay: .32s } .heroband .proves li:nth-child(2) { animation-delay: .38s }
+.heroband .proves li:nth-child(3) { animation-delay: .44s } .heroband .proves li:nth-child(4) { animation-delay: .5s }
+.heroband .proves li:nth-child(5) { animation-delay: .56s } .heroband .proves li:nth-child(6) { animation-delay: .62s }
+.heroband .proves li:nth-child(7) { animation-delay: .68s } .heroband .proves li:nth-child(8) { animation-delay: .74s }
+.heroband .proves li:nth-child(n+9) { animation-delay: .8s }
+.mapwrap svg path, .mapwrap svg circle { transition: fill .45s ease, r .3s ease, opacity .3s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .question, .heroband .proves li { animation: none; opacity: 1; }
+  .mapwrap svg path, .mapwrap svg circle { transition: none; }
+}
+/* animations au défilement */
+.progress { position: fixed; left: 0; top: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 40; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.rv.in { opacity: 1; transform: none; }
+.hero-in { animation: heroIn 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d, 0s); }
+@keyframes heroIn { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.chart.drawn path.draw { animation: draw 1.6s cubic-bezier(.3, .6, .2, 1) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.chart.drawn rect.grow { animation: grow .9s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; }
+@keyframes grow { from { transform: scaleX(0); opacity: .2; } }
+.chart.drawn circle.pop { animation: pop .6s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { transform: scale(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1; transform: none; transition: none; }
+  .heroband::before, .hero-in { animation: none; }
+  .chart.drawn path.draw, .chart.drawn rect.grow, .chart.drawn circle.pop { animation: none; stroke-dashoffset: 0; }
+}
+
+/* page SQL : modèles, vues, schéma, dictionnaire */
+.lvl { display: inline-block; font: 600 .68rem var(--font-body); letter-spacing: .04em; border-radius: 999px; padding: 2px 9px; vertical-align: 1px; }
+.lvl.D { background: #e0f2e6; color: #1a6b3c; }
+.lvl.I { background: var(--mtl-soft); color: var(--link); }
+.lvl.A { background: var(--warm-soft); color: var(--warm-ink); }
+:root[data-theme="dark"] .lvl.D { background: #143526; color: #7fd6a4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lvl.D { background: #143526; color: #7fd6a4; } }
+.mtabs { margin: 4px 0 14px; }
+.models img { background: #fff; border-radius: 10px; }
+.figure a img { cursor: zoom-in; }
+.keyfig { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+@media (max-width: 820px) { .keyfig { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.t.views { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warm); border-radius: 8px; font: .8rem/1.6 var(--font-mono); box-shadow: var(--shadow); }
+.t.views h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); color: var(--warm-ink); border-bottom: 1px solid var(--line); }
+.t.views ul { list-style: none; margin: 0; padding: 6px 10px; columns: 2 300px; color: var(--ink-2); }
+.t.views li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+details.ddl { margin-top: 12px; }
+details.ddl summary { font-weight: 600; color: var(--ink); font-size: .92rem; }
+details.ddl pre { margin-top: 8px; max-height: 560px; overflow: auto; }
+.dico { max-height: 540px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 0; }
+.dico table.data td, .dico table.data th { text-align: left; }
+.dico table.data td.desc { white-space: normal; min-width: 280px; }
+.dico table.data th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.dico code { font-size: .78rem; }
+.dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }
+select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; max-width: 100%; }
+/* --------- scène de défilement : du graphique à la carte, puis l'analyse */
+.scene { position: relative; height: 330vh; background: var(--bg); }
+.scene-pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+.scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
+.scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
+#sc-map { opacity: 0; }
+#sc-map .ring { fill: var(--mtl-soft); stroke: var(--surface); stroke-width: 1; }
+#sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
+#sc-map circle.on { opacity: 1; transform: scale(1); }
+#sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
+#sc-map .sclbl.on { opacity: 1; }
+.scene-cap { position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%); width: min(92vw, 34em); margin: 0; text-align: center; font: 300 clamp(1.25rem, 2.5vw, 1.9rem)/1.3 var(--font-display); letter-spacing: -.015em; color: var(--ink); opacity: 0; transition: opacity .35s; pointer-events: none; }
+.scene-cap b { font-weight: 600; }
+.scene-cap.on { opacity: 1; }
+.scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+#sc-chart .scax { font: 12px var(--font-mono); fill: var(--ink-3); }
+#sc-chart .scbreak { font: 600 13px var(--font-mono); fill: var(--warm-ink); }
+@media (prefers-reduced-motion: reduce) { .scene { display: none; } }
+@media (max-height: 500px) { .scene { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<script>window.LANG=(function(){try{var q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="fr"){localStorage.setItem("loyers.lang",q);return q}return localStorage.getItem("loyers.lang")==="en"?"en":"fr"}catch(e){return"fr"}})();</script>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+  <div class="wrap topbar">
+    <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
+    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html">Carte</a><a href="excel.html" aria-current="page">Excel</a><a href="sql.html">SQL</a><a href="python.html">Python</a></nav>
+    <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </div>
+</header>
+<main id="main">
+  <div class="heroband"><div class="wrap phero">
+    <p class="eyebrow hero-in" data-i18n="ey">Compétence · Excel</p>
+    <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Un classeur qui <mark>répond à la question</mark>, avec ses propres cartes</h1>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">Sept feuilles visibles — six d'analyse et un mode d'emploi — six tableaux sources, 1 239 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
+    <ul class="proves hero-in" style="--d:.24s" data-i18n="chips">
+      <li>SOMME.SI.ENS</li><li>SI.CONDITIONS</li><li>MAX.SI.ENS</li><li>INDEX / EQUIV</li><li>CENTILE</li><li>NPM</li><li>Plages nommées</li><li>Validation des données</li><li>Graphiques cartographiques</li>
+    </ul>
+    <p class="hero-in" style="--d:.3s;margin-top:20px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/modele_loyers_montreal.xlsx" download data-i18n="dl">Télécharger le classeur — français ↗</a><a class="btn" href="assets/modele_loyers_montreal_en.xlsx" download data-i18n="dlEn">Workbook — English ↗</a></p>
+  </div></div>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s1K">Feuille « Accueil »</p>
+      <h2 data-i18n="s1T">La question et la réponse, dès l'ouverture</h2>
+      <p class="intro" data-i18n="s1I">Le classeur s'ouvre sur la question du projet et quatre chiffres qui y répondent, tous recalculés par formules à partir des tableaux sources. Un bouton par feuille sert de menu. Les captures suivent la langue choisie : classeur français ici, classeur anglais en version anglaise de la page.</p>
+      <figure class="figure">
+        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy" width="1381" height="960" decoding="async">
+        <figcaption data-i18n="s1C">460 $ d'écart entre annonce et loyer payé à Montréal ; +17,2 % pour un logement reloué contre +6,0 % pour un locataire en place. Capture du classeur réel.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s2K">Feuille « Carte provinces »</p>
+      <h2 data-i18n="s2T">La carte du Canada, en graphique Excel</h2>
+      <p class="intro" data-i18n="s2I">Une carte faite avec un graphique Excel standard : les contours des provinces forment une série de lignes, chaque province est une bulle dont la couleur et la taille suivent sa valeur. Elle s'ouvre dans toutes les versions d'Excel, sans connexion et sans complément.</p>
+      <figure class="figure">
+        <img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy" width="1356" height="970" decoding="async">
+        <figcaption data-i18n="s2C">Hausse de l'IPC du loyer en 2025 : le Québec, sélectionné, est en rose et premier des 10 provinces. Change l'année à 2024 : l'Alberta prend la tête.</figcaption>
+      </figure>
+      <div class="steps" style="margin-top:14px">
+        <div class="stepc" data-i18n="st1"><span class="n">1 · PYTHON</span><h3>Des contours projetés</h3><p>Le module <code>geo.py</code> projette les contours des provinces (projection conique conforme de Lambert, paramètres de Statistique Canada) et les simplifie en 800 points.</p></div>
+        <div class="stepc" data-i18n="st2"><span class="n">2 · FORMULES</span><h3>Une valeur, une classe</h3><p>CHOISIR prend l'indicateur choisi ; CENTILE découpe les 10 valeurs en quintiles ; EQUIV donne la classe de couleur de chaque province.</p></div>
+        <div class="stepc" data-i18n="st3"><span class="n">3 · GRAPHIQUE</span><h3>Cinq séries, une sélection</h3><p>Une série par classe : une province n'a de coordonnée que dans sa classe, sinon NA(), qu'Excel ne trace pas. La province choisie a sa propre série, en rose.</p></div>
+      </div>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g1T">La valeur selon l'indicateur choisi</h3>
+<pre class="code" data-lang="xl">=CHOOSE(MATCH(IndCarte,ListeIndProv,0),J82,K82,L82)</pre>
+<pre class="code" data-lang="xl" style="margin-top:8px">=PERCENTILE(ProvValeurs,0)</pre></div>
+        <div class="stepc"><h3 data-i18n="g2T">La série d'une classe de couleur</h3>
+<pre class="code" data-lang="xl">=IF(AND(P82=1,A82&lt;&gt;ProvSelCode),D82,NA())</pre>
+<p style="margin-top:8px" data-i18n="g2P">Les étiquettes « QC +7,8 % » sont des séries dont le nom vient d'une cellule ; FIXE affiche la virgule de l'Excel de l'utilisateur.</p>
+<pre class="code" data-lang="xl">=A82&amp;" "&amp;IF((M82)&gt;=0,"+","")&amp;FIXED((M82)*100,1)&amp;" %"</pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s3K">Feuille « Carte villes »</p>
+      <h2 data-i18n="s3T">Combien coûte un déménagement, ville par ville</h2>
+      <p class="intro" data-i18n="s3I">Les 17 régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
+      <figure class="figure">
+        <img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy" width="961" height="958" decoding="async">
+        <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart sur 17. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
+      </figure>
+<pre class="code" data-lang="xl">=IF(AND(L112=1,A112&lt;&gt;VilleSelID),D112,NA())</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s4K">Feuille « Tableau de bord »</p>
+      <h2 data-i18n="s4T">Piloté par trois cellules</h2>
+      <p class="intro" data-i18n="s4I">Année de début, année de fin et type de logement : trois plages nommées (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) protégées par une validation des données. Les quatre indicateurs et les quatre graphiques se recalculent.</p>
+      <figure class="figure">
+        <img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy" width="1065" height="968" decoding="async">
+        <figcaption data-i18n="s4C">Période 2019 à 2025, 2 chambres : +27,2 % après inflation, soit 4,1 % par an.</figcaption>
+      </figure>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g3T">Hausse réelle sur la période</h3><p data-i18n="g3P">Le rapport des loyers divisé par le rapport des indices de prix : l'inflation est retirée en une seule formule.</p>
+<pre class="code" data-lang="xl">=(SUMIFS(Loyers_Montant,Loyers_Annee,Fin,Loyers_Type,TypeLog)/SUMIFS(Loyers_Montant,Loyers_Annee,Debut,Loyers_Type,TypeLog))/(INDEX(IPC_Valeur,MATCH(Fin,IPC_Annee,0))/INDEX(IPC_Valeur,MATCH(Debut,IPC_Annee,0)))-1</pre></div>
+        <div class="stepc"><h3 data-i18n="g4T">Tri des villes sans macro</h3><p data-i18n="g4P">RANG classe les hausses, puis INDEX/EQUIV reconstitue la liste triée qui alimente le graphique en barres.</p>
+<pre class="code" data-lang="xl">=RANK(D42,$D$42:$D$47,0)
+=INDEX($A$42:$A$47,MATCH(1,$E$42:$E$47,0))</pre></div>
+      </div>
+      <p class="note" data-i18n="s4N">Les formules sont enregistrées en anglais dans le fichier ; une version française d'Excel les affiche traduites (SUMIFS devient SOMME.SI.ENS, IFS devient SI.CONDITIONS, PERCENTILE devient CENTILE).</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s5K">Feuille « Scénarios »</p>
+      <h2 data-i18n="s5T">Quand le loyer moyen rattrapera-t-il les annonces ?</h2>
+      <p class="intro" data-i18n="s5I">Trois hypothèses de croissance tirées des données (tendance 1992-2019, hausse 2025 des locataires en place, rythme 2019-2025), ajustables. La fonction NPM calcule le nombre d'années pour que le loyer moyen (1 346 $) atteigne le loyer affiché aujourd'hui (1 820 $).</p>
+      <figure class="figure">
+        <img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy" width="1685" height="688" decoding="async">
+        <figcaption data-i18n="s5C">Au rythme des locataires en place, le loyer moyen n'atteindrait le niveau actuel des annonces qu'en 2031, soit dans 6 ans. Des scénarios pour raisonner ; aucun n'est une prévision.</figcaption>
+      </figure>
+<pre class="code" data-lang="xl">=IF(G11&lt;=0,"jamais",ROUNDUP(NPER(G11,0,-$E$6,$E$7),0)&amp;" ans ("&amp;(2025+ROUNDUP(NPER(G11,0,-$E$6,$E$7),0))&amp;")")</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s6K">Feuille « Simulateur »</p>
+      <h2 data-i18n="s6T">Ton loyer face au marché</h2>
+      <figure class="figure"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy" width="1689" height="627" decoding="async">
+        <figcaption data-i18n="s6C">Le site en reprend la logique, cellule pour cellule, <a href="index.html#simulateur">sur la page Analyse</a>.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="block" id="excel365">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s7K">Feuille « Excel 365 »</p>
+      <h2 data-i18n="s7T">Un portefeuille de logements lu avec les fonctions dynamiques</h2>
+      <p class="intro" data-i18n="s7I">La liste fictive d'une agence (huit logements, la même que l'exemple du programme Python) analysée avec RECHERCHEX, LET, FILTRE, TRIER et UNIQUE : loyer du marché pour chaque type, hausse du marché depuis le début du bail, position face au marché, gain d'une relocation au prix des annonces, puis les logements sous le marché classés par écart et le revenu annuel qu'une relocation libérerait. Les cases jaunes se modifient : la feuille recalcule le portefeuille. C'est la seule feuille qui demande Excel 2021 ou Microsoft 365.</p>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g7T">RECHERCHEX à deux critères, dans un LET</h3>
+<pre class="code" data-lang="xl">=LET(debut,E7,marche_bail,XLOOKUP(1,(Loyers_Annee=debut)*(Loyers_Type=C7),Loyers_Montant),F7/marche_bail-1)</pre>
+<p style="margin-top:8px" data-i18n="g7P">Le loyer du marché pour le type <i>et</i> l'année du bail, sans colonne d'aide : la recherche porte sur un produit de deux conditions. LET nomme les étapes.</p></div>
+        <div class="stepc"><h3 data-i18n="g8T">FILTRE puis TRIER, en une formule</h3>
+<pre class="code" data-lang="xl">=IFERROR(SORT(FILTER(CHOOSE({1,2,3,4},B7:B14,C7:C14,D7:D14,H7:H14),H7:H14&lt;-0.05),4,1),"")</pre>
+<p style="margin-top:8px" data-i18n="g8P">Les logements dont l'écart au marché dépasse −5 %, classés du plus grand écart au plus petit. Le revenu annuel libéré suit la même logique :</p>
+<pre class="code" data-lang="xl">=LET(gains,FILTER(J7:J14,(C7:C14="2 chambres")*(H7:H14&lt;-0.05)),IFERROR(SUM(gains)*12,0))</pre></div>
+      </div>
+      <p class="note" data-i18n="s7N">Les formules à résultat multiple sont figées sur huit lignes (formules matricielles) pour que le fichier s'ouvre sans réparation dans toute version ; dans Excel 365, retirer les accolades suffit pour qu'elles se propagent d'elles-mêmes. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="qT">Qualité du classeur</h2>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="q1T">Vérifications</h3>
+          <ul>
+            <li data-i18n="q11">Recalcul complet dans LibreOffice à chaque construction : aucune erreur visible. Les seuls NA() sont dans la feuille masquée « Calculs », où ils servent à masquer des points de graphique.</li>
+            <li data-i18n="q12">Aucune cellule vide dans les tableaux sources : la construction s'arrête sinon. Les régions sans loyer payé publié sont exclues plutôt que marquées « n.d. ».</li>
+            <li data-i18n="q13">Les chiffres de l'accueil concordent avec le pipeline Python et les requêtes SQL : 460 $, +27,2 %, Québec premier en 2025.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="q2T">Conventions</h3>
+          <ul>
+            <li data-i18n="q21">Cases jaunes : entrées. Texte bleu : données sources. Vert : valeurs lues dans une autre feuille. Noir : calculs.</li>
+            <li data-i18n="q22">Sources en tableaux Excel nommés (<code>tbl_loyers</code>, <code>tbl_trimestriel</code>…), citées dans le bandeau de chaque feuille.</li>
+            <li data-i18n="q23">Une feuille « Mode d'emploi » liste chaque fonction du classeur, de la plus simple à la plus avancée, avec l'endroit où la voir et trois exercices de prise en main.</li>
+            <li data-i18n="q24">Compatibilité d'abord : les feuilles d'analyse n'utilisent que des fonctions disponibles depuis Excel 2019. Une seule feuille, « Excel 365 », montre les fonctions dynamiques (RECHERCHEX, LET, FILTRE, TRIER, UNIQUE).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap pager"><a href="carte.html" data-i18n="pgL">← Carte</a><a href="sql.html" data-i18n="pgR">SQL →</a></div>
+</main>
+<footer><div class="wrap">Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.</div></footer>
+<script>/* Code commun aux pages de compétences : coloration syntaxique légère (SQL, Python, DAX, Excel). */
+const KW = {
+  sql: "SELECT FROM WHERE JOIN LEFT INNER CROSS ON AND OR NOT AS WITH ORDER BY GROUP HAVING LIMIT CASE WHEN THEN ELSE END IN IS NULL DESC ASC OVER PARTITION VALUES DISTINCT USING UNION ALL CAST INTEGER CREATE TABLE VIEW INDEX PRIMARY KEY FOREIGN REFERENCES CHECK UNIQUE TEXT REAL PRAGMA WINDOW ROWS BETWEEN PRECEDING CURRENT ROW GLOB DEFAULT NULLS LAST",
+  py: "def return if elif else for in import from as with assert not and or is None True False lambda class try except raise while",
+  dax: "VAR RETURN IF NOT TRUE FALSE",
+  xl: ""
+};
+function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function highlight(code, lang) {
+  const kws = new Set((KW[lang] || "").split(" ").filter(Boolean));
+  const ci = lang === "sql" || lang === "dax";
+  const com = lang === "py" ? "#" : (lang === "sql" ? "--" : "//");
+  const re = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(--[^\n]*|#[^\n]*|\/\/[^\n]*)|(\b\d+(?:\.\d+)?\b)|([A-Za-zÀ-ÿ_][\w.À-ÿ]*)(\s*\()?/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index));
+    last = re.lastIndex;
+    if (m[1]) out += `<span class="s">${esc(m[1])}</span>`;
+    else if (m[2]) {
+      if (m[2].startsWith(com)) out += `<span class="c">${esc(m[2])}</span>`;
+      else { out += esc(m[2][0]); re.lastIndex = m.index + 1; last = re.lastIndex; }
+    }
+    else if (m[3]) out += `<span class="n">${m[3]}</span>`;
+    else if (m[4]) {
+      const w = m[4], paren = m[5] || "";
+      if (kws.has(ci ? w.toUpperCase() : w)) out += `<span class="k">${esc(w)}</span>${esc(paren)}`;
+      else if (paren) out += `<span class="f">${esc(w)}</span>${esc(paren)}`;
+      else out += esc(w);
+    }
+  }
+  return out + esc(code.slice(last));
+}
+document.querySelectorAll("pre.code[data-lang]").forEach(el => { el.innerHTML = highlight(el.textContent, el.dataset.lang); });
+const fmtFR = v => v == null ? "NULL" : (typeof v === "number" ? new Intl.NumberFormat(window.LANG === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(v) : String(v));
+function resultTable(cols, rows) {
+  const isYear = cols.map(c => /annee|year/i.test(c));
+  return `<table class="data"><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+</script>
+<script>
+window.PAGE_EN = {
+  "@title": `Excel · Montreal Rents`,
+  ey: `Skill · Excel`,
+  h1: `A workbook that <mark>answers the question</mark>, with its own maps`,
+  lede: `Seven visible sheets — six of analysis plus a how-to — six source tables, 1,239 formulas, no macros, no empty cells. Pick a year: the Canada map recolours. Pick a city: its card, rank and curve follow. Simple functions (SUMIFS, IFS) carry the essentials; the advanced ones (PERCENTILE, NPER, NA()-driven series) build the maps and scenarios. The workbook ships in French and in English — same formulas, same figures.`,
+  chips: `<li>SUMIFS</li><li>IFS</li><li>MAXIFS</li><li>INDEX / MATCH</li><li>PERCENTILE</li><li>NPER</li><li>Named ranges</li><li>Data validation</li><li>Map charts</li>`,
+  dl: `Classeur — français ↗`, dlEn: `Download the workbook — English ↗`,
+  s1K: `"Accueil" sheet (home)`,
+  s1T: `The question and the answer, right when it opens`,
+  s1I: `The workbook opens on the project's question and four figures that answer it, all recomputed by formulas from the source tables. One button per sheet serves as a menu. The screenshots follow the chosen language: these come from the English workbook.`,
+  s1C: `A $460 gap between listings and rent paid in Montreal; +17.2% for a re-let unit against +6.0% for a sitting tenant. Screenshot of the real workbook.`,
+  s2K: `"Carte provinces" sheet (province map)`,
+  s2T: `The map of Canada, as a plain Excel chart`,
+  s2I: `A map built with a standard Excel chart: province outlines form a line series, and each province is a bubble whose colour and size track its value. It opens in every version of Excel, offline, no add-in.`,
+  s2C: `Rent CPI increase in 2025: Quebec, selected, is pink and first of the 10 provinces. Switch the year to 2024: Alberta takes the lead.`,
+  st1: `<span class="n">1 · PYTHON</span><h3>Projected outlines</h3><p>The <code>geo.py</code> module projects the province outlines (Lambert conformal conic projection, Statistics Canada parameters) and simplifies them to 800 points.</p>`,
+  st2: `<span class="n">2 · FORMULAS</span><h3>One value, one class</h3><p>CHOOSE picks the selected indicator; PERCENTILE cuts the 10 values into quintiles; MATCH gives each province its colour class.</p>`,
+  st3: `<span class="n">3 · CHART</span><h3>Five series, one selection</h3><p>One series per class: a province only has coordinates in its own class, otherwise NA(), which Excel does not plot. The selected province gets its own series, in pink.</p>`,
+  g1T: `The value for the selected indicator`,
+  g2T: `The series of one colour class`,
+  g2P: `The "QC +7,8 %" labels are series whose name comes from a cell; FIXED displays the decimal separator of the user's Excel.`,
+  s3K: `"Carte villes" sheet (city map)`,
+  s3T: `What moving costs, city by city`,
+  s3I: `The 17 metro areas where Statistics Canada publishes both the asking rent and the rent paid, on two maps (East and West). Pick a city: its dot turns pink, and its card, rank and quarterly curve update.`,
+  s3C: `Montreal: $1,820 asked against $1,360 paid, 4th widest gap of 17. Areas without a published paid rent are left out of the workbook: no "n/a" cells.`,
+  s4K: `"Tableau de bord" sheet (dashboard)`,
+  s4T: `Driven by three cells`,
+  s4I: `Start year, end year and unit type: three named ranges (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) guarded by data validation. The four indicators and four charts recompute.`,
+  s4C: `2019 to 2025, two-bedroom: +27.2% after inflation, or 4.1% a year.`,
+  g3T: `Real increase over the period`,
+  g3P: `The rent ratio divided by the price-index ratio: inflation removed in a single formula.`,
+  g4T: `Sorting cities without a macro`,
+  g4P: `RANK orders the increases, then INDEX/MATCH rebuilds the sorted list that feeds the bar chart.`,
+  s4N: `Formulas are stored in English in the file; a French Excel shows them translated (SUMIFS becomes SOMME.SI.ENS, IFS becomes SI.CONDITIONS, PERCENTILE becomes CENTILE).`,
+  s5K: `"Scénarios" sheet (scenarios)`,
+  s5T: `When will the average rent catch up with listings?`,
+  s5I: `Three growth assumptions drawn from the data (1992-2019 trend, 2025 sitting-tenant increase, 2019-2025 pace), all adjustable. The NPER function computes how many years the average rent ($1,346) needs to reach today's asking rent ($1,820).`,
+  s5C: `At the sitting-tenant pace, the average rent would only reach today's asking level in 2031, 6 years from now. Scenarios to reason with; none is a forecast.`,
+  s6K: `"Simulateur" sheet (simulator)`,
+  s6T: `Your rent against the market`,
+  s6C: `The site mirrors its logic, cell for cell, <a href="index.html#simulateur">on the Analysis page</a>.`,
+  qT: `Workbook quality`,
+  q1T: `Checks`,
+  q11: `Full recalculation in LibreOffice at every build: no visible errors. The only NA() live in the hidden "Calculs" sheet, where they hide chart points.`,
+  q12: `No empty cells in the source tables: the build stops otherwise. Areas without a published paid rent are excluded rather than flagged "n/a".`,
+  q13: `The home-sheet figures match the Python pipeline and the SQL queries: $460, +27.2%, Quebec first in 2025.`,
+  q2T: `Conventions`,
+  q21: `Yellow cells: inputs. Blue text: source data. Green: values read from another sheet. Black: calculations.`,
+  q22: `Sources as named Excel tables (<code>tbl_loyers</code>, <code>tbl_trimestriel</code>…), cited in each sheet's banner.`,
+  q23: `A "Mode d'emploi" (how-to) sheet lists every function in the workbook, from the simplest to the most advanced, with where to see it and three warm-up exercises.`,
+  q24: `Compatibility first: the analysis sheets use only functions available since Excel 2019. A single sheet, "Excel 365", shows the dynamic functions (XLOOKUP, LET, FILTER, SORT, UNIQUE).`,
+  s7K: `"Excel 365" sheet`, s7T: `A housing portfolio read with dynamic array functions`,
+  s7I: `A fictional agency list (eight units, the same as the Python program example) analysed with XLOOKUP, LET, FILTER, SORT and UNIQUE: market rent for each type, market increase since the lease began, position against the market, gain from a re-let at asking prices, then the units below market ranked by gap and the yearly income a re-let would free. The yellow cells are editable: the sheet recomputes the portfolio. It is the only sheet that requires Excel 2021 or Microsoft 365.`,
+  g7T: `Two-criteria XLOOKUP inside a LET`,
+  g7P: `The market rent for the type <i>and</i> the lease year, with no helper column: the lookup runs on the product of two conditions. LET names the steps.`,
+  g8T: `FILTER then SORT, in one formula`,
+  g8P: `Units whose gap to market is beyond −5%, ranked from the largest gap to the smallest. The yearly income freed follows the same logic:`,
+  s7N: `Multi-result formulas are fixed to eight rows (array formulas) so the file opens without repair in any version; in Excel 365, removing the braces lets them spill on their own. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
+  pgL: `← Map`, pgR: `SQL →`
+};
+</script>
+
+<script>/* Animations au défilement, communes à toutes les pages : barre de progression, apparition des blocs,
+   tracé progressif des courbes, compteurs. Tout est désactivé si l'utilisateur préfère réduire les animations. */
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bar = document.createElement("div");
+  bar.className = "progress";
+  document.body.appendChild(bar);
+  const top = document.querySelector(".top");
+  const onScroll = () => {
+    const h = document.documentElement;
+    if (top) top.classList.toggle("solid", h.scrollTop > 40);
+    bar.style.transform = `scaleX(${h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)})`;
+  };
+  addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  const SEL = "section.block .wrap > h2, section.block .wrap > .intro, section.block .wrap > .panel, section.block .wrap > .figure, " +
+    ".qcard, .stepc, .card, .kpi, .skill, .ctxcard, .erd > .t, .gallery > *, .two > *, .cols > *, .flow > *, .sim > *, .models, .dico, details.ddl, .mapwrap, .yearbar";
+  const mark = root => root.querySelectorAll(SEL).forEach(el => {
+    if (el.closest(".heroband") || el.classList.contains("rv")) return;
+    el.classList.add("rv");
+    const sibs = [...el.parentElement.children].filter(x => x.matches(SEL));
+    const i = sibs.indexOf(el);
+    if (i > 0 && !el.style.getPropertyValue("--d")) el.style.setProperty("--d", `${Math.min(i, 5) * 0.08}s`);
+  });
+
+  const fmt = (v, dec, ref) => {
+    const s = v.toLocaleString("fr-CA", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    return ref.includes("\u202f") || ref.includes("\u00a0") ? s : s.replace(/\u202f|\u00a0/g, " ");
+  };
+  const count = el => {
+    const txt = el.textContent, re = /(\d{1,3}(?:[\s\u202f\u00a0]\d{3})+|\d+)(,\d+)?/g, m = [...txt.matchAll(re)];
+    if (m.length !== 1 || el.dataset.counted) return;
+    el.dataset.counted = "1";
+    const raw = m[0][0], dec = m[0][2] ? m[0][2].length - 1 : 0;
+    const target = parseFloat(raw.replace(/[\s\u202f\u00a0]/g, "").replace(",", "."));
+    const pre = txt.slice(0, m[0].index), post = txt.slice(m[0].index + raw.length), t0 = performance.now(), dur = 1100;
+    const step = now => {
+      if (el.textContent !== el.dataset.last && el.dataset.last !== undefined) return;   // texte remplacé (changement de langue)
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = el.dataset.last = pre + fmt(target * e, dec, raw) + post;
+      if (k < 1) requestAnimationFrame(step); else { el.textContent = txt; delete el.dataset.last; }
+    };
+    requestAnimationFrame(step);
+  };
+  const drawChart = el => {
+    if (el.classList.contains("drawn")) return;
+    el.querySelectorAll("path").forEach(p => {
+      if (p.closest(".axis") || p.classList.contains("domain")) return;
+      const fillNone = (p.getAttribute("fill") || getComputedStyle(p).fill) === "none";
+      if (!fillNone || !p.getTotalLength) return;
+      const L = p.getTotalLength();
+      if (L < 40) return;
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.classList.add("draw");
+      setTimeout(() => { p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; p.classList.remove("draw"); }, 2000);
+    });
+    el.querySelectorAll("rect").forEach((r, i) => { if (+r.getAttribute("width") > 2 && +r.getAttribute("height") > 2) { r.classList.add("grow"); r.style.animationDelay = `${Math.min(i, 12) * 0.04}s`; } });
+    el.querySelectorAll("circle").forEach((c, i) => { c.classList.add("pop"); c.style.animationDelay = `${0.2 + Math.min(i, 40) * 0.015}s`; });
+    el.classList.add("drawn");
+  };
+
+  // les blocs défilants (code, tableaux) doivent être atteignables au clavier
+  document.querySelectorAll("pre.code, .tablewrap, .dico").forEach(el => {
+    el.tabIndex = 0;
+    if (!el.hasAttribute("aria-label")) el.setAttribute("aria-label", el.matches("pre.code") ? "Code, défilement horizontal" : "Tableau, défilement");
+  });
+  mark(document);
+  const all = () => document.querySelectorAll(".rv:not(.in)");
+  if (reduce || !("IntersectionObserver" in window)) {
+    document.querySelectorAll(".rv").forEach(e => e.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("in");
+    e.target.querySelectorAll(".kpi b, .num").forEach(count);
+    if (e.target.matches(".kpi b, .num")) count(e.target);
+    io.unobserve(e.target);
+  }), { rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { drawChart(e.target); cio.unobserve(e.target); }
+  }), { threshold: 0.25 });
+  all().forEach(e => io.observe(e));
+  document.querySelectorAll(".chart").forEach(c => cio.observe(c));
+  document.querySelectorAll(".heroband .num").forEach(n => setTimeout(() => count(n), 500));
+  new MutationObserver(ms => {
+    ms.forEach(m => m.addedNodes.forEach(n => {
+      if (n.nodeType !== 1) return;
+      mark(n.parentElement || n);
+      if (n.classList && n.classList.contains("rv") && !n.classList.contains("in")) io.observe(n);
+      n.querySelectorAll && n.querySelectorAll(".rv:not(.in)").forEach(x => io.observe(x));
+    }));
+  }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>/* Langue du site : FR par défaut, EN au choix. Le choix est mémorisé (localStorage)
+   et suivi sur toutes les pages. Chaque page fournit ses traductions dans PAGE_EN
+   (clés data-i18n) ; la page d'accueil garde son propre moteur (table T) et n'expose
+   pas de PAGE_EN. Les éléments communs (navigation, lien d'évitement, pied de page)
+   sont traduits ici. */
+(() => {
+  const NAV = {
+    "index.html": { fr: "Analyse", en: "Analysis" },
+    "carte.html": { fr: "Carte", en: "Map" },
+    "excel.html": { fr: "Excel", en: "Excel" },
+    "sql.html": { fr: "SQL", en: "SQL" },
+    "python.html": { fr: "Python", en: "Python" }
+  };
+  const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
+  const FOOT = {
+    fr: "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.",
+    en: "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks."
+  };
+  const SCROLL = {
+    code: { fr: "Code, défilement horizontal", en: "Code, scrolls horizontally" },
+    table: { fr: "Tableau, défilement", en: "Table, scrollable" }
+  };
+  const saved = new Map();
+  let frTitle = document.title;
+
+  function apply() {
+    const L = window.LANG, en = L === "en";
+    document.documentElement.lang = L;
+    document.querySelectorAll(".nav a").forEach(a => {
+      const d = NAV[a.getAttribute("href")];
+      if (d) a.textContent = d[L];
+    });
+    const skip = document.querySelector("a.skip");
+    if (skip) skip.textContent = SKIP[L];
+    const fw = document.querySelector("footer .wrap");
+    if (fw && !fw.id) fw.textContent = FOOT[L];
+    // images et liens qui ont une variante anglaise (figures, captures, classeur)
+    document.querySelectorAll("[data-en-src]").forEach(img => {
+      if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");
+      img.setAttribute("src", en ? img.dataset.enSrc : img.dataset.frSrc);
+    });
+    document.querySelectorAll("[data-en-href]").forEach(a => {
+      if (!a.dataset.frHref) a.dataset.frHref = a.getAttribute("href");
+      a.setAttribute("href", en ? a.dataset.enHref : a.dataset.frHref);
+    });
+    const P = window.PAGE_EN;
+    if (P) {
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const v = P[el.dataset.i18n];
+        if (v == null) return;
+        if (!saved.has(el)) saved.set(el, el.innerHTML);
+        el.innerHTML = en ? v : saved.get(el);
+      });
+      if (P["@title"]) document.title = en ? P["@title"] : frTitle;
+    }
+    const bf = document.getElementById("lang-fr"), be = document.getElementById("lang-en");
+    if (bf) bf.setAttribute("aria-pressed", String(!en));
+    if (be) be.setAttribute("aria-pressed", String(en));
+    document.dispatchEvent(new CustomEvent("langchange", { detail: { lang: L } }));
+    // après les re-rendus déclenchés par langchange : les zones défilantes restent
+    // atteignables au clavier et annoncées dans la bonne langue
+    document.querySelectorAll("pre.code, .tablewrap, .dico").forEach(el => {
+      el.tabIndex = 0;
+      el.setAttribute("aria-label", el.matches("pre.code") ? SCROLL.code[L] : SCROLL.table[L]);
+    });
+  }
+
+  function set(L) {
+    window.LANG = L;
+    try { localStorage.setItem("loyers.lang", L); } catch (e) {}
+    apply();
+  }
+  const bf = document.getElementById("lang-fr"), be = document.getElementById("lang-en");
+  if (bf) bf.addEventListener("click", () => set("fr"));
+  if (be) be.addEventListener("click", () => set("en"));
+  apply();
+})();
+</script>
+</html>

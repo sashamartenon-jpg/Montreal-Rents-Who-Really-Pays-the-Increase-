@@ -1,0 +1,5 @@
+source_label,unit_id,label_fr,label_en,bedrooms
+Bachelor units,studio,Studio,Studio,0
+One bedroom units,1ch,1 chambre,1 bedroom,1
+Two bedroom units,2ch,2 chambres,2 bedrooms,2
+Three bedroom units,3ch,3 chambres,3 bedrooms,3

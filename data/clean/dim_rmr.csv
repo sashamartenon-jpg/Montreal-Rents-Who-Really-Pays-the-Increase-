@@ -1,0 +1,44 @@
+geo_id,nom,province,lat,lon
+1,St. John's,NL,47.56,-52.71
+2,Halifax,NS,44.65,-63.58
+3,Fredericton,NB,45.96,-66.64
+4,Moncton,NB,46.09,-64.78
+5,Saint John,NB,45.27,-66.06
+6,Drummondville,QC,45.88,-72.48
+7,Montréal,QC,45.5,-73.57
+8,"Gatineau (Ottawa-Gatineau, partie québécoise)",QC,45.48,-75.7
+9,Québec,QC,46.81,-71.21
+10,Saguenay,QC,48.43,-71.07
+11,Sherbrooke,QC,45.4,-71.89
+12,Trois-Rivières,QC,46.34,-72.54
+13,Barrie,ON,44.39,-79.69
+14,Belleville - Quinte West,ON,44.16,-77.38
+15,Brantford,ON,43.14,-80.26
+16,Grand Sudbury,ON,46.49,-80.99
+17,Guelph,ON,43.55,-80.25
+18,Hamilton,ON,43.26,-79.87
+19,Kingston,ON,44.23,-76.49
+20,Kitchener - Cambridge - Waterloo,ON,43.45,-80.49
+21,London,ON,42.98,-81.25
+22,Oshawa,ON,43.9,-78.86
+23,"Ottawa (Ottawa-Gatineau, partie ontarienne)",ON,45.42,-75.69
+24,Peterborough,ON,44.3,-78.32
+25,St. Catharines - Niagara,ON,43.16,-79.24
+26,Thunder Bay,ON,48.38,-89.25
+27,Toronto,ON,43.65,-79.38
+28,Windsor,ON,42.31,-83.04
+29,Winnipeg,MB,49.9,-97.14
+30,Regina,SK,50.45,-104.61
+31,Saskatoon,SK,52.13,-106.67
+32,Calgary,AB,51.05,-114.07
+33,Edmonton,AB,53.55,-113.49
+34,Lethbridge,AB,49.69,-112.84
+35,Red Deer,AB,52.27,-113.81
+36,Abbotsford - Mission,BC,49.05,-122.31
+37,Chilliwack,BC,49.16,-121.95
+38,Kamloops,BC,50.67,-120.33
+39,Kelowna,BC,49.89,-119.5
+40,Nanaimo,BC,49.17,-123.94
+41,Vancouver,BC,49.28,-123.12
+42,Victoria,BC,48.43,-123.37
+43,Ensemble des RMR,CA,,

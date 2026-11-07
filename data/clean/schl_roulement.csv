@@ -1,0 +1,11 @@
+year,indicateur,valeur,unite
+2022,loyer_moyen_reloues_2ch,1235.0,dollars
+2023,loyer_moyen_reloues_2ch,1310.0,dollars
+2024,loyer_moyen_reloues_2ch,1407.0,dollars
+2025,loyer_moyen_reloues_2ch,1644.0,dollars
+2024,hausse_loyer_reloues_2ch,18.7,pct
+2025,hausse_loyer_reloues_2ch,17.2,pct
+2024,hausse_loyer_non_reloues_2ch,4.7,pct
+2025,hausse_loyer_non_reloues_2ch,6.0,pct
+2025,hausse_loyer_meme_echantillon_2ch,7.2,pct
+2025,taux_inoccupation_3plus,2.9,pct

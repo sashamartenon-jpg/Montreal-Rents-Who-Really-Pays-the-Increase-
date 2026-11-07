@@ -1,0 +1,334 @@
+<title>SQL · Loyers Montréal</title>
+<meta name="description" content="Base SQLite en modèle en étoile (__N_TABLES__ tables, __N_VUES__ vues) et __N_SQL__ requêtes analytiques sur les loyers, exécutables dans le navigateur.">
+__HEADER__
+<main id="main">
+  <div class="heroband"><div class="wrap phero">
+    <p class="eyebrow hero-in" data-i18n="ey">Compétence · SQL</p>
+    <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>__N_SQL__ requêtes</mark>, zéro chiffre non vérifié</h1>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes, __N_VUES__ vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et comparé au résultat Python : au moindre écart, la construction du site s'arrête.</p>
+    <ul class="proves" data-i18n="chips">
+      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
+    </ul>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl1">Télécharger la base et les modèles ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL</a></p>
+  </div></div>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="mK">Modélisation</p>
+      <h2 data-i18n="mT">Du modèle conceptuel à la base</h2>
+      <p class="intro" data-i18n="mI">J'ai modélisé les données avant de les coder : un modèle conceptuel (Merise) pour les objets et leurs liens, puis un modèle logique relationnel. Le modèle logique est dessiné à partir de la base elle-même, et le modèle conceptuel est confronté à la base à chaque construction : ils ne peuvent pas diverger du code.</p>
+      <div class="seg mtabs" role="group" aria-label="Modèle / Model">
+        <button type="button" data-m="mcd" aria-pressed="true" data-i18n="mTabC">Modèle conceptuel (MCD)</button>
+        <button type="button" data-m="mld" aria-pressed="false" data-i18n="mTabL">Modèle logique (MLD)</button>
+      </div>
+      <figure class="figure models" id="m-mcd"><a href="assets/sql/mcd.svg" target="_blank" rel="noopener"><img src="assets/sql/mcd.png" alt="Modèle conceptuel de données : entités Type de logement, Grande ville, Indicateur SCHL, Année, Province, Région métropolitaine, Trimestre, Estimation, reliées par sept associations avec leurs cardinalités" loading="lazy"></a>
+        <figcaption data-i18n="mCapC">Sept associations. Exemple : une région métropolitaine appartient à exactement une province (1,1), une province contient zéro ou plusieurs régions (0,n). ANNÉE et TRIMESTRE sont des entités temporelles, non traduites en tables.</figcaption></figure>
+      <figure class="figure models" id="m-mld" hidden><a href="assets/sql/mld.svg" target="_blank" rel="noopener"><img src="assets/sql/mld.png" alt="Modèle logique : 6 tables de faits et 6 dimensions, clés primaires soulignées, clés étrangères reliées à leur table de référence" loading="lazy"></a>
+        <figcaption data-i18n="mCapL">Six tables de faits (rose) et six dimensions (bleu). Chaque association porteuse de données du MCD devient une table de faits dont la clé primaire composée réunit les identifiants des entités liées.</figcaption></figure>
+      <div class="cols" style="margin-top:16px">
+        <div>
+          <h3 data-i18n="mc1T">Choix de modélisation</h3>
+          <ul>
+            <li data-i18n="mc11"><b>Troisième forme normale</b> : l'unité d'un indicateur SCHL dépend de l'indicateur seul ; elle vit dans <code>dim_indicateur</code>, pas dans la table de faits.</li>
+            <li data-i18n="mc12"><b>Dimensions de référence</b> : provinces et types d'estimation sont des tables, avec clés étrangères, plutôt que des codes libres.</li>
+            <li data-i18n="mc13"><b>Grain explicite</b> : chaque table de faits a une clé primaire composée et un commentaire qui décrit une ligne.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="mc2T">Limite assumée</h3>
+          <ul>
+            <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
+          </ul>
+          <p style="margin-top:14px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl3">Télécharger la base complète (.zip) ↗</a></p>
+          <p class="note" data-i18n="mN">Base SQLite, script SQL complet, schéma, __N_SQL__ requêtes, dictionnaire, MCD et MLD (PNG et SVG).</p>
+        </div>
+      </div>
+      <p class="note" data-i18n="mVol">__SQL_VOLUMES__</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="dT">Le schéma, en SQL</h2>
+      <p class="intro" data-i18n="dI">La base est reconstruite à chaque exécution à partir de ces deux scripts, puis contrôlée : <code>PRAGMA foreign_key_check</code> doit être vide et chaque contrainte CHECK rejette les valeurs impossibles avant qu'elles n'atteignent une analyse.</p>
+      <details class="more ddl"><summary data-i18n="dS1">Script de création des __N_TABLES__ tables (<code>sql/schema/01_tables.sql</code>)</summary>
+<pre class="code" data-lang="sql">__DDL_TABLES__</pre></details>
+      <details class="more ddl" open><summary data-i18n="dS2">Les __N_VUES__ vues analytiques (<code>sql/schema/02_vues.sql</code>)</summary>
+<pre class="code" data-lang="sql">__DDL_VUES__</pre></details>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="diT">Dictionnaire de données</h2>
+      <p class="intro" data-i18n="diI">Chaque colonne de chaque table et vue, avec son type, sa clé, sa définition et sa source. Le même dictionnaire est une feuille du classeur Excel.</p>
+      <div class="controls"><label class="small" for="dico-f" data-i18n="diF">Filtrer</label><select class="sel" id="dico-f"></select></div>
+      <div class="tablewrap dico" id="dico"></div>
+    </div>
+  </section>
+
+  <section class="block" id="console">
+    <div class="wrap">
+      <h2 data-i18n="coT">Console : exécute les requêtes toi-même</h2>
+      <p class="intro" data-i18n="coI">SQLite tourne dans ton navigateur (sql.js). Choisis une requête, modifie-la ou écris la tienne, puis exécute-la. Raccourci : Ctrl+Entrée.</p>
+      <div class="sqlbox">
+        <div class="panel" style="min-width:0">
+          <div class="qtabs" id="qtabs" role="group" aria-label="Requêtes / Queries"></div>
+          <label for="sql-editor" style="position:absolute;left:-9999px" data-i18n="edL">Requête SQL</label>
+          <textarea class="sql" id="sql-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+          <div class="sqlbar">
+            <button type="button" class="btn primary" id="sql-run" data-i18n="run">Exécuter</button>
+            <span class="sqlstat" id="sql-stat" role="status" aria-live="polite"></span>
+          </div>
+          <div class="sqlerr" id="sql-err" hidden></div>
+          <div class="tablewrap" id="sql-out"></div>
+        </div>
+        <div class="panel schema" id="schema"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="qlT">Les requêtes, une par une</h2>
+      <p class="intro" data-i18n="qlI">Pour chaque requête : la question posée, les techniques utilisées, le code et le résultat.</p>
+      <p class="note" style="margin-bottom:10px" data-i18n="qlN">Chaque requête porte son niveau : <span class="lvl D">Débutant</span> agrégats, jointures et règles de trois · <span class="lvl I">Intermédiaire</span> CTE, pivots, classements · <span class="lvl A">Avancé</span> fonctions de fenêtre (LAG, ROW_NUMBER, cadres ROWS).</p>
+      <div id="qlist"></div>
+    </div>
+  </section>
+
+  <section class="block" id="moteur">
+    <div class="wrap">
+      <p class="kicker" data-i18n="ixK">Avancé · moteur</p>
+      <h2 data-i18n="ixT">Lire un plan d'exécution, et porter la base sur PostgreSQL</h2>
+      <p class="intro" data-i18n="ixI">Deux gestes qu'on attend d'un analyste qui écrit du SQL en entreprise : savoir pourquoi une requête est rapide, et savoir déplacer une base d'un moteur à un autre sans en changer le sens.</p>
+      <div class="gallery">
+        <div class="stepc"><h3 data-i18n="ix1T">Avec et sans index : le même résultat, deux chemins</h3>
+          <p data-i18n="ix1P">La requête lit la série d'une région (Montréal, loyer demandé). La clé primaire de la table commence par le trimestre : elle ne sert à rien pour filtrer sur la région. L'index <code>ix_trim_geo_est</code> commence par la région et l'estimation, puis le trimestre : le moteur va droit aux lignes, déjà dans l'ordre demandé.</p>
+<pre class="code" data-lang="sql">__IX_QUERY__</pre>
+          <p style="margin-top:10px" data-i18n="ix1a"><b>Avec l'index</b> · <code>EXPLAIN QUERY PLAN</code></p>
+<pre class="code" data-lang="txt" style="white-space:pre-wrap">__IX_PLAN_ON__</pre>
+          <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
+<pre class="code" data-lang="txt" style="white-space:pre-wrap">__IX_PLAN_OFF__</pre>
+          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les __IX_ROWS__ lignes de la table : __IX_US_ON__ µs par exécution avec l'index, __IX_US_OFF__ µs sans (× __IX_RATIO__). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
+<pre class="code" data-lang="sql" style="white-space:pre-wrap">__IX_DDL__</pre>
+        </div>
+        <div class="stepc"><h3 data-i18n="ix2T">La même base pour PostgreSQL</h3>
+          <p data-i18n="ix2P">Le script <code>loyers_postgres.sql</code> (schéma, vues, données) est dérivé automatiquement des scripts SQLite du projet, pour que les deux versions ne divergent jamais, puis validé par la grammaire de PostgreSQL elle-même (<code>pglast</code>) : une erreur de syntaxe arrête la construction. Cinq écarts de dialecte, et seulement ceux-là :</p>
+          <ul>
+            <li data-i18n="ix21"><code>PRAGMA foreign_keys</code> retiré : les clés étrangères sont toujours actives dans PostgreSQL.</li>
+            <li data-i18n="ix22"><code>GLOB</code> remplacé par une expression régulière : <code>periode ~ '^\d{4}-[01]\d$'</code>.</li>
+            <li data-i18n="ix23"><code>REAL</code> devient <code>DOUBLE PRECISION</code>.</li>
+            <li data-i18n="ix24"><code>ROUND(x, n)</code> n'accepte qu'un <code>numeric</code> : <code>ROUND((x)::numeric, n)</code> dans les vues.</li>
+            <li data-i18n="ix25">Une sous-requête dans <code>FROM</code> doit porter un alias.</li>
+          </ul>
+          <p style="margin-top:12px"><a class="btn" href="assets/loyers_postgres.sql" download data-i18n="ix2Dl">Télécharger loyers_postgres.sql</a></p>
+          <p class="note" data-i18n="ix2N">Chargement : <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Le script est aussi dans le paquet de la base. Validation : syntaxe PostgreSQL complète ; l'exécution sur un serveur PostgreSQL n'a pas encore été faite dans ce projet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="chT">Choix techniques</h2>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="ch1T">Pourquoi SQLite</h3>
+          <ul>
+            <li data-i18n="ch11">La base tient en un fichier versionné dans le dépôt et s'ouvre dans le navigateur, sans serveur.</li>
+            <li data-i18n="ch12">Les requêtes restent en SQL standard : elles tournent aussi sur DuckDB, PostgreSQL ou SQL Server avec des ajustements mineurs (POWER, concaténation).</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="ch2T">Comment les résultats sont vérifiés</h3>
+          <ul>
+            <li data-i18n="ch21"><code>src/build_db.py</code> reconstruit la base, exécute les __N_SQL__ fichiers <code>sql/*.sql</code> et compare les résultats clés au pipeline Python, ainsi que deux requêtes entre elles.</li>
+            <li data-i18n="ch22">Un écart (même de 0,05 point) interrompt la construction : aucun chiffre non vérifié ne peut être publié.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap pager"><a href="excel.html" data-i18n="pgL">← Excel</a><a href="python.html" data-i18n="pgR">Python →</a></div>
+</main>
+__FOOTER__
+<script id="sqlres" type="application/json">__SQL_JSON__</script>
+<script>__COMMON_JS__</script>
+<script>
+window.PAGE_EN = {
+  "@title": `SQL · Montreal Rents`,
+  ey: `Skill · SQL`,
+  h1: `A modelled database, <mark>__N_SQL__ queries</mark>, zero unverified figures`,
+  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints, __N_VUES__ analytical views and a data dictionary. Every figure on this site is recomputed in SQL and compared to the Python result: the slightest gap stops the site build.`,
+  ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to PostgreSQL`,
+  ixI: `Two things expected from an analyst who writes SQL at work: knowing why a query is fast, and moving a database from one engine to another without changing its meaning.`,
+  ix1T: `With and without an index: same result, two paths`,
+  ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
+  ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
+  ix1N: `Measured at site build time on the table's __IX_ROWS__ rows: __IX_US_ON__ µs per run with the index, __IX_US_OFF__ µs without (× __IX_RATIO_EN__). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
+  ix2T: `The same database for PostgreSQL`,
+  ix2P: `The <code>loyers_postgres.sql</code> script (schema, views, data) is derived automatically from the project's SQLite scripts, so the two versions can never drift apart, then validated by PostgreSQL's own grammar (<code>pglast</code>): a syntax error stops the build. Five dialect differences, and only those:`,
+  ix21: `<code>PRAGMA foreign_keys</code> removed: foreign keys are always enforced in PostgreSQL.`,
+  ix22: `<code>GLOB</code> replaced by a regular expression: <code>periode ~ '^\\d{4}-[01]\\d$'</code>.`,
+  ix23: `<code>REAL</code> becomes <code>DOUBLE PRECISION</code>.`,
+  ix24: `<code>ROUND(x, n)</code> only accepts a <code>numeric</code>: <code>ROUND((x)::numeric, n)</code> in the views.`,
+  ix25: `A subquery in <code>FROM</code> must carry an alias.`,
+  ix2Dl: `Download loyers_postgres.sql`,
+  ix2N: `Loading: <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. The script also ships in the database package. Validation: full PostgreSQL syntax; execution on a PostgreSQL server has not yet been done in this project.`,
+  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
+  dl1: `Download the database and models ↗`, dl2: `SQL script`,
+  mK: `Modelling`,
+  mT: `From conceptual model to database`,
+  mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
+  mTabC: `Conceptual model (MCD)`, mTabL: `Logical model (MLD)`,
+  mCapC: `Seven associations. Example: a metro area belongs to exactly one province (1,1); a province holds zero or more metro areas (0,n). ANNÉE (year) and TRIMESTRE (quarter) are temporal entities, not turned into tables.`,
+  mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities.`,
+  mc1T: `Modelling choices`,
+  mc11: `<b>Third normal form</b>: a CMHC indicator's unit depends on the indicator alone; it lives in <code>dim_indicateur</code>, not in the fact table.`,
+  mc12: `<b>Reference dimensions</b>: provinces and estimate types are tables, with foreign keys, rather than free-form codes.`,
+  mc13: `<b>Explicit grain</b>: every fact table has a composite primary key and a comment describing one row.`,
+  mc2T: `Acknowledged limit`,
+  mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
+  dl3: `Download the full database (.zip) ↗`,
+  mN: `SQLite database, full SQL script, schema, __N_SQL__ queries, dictionary, conceptual and logical models (PNG and SVG).`,
+  mVol: `__SQL_VOLUMES_EN__`,
+  dT: `The schema, in SQL`,
+  dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,
+  dS1: `Creation script for the __N_TABLES__ tables (<code>sql/schema/01_tables.sql</code>)`,
+  dS2: `The __N_VUES__ analytical views (<code>sql/schema/02_vues.sql</code>)`,
+  diT: `Data dictionary`,
+  diI: `Every column of every table and view, with its type, key, definition and source. The same dictionary is a sheet of the Excel workbook. Definitions are kept in French, as shipped in the database package.`,
+  diF: `Filter`,
+  coT: `Console: run the queries yourself`,
+  coI: `SQLite runs in your browser (sql.js). Pick a query, edit it or write your own, then run it. Shortcut: Ctrl+Enter.`,
+  run: `Run`, edL: `SQL query`,
+  qlT: `The queries, one by one`,
+  qlI: `For each query: the question asked, the techniques used, the code and the result.`,
+  qlN: `Each query carries its level: <span class="lvl D">Beginner</span> aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> CTEs, pivots, rankings · <span class="lvl A">Advanced</span> window functions (LAG, ROW_NUMBER, ROWS frames).`,
+  chT: `Technical choices`,
+  ch1T: `Why SQLite`,
+  ch11: `The database fits in one file versioned in the repository and opens in the browser, no server.`,
+  ch12: `The queries stay in standard SQL: they also run on DuckDB, PostgreSQL or SQL Server with minor adjustments (POWER, concatenation).`,
+  ch2T: `How the results are verified`,
+  ch21: `<code>src/build_db.py</code> rebuilds the database, runs the __N_SQL__ <code>sql/*.sql</code> files and compares the key results to the Python pipeline, as well as two queries against each other.`,
+  ch22: `Any gap (even 0.05 of a point) stops the build: no unverified figure can get published.`,
+  pgL: `← Excel`, pgR: `Python →`
+};
+const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
+const LVL = { "Débutant": "Beginner", "Intermédiaire": "Intermediate", "Avancé": "Advanced" };
+const tr = (fr, en) => window.LANG === "en" ? en : fr;
+const NOTES = {
+  "01_controle_qualite.sql": { niv: "Débutant", q: "Les données sont-elles complètes et fiables ?", tags: ["UNION ALL", "COUNT DISTINCT", "CASE WHEN"], why: "Avant toute analyse : couverture, nombre de séries, valeurs manquantes et estimations cotées E (à utiliser avec prudence) dans chaque table de faits. Les 12 valeurs manquantes sont des estimations que Statistique Canada n'a pas publiées.",
+    q_en: "Is the data complete and reliable?", why_en: "Before any analysis: coverage, number of series, missing values and E-rated estimates (use with caution) in each fact table. The 12 missing values are estimates Statistics Canada did not publish." },
+  "02_variation_par_type.sql": { niv: "Intermédiaire", q: "Quels types de logement ont le plus augmenté ces dernières années ?", tags: ["LAG", "PARTITION BY", "JOIN"], why: "PARTITION BY relance le calcul de LAG pour chaque type de logement : la variation du studio ne se compare jamais au 3 chambres. En 2025, le 2 chambres (+14,5 %) et le studio (+12,7 %) mènent.",
+    q_en: "Which unit types rose the most in recent years?", why_en: "PARTITION BY restarts the LAG computation for each unit type: a bachelor's change is never compared to a three-bedroom's. In 2025, two-bedrooms (+14.5%) and bachelors (+12.7%) lead." },
+  "03_moyenne_mobile.sql": { niv: "Avancé", q: "La hausse est-elle un pic isolé ou une tendance ?", tags: ["AVG OVER", "ROWS BETWEEN", "CTE en chaîne"], tags_en: ["AVG OVER", "ROWS BETWEEN", "Chained CTEs"], why: "La moyenne mobile sur 3 ans lisse les variations ponctuelles. Elle passe de 2 % avant 2019 à 9,7 % en 2025 : la hausse est durable. Le filtre sur les années est appliqué après le calcul de la fenêtre, pour ne pas tronquer les premières moyennes.",
+    q_en: "Is the increase a one-off spike or a trend?", why_en: "The 3-year moving average smooths one-off swings. It goes from 2% before 2019 to 9.7% in 2025: the increase is durable. The year filter is applied after the window computation, so the first averages are not truncated." },
+  "04_loyer_reel.sql": { niv: "Débutant", q: "Que valent les loyers une fois l'inflation retirée ?", tags: ["CTE", "JOIN", "CROSS JOIN"], why: "La CTE isole l'IPC de 2025, réutilisé comme base pour toutes les lignes. Chaque loyer est ramené en dollars de 2025.",
+    q_en: "What are rents worth once inflation is removed?", why_en: "The CTE isolates the 2025 CPI, reused as the base for every row. Each rent is restated in 2025 dollars." },
+  "05_rythme_par_periode.sql": { niv: "Intermédiaire", q: "Le rythme de hausse réelle a-t-il changé après 2019 ?", tags: ["VALUES", "POWER", "CTE multiples"], tags_en: ["VALUES", "POWER", "Multiple CTEs"], why: "Une table de périodes construite avec VALUES évite de dupliquer le calcul. Le taux de croissance annuel composé passe de 0,50 % à 4,09 %.",
+    q_en: "Did the pace of real increases change after 2019?", why_en: "A period table built with VALUES avoids duplicating the computation. The compound annual growth rate goes from 0.50% to 4.09%." },
+  "06_classement_villes.sql": { niv: "Intermédiaire", q: "Où les loyers ont-ils le plus augmenté depuis 2019 ?", tags: ["Agrégation conditionnelle", "RANK"], tags_en: ["Conditional aggregation", "RANK"], why: "MAX(CASE WHEN ...) pivote 2019 et 2025 sur une seule ligne par ville ; RANK classe les hausses. Montréal est première, avec +57 %.",
+    q_en: "Where did rents rise the most since 2019?", why_en: "MAX(CASE WHEN ...) pivots 2019 and 2025 onto a single row per city; RANK orders the increases. Montreal comes first, at +57%." },
+  "07_rang_montreal_par_annee.sql": { niv: "Avancé", q: "Montréal est-elle toujours la grande ville la moins chère ?", tags: ["RANK", "MAX OVER", "PARTITION BY année"], tags_en: ["RANK", "MAX OVER", "PARTITION BY year"], why: "Non : première jusqu'en 2019, elle passe deuxième derrière Québec à partir de 2020. Le contrôle automatique compare ce rang aux loyers de la requête 06.",
+    q_en: "Is Montreal still the cheapest large city?", why_en: "No: first until 2019, it drops to second behind Quebec City from 2020 on. The automatic check compares this rank to the rents of query 06." },
+  "08_prime_de_relocation.sql": { niv: "Débutant", q: "Combien coûte un logement qui change de locataire ?", tags: ["JOIN entre sources", "CAST"], tags_en: ["JOIN across sources", "CAST"], why: "Jointure entre la série de Statistique Canada et les indicateurs du rapport SCHL. En 2025, l'écart atteint 298 $ par mois.",
+    q_en: "What does a unit cost when it changes tenant?", why_en: "A join between the Statistics Canada series and the CMHC report indicators. In 2025, the gap reaches $298 per month." },
+  "09_demande_vs_paye.sql": { niv: "Avancé", q: "Dans quelles villes déménager coûte-t-il le plus cher ?", tags: ["ROW_NUMBER", "Dernier enregistrement par groupe", "Pivot", "RANK"], tags_en: ["ROW_NUMBER", "Latest record per group", "Pivot", "RANK"], why: "ROW_NUMBER isole le dernier trimestre publié de chaque série (motif classique en BI), puis un pivot met loyer demandé et loyer payé côte à côte. Montréal est 4e sur 16, avec un écart de 460 $.",
+    q_en: "In which cities does moving cost the most?", why_en: "ROW_NUMBER isolates the latest published quarter of each series (a classic BI pattern), then a pivot puts asking rent and paid rent side by side. Montreal is 4th of 16, with a $460 gap." },
+  "10_provinces_loyer_inflation.sql": { niv: "Intermédiaire", q: "Quelle province a connu la plus forte hausse des loyers en 2025 ?", tags: ["Pivot", "RANK", "Ratio de ratios"], tags_en: ["Pivot", "RANK", "Ratio of ratios"], why: "Le Québec arrive premier en 2025 (+7,8 %), mais seulement 4e sur 2019-2025 : la hausse québécoise est récente et s'est concentrée en 2024 et 2025.",
+    q_en: "Which province saw the strongest rent increase in 2025?", why_en: "Quebec comes first in 2025 (+7.8%) but only 4th over 2019-2025: the Quebec surge is recent and concentrated in 2024 and 2025." },
+  "12_vues_quebec.sql": { niv: "Intermédiaire", q: "Au Québec, où l'écart entre annonce et loyer payé est-il le plus fort ?", tags: ["Requête sur des vues", "JOIN sur 2 clés", "NULLS LAST"], tags_en: ["Query over views", "JOIN on 2 keys", "NULLS LAST"], why: "La logique (dernier trimestre publié, pivot, variation de l'IPC) vit dans les vues ; la requête finale tient en dix lignes. Sherbrooke (+35,4 %) devance Montréal (+33,8 %). Les régions sans loyer payé publié restent visibles en fin de liste.",
+    q_en: "In Quebec, where is the gap between listings and rent paid the widest?", why_en: "The logic (latest published quarter, pivot, CPI change) lives in the views; the final query fits in ten lines. Sherbrooke (+35.4%) edges out Montreal (+33.8%). Areas without a published paid rent stay visible at the end of the list." },
+  "11_inoccupation_vs_loyer.sql": { niv: "Avancé", q: "Quand les loyers ont-ils monté malgré plus de logements vacants ?", tags: ["JOIN sur 2 clés", "LAG", "Filtre sur valeurs calculées"], tags_en: ["JOIN on 2 keys", "LAG", "Filter on computed values"], why: "Les deux séries sont alignées par année, puis LAG compare chaque année à la précédente. Trois années répondent au critère, dont 2025.",
+    q_en: "When did rents rise despite more vacant units?", why_en: "The two series are aligned by year, then LAG compares each year to the previous one. Three years meet the criterion, 2025 among them." }
+};
+const SCHEMA_TXT = [["fait_loyer", "annee, geo_id, unit_id, loyer"], ["fait_loyer_trimestriel", "periode, geo_id, estimation (A/P), loyer, cote"],
+  ["fait_inoccupation", "annee, geo_id, taux"], ["ipc_provinces", "annee, code, ipc_loyer, ipc_ensemble"], ["ipc", "annee, geo_id, ipc"],
+  ["schl_roulement", "annee, geo_id, indicateur, valeur"], ["dim_logement", "unit_id, libelle_fr, chambres"], ["dim_geo", "geo_id, libelle_fr"], ["dim_rmr", "geo_id, nom, province, lat, lon"],
+  ["dim_province", "code, nom, niveau"], ["dim_estimation", "code, libelle"], ["dim_indicateur", "code, libelle, unite"],
+  ["Vues", "v_loyer_reel, v_variation_annuelle, v_dernier_trimestre, v_ecart_demande_paye, v_ipc_provinces_variation"]];
+document.querySelectorAll(".mtabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".mtabs button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  document.getElementById("m-mcd").hidden = b.dataset.m !== "mcd";
+  document.getElementById("m-mld").hidden = b.dataset.m !== "mld";
+});
+const DICO = __DICO_JSON__;
+function drawDico() {
+  const f = document.getElementById("dico-f").value;
+  const rows = DICO.filter(r => !f || r.table === f);
+  const H = tr(["Table", "Colonne", "Type", "Clé", "Description", "Source"], ["Table", "Column", "Type", "Key", "Description (FR)", "Source"]);
+  document.getElementById("dico").innerHTML = `<table class="data"><tr>${H.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(r =>
+    `<tr><td><code class="${r.table.startsWith("v_") ? "vw" : "tb"}">${esc(r.table)}</code></td><td><code>${esc(r.colonne)}</code></td><td>${esc(r.type || "")}</td><td>${esc(r.cle || "")}</td><td class="desc">${esc(r.description || "")}</td><td>${esc(r.source || "")}</td></tr>`).join("")}</table>`;
+}
+function drawDicoFilter() {
+  const cur = document.getElementById("dico-f").value;
+  document.getElementById("dico-f").innerHTML = `<option value="">${tr("Toutes les tables et vues", "All tables and views")} (${DICO.length} ${tr("colonnes", "columns")})</option>` +
+    [...new Set(DICO.map(r => r.table))].map(t => `<option value="${t}"${t === cur ? " selected" : ""}>${t}</option>`).join("");
+}
+drawDicoFilter();
+document.getElementById("dico-f").onchange = drawDico;
+drawDico();
+function drawQlist() {
+  document.getElementById("qlist").innerHTML = SQLRES.map(q => {
+    const n = NOTES[q.file] || { q: q.title, tags: [], why: "" };
+    const en = window.LANG === "en";
+    const body = q.sql.split("\n").slice(1).join("\n");
+    const tags = (en && n.tags_en) || n.tags;
+    const lvl = n.niv ? (en ? LVL[n.niv] : n.niv) : "";
+    return `<article class="qcard"><div style="min-width:0"><p class="eyebrow" style="margin:0 0 4px">${esc(q.file)} <span class="lvl ${n.niv ? n.niv[0] : ""}">${esc(lvl)}</span></p><h3>${esc((en && n.q_en) || n.q)}</h3>
+      <div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div><pre class="code">${highlight(body, "sql")}</pre></div>
+      <div style="min-width:0"><p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tablewrap">${resultTable(q.columns, q.rows)}</div></div></article>`;
+  }).join("");
+}
+drawQlist();
+
+const st = { i: 0, db: null, loading: null };
+function loadSQL() {
+  if (st.loading) return st.loading;
+  const stat = document.getElementById("sql-stat");
+  stat.textContent = tr("Chargement de SQLite…", "Loading SQLite…");
+  st.loading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); })
+    .then(() => initSqlJs({ locateFile: f => "assets/" + f }))
+    .then(SQL => fetch("assets/loyers.sqlite").then(r => { if (!r.ok) throw new Error("db"); return r.arrayBuffer(); }).then(b => { st.db = new SQL.Database(new Uint8Array(b)); }))
+    .then(() => { stat.textContent = tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run"); })
+    .catch(() => { stat.textContent = tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown."); });
+  return st.loading;
+}
+async function runSQL() {
+  const err = document.getElementById("sql-err"); err.hidden = true;
+  await loadSQL();
+  if (!st.db) { const q = SQLRES[st.i]; document.getElementById("sql-out").innerHTML = resultTable(q.columns, q.rows); return; }
+  try {
+    const t0 = performance.now();
+    const res = st.db.exec(document.getElementById("sql-editor").value);
+    const last = res[res.length - 1];
+    document.getElementById("sql-out").innerHTML = last ? resultTable(last.columns, last.values.slice(0, 500)) : "";
+    document.getElementById("sql-stat").textContent = last
+      ? `${last.values.length} ${tr("ligne(s)", "row(s)")} · ${Math.round(performance.now() - t0)} ms`
+      : tr("Requête exécutée, aucun résultat.", "Query ran, no result set.");
+  } catch (e) { err.textContent = e.message; err.hidden = false; }
+}
+function drawTabs() {
+  const tabs = document.getElementById("qtabs");
+  tabs.innerHTML = SQLRES.map((q, i) => { const n = NOTES[q.file] || {}; const lvl = n.niv ? (window.LANG === "en" ? LVL[n.niv] : n.niv) : "";
+    return `<button type="button" aria-pressed="${i === st.i}" data-i="${i}" title="${lvl}">${q.file.replace(".sql", "")}</button>`; }).join("");
+  tabs.querySelectorAll("button").forEach(b => b.onclick = () => { st.i = +b.dataset.i; drawTabs(); document.getElementById("sql-editor").value = SQLRES[st.i].sql; runSQL(); });
+}
+drawTabs();
+document.getElementById("sql-editor").value = SQLRES[st.i].sql;
+function drawSchema() {
+  document.getElementById("schema").innerHTML = `<p style='margin:0 0 6px;font-family:var(--font-body)'>${tr("Tables", "Tables")}</p>` + SCHEMA_TXT.map(([n, c]) => `<b>${n}</b>${c}`).join("<br>");
+}
+drawSchema();
+document.getElementById("sql-out").innerHTML = resultTable(SQLRES[0].columns, SQLRES[0].rows);
+document.getElementById("sql-run").onclick = runSQL;
+document.getElementById("sql-editor").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSQL(); }
+  if (e.key === "Tab") { e.preventDefault(); const el = e.target; el.setRangeText("  ", el.selectionStart, el.selectionEnd, "end"); }
+});
+document.addEventListener("langchange", () => { drawQlist(); drawDicoFilter(); drawDico(); drawTabs(); drawSchema(); });
+loadSQL();
+</script>

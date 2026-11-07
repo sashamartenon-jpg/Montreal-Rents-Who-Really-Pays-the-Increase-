@@ -1,0 +1,1719 @@
+<title>Loyers à Montréal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Analyse des loyers à Montréal de 1992 à 2025 à partir des données de la SCHL : hausse réelle, comparaison avec cinq grandes villes, simulateur Excel.">
+<meta property="og:title" content="Loyers à Montréal : +27 % en dollars constants depuis 2019">
+<meta property="og:description" content="34 ans de données SCHL et Statistique Canada, 42 villes sur une carte, un simulateur de loyer, le modèle Excel et la base SQL à télécharger. Un projet d'intelligence d'affaires, de la source à la décision.">
+<meta property="og:image" content="assets/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout : une colonne éditoriale de 1080 px ; chaque constat = texte court + graphique ; outils (simulateur) en grille tableur */
+:root {
+  /* Palette : bleu ciel #0593C6 (données, marque), rose #D83995 (accent unique), blanc #FCFFFF (surfaces) */
+  --bg: #f1f6f9;
+  --surface: #fcffff;
+  --ink: #0f1b26;
+  --ink-2: #44546a;
+  --ink-3: #607286;
+  --line: #d6e2ea;
+  --grid: #e6eef3;
+  --mtl: #0593c6;
+  --mtl-soft: #e0f2fa;
+  --link: #04739b;
+  --warm: #d83995;
+  --warm-ink: #b12a7a;
+  --warm-soft: #fbe5f1;
+  --other: #a5b3c1;
+  --u-studio: #c98500;
+  --u-1ch: #0593c6;
+  --u-2ch: #d83995;
+  --u-3ch: #6250d6;
+  --map-0: #eaf5fa; --map-1: #b9e0f1; --map-2: #7cc6e5; --map-3: #2fa6d6; --map-4: #0583b2; --map-5: #04557a;
+  --map-na: #e3e8ec;
+  --cell-in: #fff6c2;
+  --cell-sel: #0593c6;
+  --code-bg: #f4f9fb; --code-fg: #1b2733; --code-kw: #04739b; --code-str: #0d7a52; --code-com: #55687c; --code-num: #b12a7a; --code-fn: #5a46c9;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.2rem;
+  --step-4: clamp(2.3rem, 5.2vw, 3.8rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+    --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+    --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+    --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+    --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+    --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1620; --surface: #0f2230; --ink: #e6f2f8; --ink-2: #a8bccb; --ink-3: #8399aa;
+  --line: #1f3a4d; --grid: #172f40; --mtl: #1c90c2; --mtl-soft: #0d3346; --link: #5cc1ea; --warm: #d9468f; --warm-ink: #f07fbd; --warm-soft: #3a1530;
+  --other: #4f6678; --u-studio: #c98500; --u-1ch: #1c90c2; --u-2ch: #d9468f; --u-3ch: #9085e9;
+  --map-0: #12303f; --map-1: #134b63; --map-2: #146a8c; --map-3: #1c90c2; --map-4: #4fb3dc; --map-5: #9fd8ef; --map-na: #1a2b37;
+  --cell-in: #3a3418; --cell-sel: #1c90c2; color-scheme: dark;
+  --code-bg: #0b1a25; --code-fg: #dcebf3; --code-kw: #5cc1ea; --code-str: #5fd3a2; --code-com: #7f93a3; --code-num: #f07fbd; --code-fn: #b4a9f5;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--mtl); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* barre du haut */
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.brand { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: .01em; }
+.brand span { color: var(--ink-3); font-weight: 500; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.btn { font: 500 .85rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--warm); border-color: var(--warm); color: #fff; }
+.btn.primary:hover { filter: brightness(1.06); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: 500 .8rem var(--font-body); background: var(--surface); color: var(--ink-2); border: 0; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* hero */
+.hero { padding-block: 40px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: end; }
+.eyebrow { font: 500 .75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--step-4); line-height: 1.02; margin: 0 0 16px; text-wrap: balance; letter-spacing: -.01em; }
+.hero h1 em { font-style: normal; color: var(--warm-ink); }
+.hero p.lede { font-size: 1.1rem; color: var(--ink-2); margin: 0 0 16px; max-width: 34em; }
+.pace { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.pace div { border-top: 3px solid var(--other); padding-top: 8px; }
+.pace div.now { border-top-color: var(--warm); }
+.pace b { display: block; font: 600 1.5rem var(--font-display); }
+.pace small { color: var(--ink-3); font-size: .82rem; line-height: 1.35; display: block; }
+
+/* sections */
+section.block { padding-block: 36px; border-top: 1px solid var(--line); }
+.block h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--step-3); line-height: 1.1; margin: 0 0 10px; text-wrap: balance; max-width: 22em; }
+.block .intro { color: var(--ink-2); max-width: 44em; margin: 0 0 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+.controls label.small { font-size: .78rem; color: var(--ink-3); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 .82rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 4px 10px 4px 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip .sw { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .5; }
+.chip[aria-pressed="false"] .sw { background: transparent; border: 1.5px solid var(--c); }
+.two { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font: 600 .95rem var(--font-body); margin: 0 0 2px; }
+.chart-sub { font-size: .8rem; color: var(--ink-3); margin: 0 0 8px; }
+.note { font-size: .8rem; color: var(--ink-3); margin: 10px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--ink-2); margin: 0 0 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.callout { border-left: 3px solid var(--warm); background: var(--warm-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 14px 0 0; max-width: 46em; font-size: .95rem; }
+
+/* svg */
+.axis text { fill: var(--ink-3); font: 11px var(--font-mono); }
+.axis line, .axis path { stroke: var(--line); }
+.gridline { stroke: var(--grid); }
+.lbl { fill: var(--ink-2); font: 500 11.5px var(--font-body); }
+.lbl.strong { fill: var(--ink); font-weight: 600; }
+.ann { fill: var(--ink-2); font: 12px var(--font-body); }
+.ann.big { fill: var(--ink); font: 600 15px var(--font-display); }
+.cross { stroke: var(--ink-3); stroke-dasharray: 3 3; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 8px 10px; font-size: .8rem; min-width: 150px; z-index: 5; }
+.tip .t { font: 600 .8rem var(--font-mono); margin-bottom: 4px; }
+.tip .r { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.tip .r b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .r i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--c); margin-right: 6px; }
+
+/* tableau / données */
+.tablewrap { overflow-x: auto; margin-top: 10px; }
+table.data { border-collapse: collapse; font-size: .82rem; width: 100%; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 5px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th { font-weight: 600; color: var(--ink-2); }
+details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); margin-top: 10px; }
+
+/* simulateur tableur */
+.sim { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.verdict { font-size: 1.05rem; }
+.verdict p { margin: 0 0 12px; }
+.verdict b { font-family: var(--font-display); font-size: 1.25rem; }
+.sheet { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); font-family: var(--font-mono); font-size: .8rem; }
+.fbar { display: flex; border-bottom: 1px solid var(--line); background: var(--bg); }
+.fbar .ref { width: 64px; flex: none; padding: 6px 8px; border-right: 1px solid var(--line); color: var(--ink-2); text-align: center; }
+.fbar .fx { padding: 6px 8px; color: var(--ink-3); border-right: 1px solid var(--line); font-style: italic; }
+.fbar .formula { padding: 6px 8px; overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; color: var(--ink); }
+.grid { overflow-x: auto; }
+.grid table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.grid col.c-rh { width: 36px; } .grid col.c-b { width: 42%; }
+.grid td .c { overflow-wrap: anywhere; }
+.grid th { background: var(--bg); color: var(--ink-3); font-weight: 400; border: 1px solid var(--line); padding: 3px 6px; text-align: center; }
+.grid td { border: 1px solid var(--grid); padding: 0; height: 30px; }
+.grid td.rh { background: var(--bg); color: var(--ink-3); text-align: center; width: 36px; border-color: var(--line); }
+.grid td .c { padding: 4px 8px; display: block; cursor: cell; font-family: var(--font-body); font-size: .84rem; }
+.grid td .c.v { text-align: right; font-family: var(--font-mono); }
+.grid td.sel { outline: 2px solid var(--cell-sel); outline-offset: -2px; }
+.grid td.in { background: var(--cell-in); }
+.grid td.in input, .grid td.in select { width: 100%; border: 0; background: transparent; color: var(--link); font: 500 .84rem var(--font-mono); padding: 4px 8px; text-align: right; }
+.grid td.sec .c { font-weight: 600; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; color: var(--ink-3); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+
+/* navigation */
+.topbar { flex-wrap: wrap; }
+.brand { color: var(--ink); text-decoration: none; }
+.nav { display: flex; gap: 2px; }
+.nav a { font: 500 .88rem var(--font-body); color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
+.nav a:hover { color: var(--ink); background: var(--bg); }
+.nav a[aria-current="page"] { background: var(--ink); color: var(--bg); }
+@media (max-width: 760px) {
+  .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
+}
+/* bandeau compétences (accueil) */
+.skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
+.skill { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--ink); transition: border-color .15s; }
+.skill:hover { border-color: var(--mtl); }
+.skill .tool { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); }
+.skill b { font: 600 1.05rem var(--font-display); }
+.skill small { color: var(--ink-3); font-size: .82rem; line-height: 1.4; }
+.skill .go { margin-top: auto; padding-top: 6px; font-size: .82rem; color: var(--link); }
+@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* pages compétences */
+.phero { padding-block: 40px 24px; max-width: 760px; }
+.phero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
+.phero p { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 16px; }
+.proves { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.proves li { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
+.figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 0; }
+.figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+.figure figcaption { font-size: .82rem; color: var(--ink-3); margin-top: 8px; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stepc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.stepc .n { font: 500 .72rem var(--font-mono); color: var(--ink-3); letter-spacing: .06em; }
+.stepc h3 { font: 600 1.05rem var(--font-display); margin: 4px 0 6px; }
+.stepc p { margin: 0; color: var(--ink-2); font-size: .9rem; }
+.code { background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 0; overflow-x: auto; font: 12.5px/1.55 var(--font-mono); tab-size: 4; }
+.code .k { color: var(--code-kw); font-weight: 500; }
+.code .s { color: var(--code-str); }
+.code .c { color: var(--code-com); font-style: italic; }
+.code .n { color: var(--code-num); }
+.code .f { color: var(--code-fn); }
+.code[data-lang="xl"] { white-space: pre-wrap; overflow-wrap: anywhere; }
+.qcard.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+.qcard { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.qcard h3 { font: 600 1.1rem var(--font-display); margin: 0 0 4px; }
+.qcard .why { color: var(--ink-2); font-size: .9rem; margin: 6px 0 10px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 10px; }
+.tags span { font: 500 .72rem var(--font-mono); background: var(--mtl-soft); color: var(--link); border-radius: 4px; padding: 2px 7px; }
+.status-banner { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-left: 4px solid var(--warm); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 8px; }
+.status-banner b { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+.status-banner p { margin: 4px 0 0; color: var(--ink-2); font-size: .92rem; }
+.pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 28px; border-top: 1px solid var(--line); }
+.pager a { text-decoration: none; font-weight: 500; }
+.erd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.erd .t { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font: .8rem/1.6 var(--font-mono); min-width: 0; }
+.erd .t.fact { border: 2px solid var(--mtl); }
+.erd .t h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); background: var(--bg); border-bottom: 1px solid var(--line); }
+.erd .t.fact h4 { background: var(--mtl-soft); color: var(--link); }
+.erd .t ul { list-style: none; margin: 0; padding: 6px 10px; color: var(--ink-2); }
+.erd .t li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+.gallery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 820px) {
+  .steps, .qcard, .qcard.wide, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* hero note */
+.hero-note { font-size: .8rem; color: var(--ink-3); margin: 12px 0 0; max-width: 40em; }
+/* relocation */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.kpi b { display: block; font: 600 1.7rem var(--font-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--ink-3); font-size: .8rem; line-height: 1.35; display: block; margin-top: 4px; }
+.kpi.hot b { color: var(--warm-ink); }
+/* implications */
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card .who { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.card h3 { font: 600 1.15rem var(--font-display); margin: 0; text-wrap: balance; }
+.card p { margin: 0; color: var(--ink-2); font-size: .92rem; }
+.card .dec { margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; font-size: .9rem; }
+.card .dec b { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--warm-ink); display: block; margin-bottom: 2px; }
+/* console SQL */
+.sqlbox { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; align-items: start; }
+.qtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.qtabs button { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.qtabs button[aria-pressed="true"] { border-color: var(--mtl); color: var(--link); background: var(--mtl-soft); }
+.qtitle { font-size: .9rem; color: var(--ink-2); margin: 0 0 8px; }
+textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 var(--font-mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; tab-size: 2; white-space: pre; overflow: auto; }
+.sqlbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+.sqlstat { font: .78rem var(--font-mono); color: var(--ink-3); }
+.sqlerr { color: #d03b3b; font: .82rem var(--font-mono); white-space: pre-wrap; }
+.schema { font: .76rem/1.5 var(--font-mono); color: var(--ink-2); }
+.schema b { color: var(--ink); display: block; margin-top: 8px; }
+.schema b:first-child { margin-top: 0; }
+/* fabrication */
+
+/* méthode */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow > * { text-decoration: none; color: var(--ink); }
+.flow a.flowlink:hover { border-color: var(--mtl); }
+.flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
+.flow b { display: block; font-family: var(--font-display); font-size: 1rem; }
+.flow small { color: var(--ink-3); display: block; line-height: 1.35; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.cols h3 { font: 600 1.05rem var(--font-display); margin: 0 0 8px; }
+.cols ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: .92rem; }
+.cols li { margin-bottom: 6px; }
+.star { font-family: var(--font-mono); font-size: .78rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
+.star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
+.star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* pied de page */
+footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: .85rem; z-index: 20; }
+
+@media (max-width: 820px) {
+  .hero, .two, .sim, .cols, .cards3, .sqlbox { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .flow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero { padding-block: 28px 20px; }
+}
+@media (max-width: 420px) { .brand span { display: none; } }
+
+/* ===================== identité visuelle : dégradé flou bleu, rose et corail, verre dépoli ===================== */
+:root {
+  --bg: #f3f6fb; --surface: #ffffff; --glass: rgba(255, 255, 255, .72); --glass-line: rgba(255, 255, 255, .85);
+  --ink: #13233a; --ink-2: #44546a; --ink-3: #5b6b82; --line: #dbe4ef; --grid: #e8eef6;
+  --mtl: #2f86d6; --mtl-soft: #e8f2fc; --link: #1f6fc0; --warm: #e0457b; --warm-ink: #b8285e; --warm-soft: #fdeaf1;
+  --coral: #f2876b; --other: #a9b6c6; --u-1ch: #2f86d6; --u-2ch: #e0457b; --u-3ch: #7b6cd9;
+  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0;
+  --cell-sel: #2f86d6; --warm-btn: #c9336b;
+  --font-display: "Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(19, 35, 58, .05), 0 12px 32px rgba(19, 35, 58, .07);
+  --mesh: radial-gradient(42% 60% at 34% 62%, rgba(242, 135, 107, .95) 0%, rgba(242, 135, 107, 0) 70%),
+          radial-gradient(38% 55% at 46% 48%, rgba(224, 69, 123, .95) 0%, rgba(224, 69, 123, 0) 70%),
+          radial-gradient(30% 70% at 60% 40%, rgba(30, 47, 92, .85) 0%, rgba(30, 47, 92, 0) 70%),
+          radial-gradient(45% 50% at 80% 75%, rgba(123, 108, 217, .55) 0%, rgba(123, 108, 217, 0) 70%),
+          linear-gradient(115deg, #2a78c8 0%, #3f93da 35%, #6fb0e6 70%, #a9d2f2 100%);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); } }
+:root[data-theme="dark"] {
+  --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
+  --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
+  --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
+  --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+.skip { position: absolute; left: 12px; top: -48px; z-index: 60; background: #fff; color: #13233a; font: 600 .9rem var(--font-body); padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none; transition: top .2s; }
+.skip:focus { top: 0; }
+:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; border-radius: 4px; }
+.heroband :focus-visible, .top :focus-visible { outline-color: #fff; }
+body { background: var(--bg); font-family: var(--font-body); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(40% 35% at 95% 20%, rgba(224, 69, 123, .07), transparent 70%),
+              radial-gradient(45% 40% at 0% 70%, rgba(47, 134, 214, .08), transparent 70%); }
+h1, h2, h3 { font-family: var(--font-display); }
+.block h2 { font-weight: 400; letter-spacing: -.02em; font-size: clamp(1.9rem, 3.6vw, 2.7rem); line-height: 1.08; }
+.block h2::before { content: ""; display: block; width: 44px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--warm), var(--coral)); margin-bottom: 16px; }
+.kicker { font: 600 .74rem var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--warm-ink); margin: 0 0 8px; }
+
+/* en-tête flottant en verre */
+.top { position: sticky; top: 0; z-index: 30; background: rgba(18, 40, 78, .38); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.top .wrap { padding-block: 10px; }
+.top { transition: background .3s; }
+.top.solid { background: rgba(19, 35, 58, .88); }
+@media (max-width: 760px) { .top { position: relative; } .top .btn#share { display: none; } }
+.top .brand { color: #fff; font: 600 1.08rem var(--font-display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
+.top .brand::before { content: ""; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, #8ec2ea, var(--warm) 60%, var(--coral)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+.top .brand span { color: rgba(255, 255, 255, .78); font-weight: 400; }
+.top .nav { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; padding: 4px; }
+.top .nav a { color: rgba(255, 255, 255, .92); border-radius: 999px; padding: 6px 14px; }
+.top .nav a:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+.top .nav a[aria-current="page"] { background: rgba(255, 255, 255, .95); color: #17325e; font-weight: 600; }
+.top .nav a[aria-current="page"]::before { content: "• "; color: var(--warm); }
+.top .btn { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .btn:hover { background: rgba(255, 255, 255, .24); border-color: rgba(255, 255, 255, .6); }
+.top .seg { border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
+.top .seg button { background: transparent; color: rgba(255, 255, 255, .85); }
+.top .seg button[aria-pressed="true"] { background: #fff; color: #17325e; }
+
+/* bandeau : maillage de dégradés flous et verre cannelé */
+.heroband { position: relative; isolation: isolate; color: #fff; background: var(--mesh); background-color: #2a78c8; overflow: hidden; margin-top: -60px; padding-top: 60px; border-bottom: 0; }
+.heroband::before { content: ""; position: absolute; inset: -10%; z-index: -1; background: var(--mesh); filter: blur(24px) saturate(115%); animation: drift 22s ease-in-out infinite alternate; }
+.heroband::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 1px, rgba(255,255,255,.03) 1px 9px, rgba(10,20,45,.07) 9px 10px, rgba(255,255,255,0) 10px 14px),
+              linear-gradient(90deg, rgba(9, 24, 52, .42) 0%, rgba(9, 24, 52, .18) 55%, rgba(9, 24, 52, .05) 100%); }
+@keyframes drift { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(-3%, 2%, 0) scale(1.06); } }
+.heroband .eyebrow { color: rgba(255, 255, 255, .92); font: 500 .8rem var(--font-body); letter-spacing: .14em; }
+.heroband h1, .heroband .phero h1 { color: #fff; font-family: var(--font-display); font-weight: 300; letter-spacing: -.035em; text-shadow: 0 2px 30px rgba(9, 24, 52, .25); }
+.heroband h1 em, .heroband h1 mark { font-style: normal; background: none; color: #fff; font-weight: 500; padding: 0; -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; }
+.heroband .phero { max-width: 1080px; padding-block: 64px 48px; }
+.heroband .phero h1 { font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.02; max-width: 14em; }
+.heroband .phero > p { color: rgba(255, 255, 255, .92); max-width: 44em; font-size: 1.08rem; }
+.heroband .phero p b { color: #fff; }
+.heroband .proves li { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .35); color: #fff; font-family: var(--font-body); border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.heroband .proves li.ai { background: #fff; color: #13233a; border-color: #fff; font-weight: 600; }
+.heroband a:not(.btn):not(.pill) { color: #fff; }
+.heroband .btn:not(.primary) { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .45); border-radius: 999px; }
+.heroband .btn.primary, .pill { background: #fff; color: #13233a; border: 0; border-radius: 999px; padding: 10px 18px; font: 600 .92rem var(--font-body); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; box-shadow: 0 8px 24px rgba(9, 24, 52, .2); }
+.heroband .btn.primary:hover, .pill:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--warm-btn); border-color: var(--warm-btn); color: #fff; font-weight: 600; border-radius: 999px; }
+.btn.primary:hover { background: var(--warm); border-color: var(--warm); filter: none; }
+
+/* accueil */
+.hero2 { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: center; min-height: min(72vh, 680px); padding-block: 36px 70px; }
+.hero2 h1 { font-size: clamp(2.6rem, 5.2vw, 4.5rem); line-height: 1; margin: 0 0 20px; max-width: 12.5em; }
+.hero2 .lede { color: rgba(255, 255, 255, .94); font-size: 1.12rem; max-width: 34em; margin: 0 0 26px; }
+.hero2 .lede b { color: #fff; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.cta .ghost { color: #fff; font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .5); padding-bottom: 2px; }
+.glass-stack { background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .35); border-radius: 26px; padding: 14px; -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); box-shadow: 0 20px 60px rgba(9, 24, 52, .25); }
+.glass-stack .handle { width: 46px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .8); margin: 2px auto 12px; }
+.glass-stack .where { font-size: .82rem; color: rgba(255, 255, 255, .92); margin: 0 6px 12px; display: flex; gap: 8px; align-items: center; }
+.gcard { background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .3); border-radius: 18px; padding: 14px 16px 10px; margin-top: 10px; position: relative; overflow: hidden; }
+.gcard .h { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.02rem; font-weight: 500; }
+.gcard .h small { font-size: .74rem; color: rgba(255, 255, 255, .88); }
+.gcard .row { display: flex; justify-content: space-between; align-items: end; margin-top: 10px; gap: 10px; }
+.gcard .row span { display: block; font-size: .74rem; color: rgba(255, 255, 255, .85); }
+.gcard .row b { font: 400 1.75rem/1.05 var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gcard .row .r { text-align: right; }
+.gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
+.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
+.hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
+.hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.hero-strip b { color: #fff; font-weight: 600; }
+@media (max-width: 900px) {
+  .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
+  .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+  .hero-strip a:last-child { grid-column: 1 / -1; }
+}
+
+/* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
+.hero-stage { position: relative; }
+.hero-stage > .wrap, .heroband.home > nav { position: relative; z-index: 1; }
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.heroband::before { animation: bloom 2s cubic-bezier(.2, .7, .2, 1) both, drift 22s ease-in-out 2s infinite alternate; }
+@keyframes bloom { from { opacity: .35; transform: translate3d(0, 0, 0) scale(1.22); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+#hero-curve { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+#hero-curve .area { fill: url(#hc-grad); opacity: 0; animation: hcFade 1.6s ease-out 2.1s both; }
+#hero-curve .line { fill: none; stroke: rgba(255, 255, 255, .62); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 12px rgba(255, 255, 255, .45)); }
+#hero-curve .line.go { animation: draw 2.7s cubic-bezier(.45, 0, .2, 1) .35s forwards; }
+#hero-curve .brk { stroke: rgba(255, 255, 255, .7); stroke-width: 1; stroke-dasharray: 3 7; opacity: 0; animation: hcFade .9s ease-out 2.2s both; }
+#hero-curve .dot { fill: #ffd9cc; opacity: 0; transform-box: fill-box; transform-origin: center; animation: hcPop .7s cubic-bezier(.2, .7, .2, 1) 2.55s both; }
+#hero-curve .halo { fill: none; stroke: #ffd9cc; stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: halo 2.6s ease-out 2.9s infinite; }
+#hero-curve .yr { fill: rgba(255, 255, 255, .7); font: 500 11px var(--font-body); letter-spacing: .1em; opacity: 0; animation: hcFade .8s ease-out both; }
+#hero-curve .yr.hot { fill: #ffd9cc; }
+#hero-curve .tag { fill: #fff; font: 500 13px var(--font-body); opacity: 0; animation: hcFade .8s ease-out 2.8s both; }
+.hero-year { position: absolute; right: 2%; top: 46%; transform: translateY(-50%); font: 300 clamp(8rem, 22vw, 20rem)/1 var(--font-display); letter-spacing: -.05em; color: rgba(255, 255, 255, .1); transition: opacity .5s; font-variant-numeric: tabular-nums; white-space: nowrap; user-select: none; }
+@keyframes hcFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hcPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes halo { 0% { opacity: .9; transform: scale(.6); } 70%, 100% { opacity: 0; transform: scale(3.2); } }
+.hero2 h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .14em; margin-bottom: -.14em; }
+.hero2 h1 .wi { display: inline-block; transform: translateY(112%); animation: wordUp 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(.15s + var(--i, 0) * .065s); }
+.heroband h1 em:has(.wi) { background-image: none; }
+.heroband h1 em .wi { background-image: linear-gradient(90deg, #ffffff, #ffd9cc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes wordUp { from { transform: translateY(112%); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
+@media (max-width: 900px) {
+  #hero-curve { opacity: .75; }
+  .hero-year { font-size: clamp(6rem, 34vw, 12rem); top: 12%; transform: none; right: -2%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroband::before { animation: none; }
+  #hero-curve .area, #hero-curve .brk, #hero-curve .dot, #hero-curve .yr, #hero-curve .tag { animation: none; opacity: 1; }
+  #hero-curve .halo { display: none; }
+  #hero-curve .line.go { animation: none; stroke-dashoffset: 0 !important; }
+  .hero2 h1 .wi { animation: none; transform: none; }
+}
+
+/* contexte */
+.ctx { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.ctxcard { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+.ctxcard .n { font: 300 2.4rem/1 var(--font-display); color: var(--warm); }
+.ctxcard h3 { font: 500 1.18rem var(--font-display); margin: 10px 0 8px; letter-spacing: -.01em; }
+.ctxcard p { margin: 0 0 8px; color: var(--ink-2); font-size: .93rem; }
+.ctxcard .src { font-size: .78rem; color: var(--ink-3); }
+.question { margin-top: 22px; border-radius: 20px; padding: 22px 24px; color: #fff; background: var(--mesh); position: relative; overflow: hidden; isolation: isolate; }
+.question::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(9,24,52,.5), rgba(9,24,52,.15)); }
+.question b { font: 400 1.4rem/1.25 var(--font-display); display: block; margin-bottom: 6px; }
+.question p { margin: 0; color: rgba(255,255,255,.92); }
+@media (max-width: 900px) { .ctx { grid-template-columns: minmax(0, 1fr); } }
+.chow { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 14px; font-size: .88rem; color: var(--ink-2); }
+.chow b { font-family: var(--font-display); color: var(--ink); }
+.chow .tagp { background: var(--warm-soft); color: var(--warm-ink); border-radius: 999px; padding: 3px 10px; font-weight: 600; font-size: .8rem; }
+
+/* cartes et panneaux : verre clair */
+.panel, .qcard, .card, .figure, .stepc, .kpi, .skill { border-radius: 18px; box-shadow: var(--shadow); border-color: var(--line); }
+.kpi { border-top: 3px solid var(--mtl); }
+.kpi.hot { border-top-color: var(--warm); }
+.kpi b { font-family: var(--font-display); font-weight: 400; letter-spacing: -.02em; }
+.card .who { color: var(--warm-ink); }
+.skills { padding-block: 8px 36px; }
+.skill { border-top: 3px solid transparent; border-image: linear-gradient(90deg, var(--mtl), var(--warm)) 1; border-image-slice: 1; transition: transform .2s, box-shadow .2s; }
+.skill:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(19, 35, 58, .12); }
+.pager a { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 16px; }
+.pager a:hover { border-color: var(--mtl); }
+footer { background: #13233a; color: #c9d6e6; border-top: 0; position: relative; }
+footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+footer a { color: #fff; }
+
+/* animations : respiration du bandeau-question, pastilles du bandeau, cartes D3 */
+.question { background-size: 150% 150%; animation: qpan 16s ease-in-out infinite alternate; }
+@keyframes qpan { from { background-position: 0% 40%; } to { background-position: 100% 60%; } }
+.heroband .proves li { opacity: 0; animation: heroIn .7s cubic-bezier(.2, .7, .2, 1) both; }
+.heroband .proves li:nth-child(1) { animation-delay: .32s } .heroband .proves li:nth-child(2) { animation-delay: .38s }
+.heroband .proves li:nth-child(3) { animation-delay: .44s } .heroband .proves li:nth-child(4) { animation-delay: .5s }
+.heroband .proves li:nth-child(5) { animation-delay: .56s } .heroband .proves li:nth-child(6) { animation-delay: .62s }
+.heroband .proves li:nth-child(7) { animation-delay: .68s } .heroband .proves li:nth-child(8) { animation-delay: .74s }
+.heroband .proves li:nth-child(n+9) { animation-delay: .8s }
+.mapwrap svg path, .mapwrap svg circle { transition: fill .45s ease, r .3s ease, opacity .3s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .question, .heroband .proves li { animation: none; opacity: 1; }
+  .mapwrap svg path, .mapwrap svg circle { transition: none; }
+}
+/* animations au défilement */
+.progress { position: fixed; left: 0; top: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 40; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.rv.in { opacity: 1; transform: none; }
+.hero-in { animation: heroIn 1s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d, 0s); }
+@keyframes heroIn { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.chart.drawn path.draw { animation: draw 1.6s cubic-bezier(.3, .6, .2, 1) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.chart.drawn rect.grow { animation: grow .9s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; }
+@keyframes grow { from { transform: scaleX(0); opacity: .2; } }
+.chart.drawn circle.pop { animation: pop .6s cubic-bezier(.2, .7, .2, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { transform: scale(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1; transform: none; transition: none; }
+  .heroband::before, .hero-in { animation: none; }
+  .chart.drawn path.draw, .chart.drawn rect.grow, .chart.drawn circle.pop { animation: none; stroke-dashoffset: 0; }
+}
+
+/* page SQL : modèles, vues, schéma, dictionnaire */
+.lvl { display: inline-block; font: 600 .68rem var(--font-body); letter-spacing: .04em; border-radius: 999px; padding: 2px 9px; vertical-align: 1px; }
+.lvl.D { background: #e0f2e6; color: #1a6b3c; }
+.lvl.I { background: var(--mtl-soft); color: var(--link); }
+.lvl.A { background: var(--warm-soft); color: var(--warm-ink); }
+:root[data-theme="dark"] .lvl.D { background: #143526; color: #7fd6a4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lvl.D { background: #143526; color: #7fd6a4; } }
+.mtabs { margin: 4px 0 14px; }
+.models img { background: #fff; border-radius: 10px; }
+.figure a img { cursor: zoom-in; }
+.keyfig { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+@media (max-width: 820px) { .keyfig { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.t.views { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warm); border-radius: 8px; font: .8rem/1.6 var(--font-mono); box-shadow: var(--shadow); }
+.t.views h4 { margin: 0; padding: 6px 10px; font: 600 .82rem var(--font-mono); color: var(--warm-ink); border-bottom: 1px solid var(--line); }
+.t.views ul { list-style: none; margin: 0; padding: 6px 10px; columns: 2 300px; color: var(--ink-2); }
+.t.views li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
+details.ddl { margin-top: 12px; }
+details.ddl summary { font-weight: 600; color: var(--ink); font-size: .92rem; }
+details.ddl pre { margin-top: 8px; max-height: 560px; overflow: auto; }
+.dico { max-height: 540px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 0; }
+.dico table.data td, .dico table.data th { text-align: left; }
+.dico table.data td.desc { white-space: normal; min-width: 280px; }
+.dico table.data th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.dico code { font-size: .78rem; }
+.dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }
+select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; max-width: 100%; }
+/* --------- scène de défilement : du graphique à la carte, puis l'analyse */
+.scene { position: relative; height: 330vh; background: var(--bg); }
+.scene-pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+.scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
+.scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
+#sc-map { opacity: 0; }
+#sc-map .ring { fill: var(--mtl-soft); stroke: var(--surface); stroke-width: 1; }
+#sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
+#sc-map circle.on { opacity: 1; transform: scale(1); }
+#sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
+#sc-map .sclbl.on { opacity: 1; }
+.scene-cap { position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%); width: min(92vw, 34em); margin: 0; text-align: center; font: 300 clamp(1.25rem, 2.5vw, 1.9rem)/1.3 var(--font-display); letter-spacing: -.015em; color: var(--ink); opacity: 0; transition: opacity .35s; pointer-events: none; }
+.scene-cap b { font-weight: 600; }
+.scene-cap.on { opacity: 1; }
+.scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+#sc-chart .scax { font: 12px var(--font-mono); fill: var(--ink-3); }
+#sc-chart .scbreak { font: 600 13px var(--font-mono); fill: var(--warm-ink); }
+@media (prefers-reduced-motion: reduce) { .scene { display: none; } }
+@media (max-height: 500px) { .scene { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+__HEADER__
+
+<main id="main">
+  <div class="heroband home">
+    <div class="hero-stage">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-year" id="hero-year">1992</div>
+      <svg id="hero-curve" focusable="false"></svg>
+    </div>
+    <div class="wrap hero2">
+      <div>
+        <p class="eyebrow hero-in" data-i18n="eyebrow">Étude de données · Montréal · 1992-2026</p>
+        <h1 id="h1"></h1>
+        <p class="lede hero-in" id="lede" style="--d:.55s"></p>
+        <div class="cta hero-in" style="--d:.7s">
+          <a class="pill" href="#contexte" data-i18n="ctaRead">Lire l'analyse ↓</a>
+          <a class="ghost" href="assets/modele_loyers_montreal.xlsx" data-en-href="assets/modele_loyers_montreal_en.xlsx" download data-i18n="ctaXl">Télécharger l'Excel ↗</a>
+          <a class="ghost" href="assets/base_loyers_montreal.zip" download data-i18n="ctaDb">Base SQL ↗</a>
+        </div>
+      </div>
+      <aside class="glass-stack hero-in" style="--d:.85s" aria-label="Chiffres clés">
+        <div class="handle"></div>
+        <p class="where"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="g-where"></span></p>
+        <div class="gcard">
+          <div class="h"><span id="g1-t"></span><small id="g1-s"></small></div>
+          <div class="row"><div><span id="g1-al"></span><b class="num" id="g1-a"></b></div><span class="chip2" id="g1-gap"></span><div class="r"><span id="g1-bl"></span><b class="num" id="g1-b"></b></div></div>
+          <div class="ticks"></div>
+        </div>
+        <div class="gcard">
+          <div class="h"><span id="g2-t"></span><small id="g2-s"></small></div>
+          <div class="row"><div><span id="g2-al"></span><b class="num" id="g2-a"></b></div><span class="chip2" id="g2-gap"></span><div class="r"><span id="g2-bl"></span><b class="num" id="g2-b"></b></div></div>
+          <div class="ticks"></div>
+        </div>
+      </aside>
+    </div>
+    </div>
+    <nav class="wrap hero-strip" id="facts" aria-label="Le projet en bref"></nav>
+  </div>
+
+  <section class="scene" id="voyage" aria-hidden="true">
+    <div class="scene-pin">
+      <p class="scene-hint" data-i18n="scnH">Défile pour traverser les données</p>
+      <div class="scene-layer" id="sc-chart"></div>
+      <div class="scene-layer" id="sc-map"></div>
+      <p class="scene-cap" id="sc-cap1" data-i18n="scn1">34 ans de loyers à Montréal : en 2019, <b>la courbe casse</b>.</p>
+      <p class="scene-cap" id="sc-cap2" data-i18n="scn2">Et l'écart entre annonces et loyers payés se retrouve <b>partout au pays</b>.</p>
+      <p class="scene-cap" id="sc-cap3" data-i18n="scn3">Pourquoi ? <b>Place à l'analyse.</b></p>
+    </div>
+  </section>
+
+  <section class="block" id="contexte">
+    <div class="wrap">
+      <p class="kicker rv" data-i18n="ctxK">Le contexte</p>
+      <h2 class="rv" data-i18n="ctxT">Un même logement, deux loyers</h2>
+      <p class="intro rv" data-i18n="ctxI">Pour comprendre qui paie la hausse, il faut séparer deux prix que les moyennes mélangent : celui que paie un locataire déjà installé et celui que l'on demande à un nouveau locataire.</p>
+      <div class="ctx" id="ctx"></div>
+      <div class="question rv"><b data-i18n="qT">La question : la hausse des loyers touche-t-elle tout le monde de la même façon ?</b><p data-i18n="qP">Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun vérifié en Python, en SQL et dans Excel.</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker rv" data-i18n="c1K">Constat 1</p>
+      <h2 class="rv" data-i18n="c1T">Depuis 2019, la hausse a changé de régime</h2>
+      <p class="intro rv" id="c1-intro"></p>
+      <div class="two rv">
+        <div class="panel">
+          <p class="chart-title" data-i18n="heroChartT">Loyer moyen d'un 2 chambres, en dollars de 2025</p>
+          <p class="chart-sub" data-i18n="heroChartS">Loyer d'octobre corrigé de l'inflation (IPC Montréal)</p>
+          <div class="chart" id="c-hero"></div>
+        </div>
+        <div>
+          <div class="pace">
+            <div><b class="num" id="pace-old"></b><small id="pace-old-l"></small></div>
+            <div class="now"><b class="num" id="pace-new"></b><small id="pace-new-l"></small></div>
+          </div>
+          <div class="chow" id="chow"></div>
+          <p class="hero-note" id="hero-note"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="s1T">Toutes les tailles de logement ont suivi la même cassure</h2>
+      <p class="intro" id="s1-intro"></p>
+      <div class="panel">
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Unité">
+            <button type="button" id="m-nom" aria-pressed="false" data-i18n="nominal">Dollars courants</button>
+            <button type="button" id="m-real" aria-pressed="true" data-i18n="real">Dollars de 2025</button>
+          </div>
+          <div class="chips" id="unit-chips"></div>
+        </div>
+        <div class="chart" id="c-units"></div>
+        <details class="more">
+          <summary data-i18n="tableView">Voir les données en tableau</summary>
+          <div class="tablewrap" id="t-units"></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker rv" data-i18n="c2K">Constat 2</p>
+      <h2 id="s2T"></h2>
+      <p class="intro" id="s2-intro"></p>
+      <div class="two">
+        <div class="panel">
+          <div class="controls">
+            <div class="seg" role="group" aria-label="Échelle">
+              <button type="button" id="c-abs" aria-pressed="false" data-i18n="dollars">Dollars</button>
+              <button type="button" id="c-idx" aria-pressed="true" data-i18n="index">Indice 2019 = 100</button>
+            </div>
+          </div>
+          <p class="chart-title" data-i18n="citiesT">Loyer moyen d'un 2 chambres, six grandes villes</p>
+          <p class="chart-sub" id="cities-sub"></p>
+          <div class="chart" id="c-cities"></div>
+        </div>
+        <div class="panel">
+          <p class="chart-title" data-i18n="barsT">Hausse du loyer moyen, 2019 à 2025</p>
+          <p class="chart-sub" data-i18n="barsS">2 chambres, dollars courants</p>
+          <div class="chart" id="c-bars"></div>
+          <p class="note" id="ratio-note"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker rv" data-i18n="c3K">Constat 3 · la réponse</p>
+      <h2 id="s3T"></h2>
+      <p class="intro" id="s3-intro"></p>
+      <div class="two">
+        <div class="panel">
+          <p class="chart-title" data-i18n="vacT">Taux d'inoccupation, Montréal</p>
+          <p class="chart-sub" data-i18n="vacS">Immeubles de 6 logements et plus, en %</p>
+          <div class="chart" id="c-vac"></div>
+        </div>
+        <div class="panel">
+          <p class="chart-title" data-i18n="yoyT">Variation annuelle du loyer moyen, Montréal</p>
+          <p class="chart-sub" data-i18n="yoyS">2 chambres, dollars courants, en %</p>
+          <div class="chart" id="c-yoy"></div>
+        </div>
+      </div>
+      <h3 class="chart-title" style="font-size:1.25rem;font-family:var(--font-display);margin:28px 0 6px" id="reloc-t"></h3>
+      <p class="intro" id="reloc-i"></p>
+      <div class="kpis">
+        <div class="kpi"><b id="k1"></b><small id="k1l"></small></div>
+        <div class="kpi hot"><b id="k2"></b><small id="k2l"></small></div>
+        <div class="kpi"><b id="k3"></b><small id="k3l"></small></div>
+      </div>
+      <div class="panel">
+        <p class="chart-title" id="reloc-ct"></p>
+        <p class="chart-sub" id="reloc-cs"></p>
+        <div class="legend" id="reloc-legend"></div>
+        <div class="chart" id="c-reloc"></div>
+      </div>
+      <p class="callout" id="reloc-map" style="border-left-color:var(--mtl);background:var(--mtl-soft)"></p>
+      <p class="callout" id="s3-callout"></p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="impT">Ce que ça change, concrètement</h2>
+      <p class="intro" data-i18n="impI">Les mêmes chiffres ne mènent pas à la même décision selon qui les lit.</p>
+      <div class="cards3" id="impl"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="skK">Comment j'ai répondu</p>
+      <h2 data-i18n="skT">Quatre outils, une seule chaîne de données</h2>
+      <p class="intro" data-i18n="skI">Chaque chiffre de cette page est calculé en Python, recalculé en SQL et dans Excel ; la construction du site s'arrête au moindre écart.</p>
+    </div>
+    <div class="wrap skills" id="skills"></div>
+  </section>
+
+  <section class="block" id="simulateur">
+    <div class="wrap">
+      <h2 data-i18n="simT">Et ton loyer à toi ?</h2>
+      <p class="intro"><a href="excel.html" data-i18n="simX">Voir le modèle Excel complet →</a></p>
+      <p class="intro" data-i18n="simI">Le simulateur reprend la feuille « Simulateur » du modèle Excel, cellule pour cellule. Modifie les cases jaunes, puis clique sur un résultat pour voir sa formule. Le calcul se fait dans ton navigateur : rien n'est envoyé ni enregistré.</p>
+      <div class="sim">
+        <div class="panel verdict" id="verdict" aria-live="polite"></div>
+        <div>
+          <div class="sheet">
+            <div class="fbar"><div class="ref" id="f-ref">C11</div><div class="fx">fx</div><div class="formula" id="f-text"></div></div>
+            <div class="grid"><table id="sheet"></table></div>
+          </div>
+          <div class="controls" style="margin-top:12px">
+            <a class="btn primary" id="dl-xlsx" href="assets/modele_loyers_montreal.xlsx" data-en-href="assets/modele_loyers_montreal_en.xlsx" download data-i18n="dlX">Télécharger le modèle Excel</a>
+            <a class="btn" href="data/data.json" download data-i18n="dlD">Données (JSON)</a>
+          </div>
+          <p class="note" data-i18n="xlsxNote">Le classeur contient aussi une synthèse par type de logement (années modifiables), la comparaison des villes et les données sources. Formules SOMME.SI.ENS (SUMIFS) et INDEX/EQUIV.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="mT">Méthode</h2>
+      <div class="flow">
+        <div><b>Statistique Canada · SCHL</b><small data-i18n="f1">4 sources officielles, extraites et recoupées</small></div>
+        <a class="flowlink" href="python.html"><b>Python · pandas</b><small data-i18n="f2">Contrôles qualité, modèle en étoile, loyers réels</small></a>
+        <a class="flowlink" href="sql.html"><b>SQL · SQLite</b><small data-i18n="f2b">__N_SQL__ requêtes, vérifiées contre Python</small></a>
+        <a class="flowlink" href="excel.html"><b>Excel</b><small data-i18n="f3">Cartes, tableau de bord, scénarios, simulateur</small></a>
+        <a class="flowlink" href="carte.html"><b data-i18n="f4t">Carte interactive</b><small data-i18n="f4">Provinces et 42 régions métropolitaines</small></a>
+      </div>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="mModel">Modèle de données</h3>
+          <div class="star">
+            <div class="d">dim_logement<br><small>unit_id, chambres</small></div>
+            <div class="f">fait_loyer<br><small>annee<br>geo_id · unit_id<br>loyer</small></div>
+            <div class="d">dim_geo<br><small>6 RMR</small></div>
+            <div class="d">fait_inoccupation · ipc<br><small>par année</small></div>
+            <div class="d">schl_roulement<br><small>loyers reloués</small></div>
+          </div>
+          <h3 style="margin-top:18px" data-i18n="mCalc">Calculs</h3>
+          <ul id="calc-list"></ul>
+        </div>
+        <div>
+          <h3 data-i18n="mLim">Limites</h3>
+          <ul id="lim-list"></ul>
+          <h3 style="margin-top:18px" data-i18n="mSrc">Sources</h3>
+          <ul id="src-list"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="fiabilite">
+    <div class="wrap">
+      <p class="kicker" data-i18n="fiaK">Contexte, sources et fiabilité</p>
+      <h2 data-i18n="fiaT">D'où viennent les chiffres — et pourquoi s'y fier ?</h2>
+      <p class="intro" data-i18n="fiaI">Trois questions qu'un lecteur exigeant doit poser à n'importe quelle analyse : d'où viennent les données, que valent-elles, et à quoi sert la réponse.</p>
+      <div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+        <div>
+          <h3 data-i18n="fia1T">D'où viennent les données</h3>
+          <ul data-i18n="fia1">
+            <li>Quatre tableaux publics de <b>Statistique Canada</b> (34-10-0133-01, 34-10-0127-01, 18-10-0005-01, 46-10-0092-01) et le <b>Rapport sur le marché locatif 2025</b> de la SCHL — les références des prêteurs, des municipalités et des médias.</li>
+            <li>Extraites le 4 novembre 2026 sous Licence du gouvernement ouvert. Les données brutes sont conservées telles quelles dans le dépôt : toute la chaîne se rejoue depuis la source.</li>
+            <li>La série maîtresse (2 chambres, Montréal, vecteur v3824161) est identique dans trois extractions distinctes du même tableau.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="fia2T">Est-ce fiable ?</h3>
+          <ul data-i18n="fia2">
+            <li>Enquêtes officielles, méthodologie publiée, 34 ans de recul : la meilleure mesure publique du marché locatif canadien.</li>
+            <li>Ses limites sont dites, pas cachées (liste complète sous « Méthode ») : loyers demandés et payés en <b>estimations expérimentales</b> (valeurs fragiles signalées) ; loyer payé publié pour 16 régions sur 42 ; champ SCHL limité aux immeubles privés de 3 logements et plus.</li>
+            <li>Garde-fou du projet : chaque chiffre est calculé en Python puis <b>recalculé en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="fia3T">Pourquoi cette analyse est pertinente</h3>
+          <ul data-i18n="fia3">
+            <li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, un pipeline contrôlé, et les mêmes chiffres dans trois outils — le métier de l'intelligence d'affaires, démontré de bout en bout.</li>
+            <li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li>
+            <li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap" id="footer-text"></div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+<div class="tip" id="tip" hidden></div>
+
+<script id="data" type="application/json">__DATA_JSON__</script>
+<script id="scene-data" type="application/json">__SCENE_JSON__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const K = DATA.insights;
+const qs = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
+
+const state = {
+  lang: (typeof window.LANG === "string" ? window.LANG : (qs.get("lang") === "en" ? "en" : "fr")),
+  mode: qs.get("m") === "nom" ? "nom" : "real",
+  units: (qs.get("u") || "studio,1ch,2ch,3ch").split(",").filter(u => ["studio","1ch","2ch","3ch"].includes(u)),
+  cities: qs.get("c") === "abs" ? "abs" : "idx",
+  sim: {
+    rent: +qs.get("loyer") || 1250,
+    unit: ["studio","1ch","2ch","3ch"].includes(qs.get("type")) ? qs.get("type") : "2ch",
+    year: Math.min(2025, Math.max(1992, +qs.get("bail") || 2019)),
+    income: qs.has("revenu") ? Math.max(0, +qs.get("revenu")) : 60000
+  },
+  sel: "C11"
+};
+if (!state.units.length) state.units = ["2ch"];
+
+/* ------------------------------ ouverture : titre mot à mot, courbe de 34 ans, année qui défile, chiffres qui montent */
+let heroPlayed = false;
+function wrapWords(el) {
+  let i = 0;
+  const walk = node => {
+    [...node.childNodes].forEach(ch => {
+      if (ch.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        ch.textContent.split(/([ \t\n]+)/).forEach(part => {
+          if (!part) return;
+          if (/^[ \t\n]+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement("span"); w.className = "w";
+          const wi = document.createElement("span"); wi.className = "wi"; wi.style.setProperty("--i", i++); wi.textContent = part;
+          w.appendChild(wi); frag.appendChild(w);
+        });
+        node.replaceChild(frag, ch);
+      } else if (ch.nodeType === 1) walk(ch);
+    });
+  };
+  walk(el);
+}
+function heroIntro() {
+  if (heroPlayed) return;
+  heroPlayed = true;
+  const fr = state.lang === "fr";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const svg = d3.select("#hero-curve");
+  if (svg.empty() || typeof d3 === "undefined") return;
+  const stage = document.querySelector(".hero-stage");
+  const y0 = twoReal[0].year, y1 = twoReal[twoReal.length - 1].year, DUR = 2.7, T0 = .35;
+  const grad = svg.append("defs").append("linearGradient").attr("id", "hc-grad").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", 1);
+  grad.append("stop").attr("offset", "0%").attr("stop-color", "#fff").attr("stop-opacity", .22);
+  grad.append("stop").attr("offset", "100%").attr("stop-color", "#fff").attr("stop-opacity", 0);
+  const area = svg.append("path").attr("class", "area");
+  const line = svg.append("path").attr("class", "line");
+  const yrs = [y0, 2000, 2010, 2019, y1].map(yr => svg.append("text").attr("class", "yr" + (yr === 2019 ? " hot" : ""))
+    .attr("text-anchor", yr === y0 ? "start" : yr === y1 ? "end" : "middle")
+    .style("animation-delay", (T0 + DUR * (yr - y0) / (y1 - y0)).toFixed(2) + "s").text(yr).datum(yr));
+  const p19 = twoReal.find(d => d.year === 2019);
+  const brk = svg.append("line").attr("class", "brk"), halo = svg.append("circle").attr("class", "halo").attr("r", 7),
+    dot = svg.append("circle").attr("class", "dot").attr("r", 5.5),
+    tag = svg.append("text").attr("class", "tag").attr("text-anchor", "end").text(fr ? "2019 · la courbe casse" : "2019 · the curve breaks");
+  let heroDone = false;
+  function layout() {
+    const W = stage.clientWidth, H = stage.clientHeight, mobile = W < 900;
+    svg.attr("viewBox", `0 0 ${W} ${H}`).attr("width", W).attr("height", H);
+    const x = d3.scaleLinear().domain([y0, y1]).range([0, W]);
+    const y = d3.scaleLinear().domain(d3.extent(twoReal, d => d.v)).range([H - 36, H - (mobile ? 150 : 230)]);
+    area.attr("d", d3.area().x(d => x(d.year)).y0(H).y1(d => y(d.v)).curve(d3.curveMonotoneX)(twoReal));
+    line.attr("d", d3.line().x(d => x(d.year)).y(d => y(d.v)).curve(d3.curveMonotoneX)(twoReal));
+    if (heroDone) line.attr("stroke-dasharray", null).attr("stroke-dashoffset", null);
+    else { const len = line.node().getTotalLength(); line.attr("stroke-dasharray", len).attr("stroke-dashoffset", len).classed("go", true); }
+    yrs.forEach(tx => { const yr = tx.datum(); tx.attr("x", Math.min(W - 8, Math.max(8, x(yr)))).attr("y", H - 8); });
+    if (p19) {
+      brk.attr("x1", x(2019)).attr("x2", x(2019)).attr("y1", y(p19.v)).attr("y2", H - 22);
+      halo.attr("cx", x(2019)).attr("cy", y(p19.v)); dot.attr("cx", x(2019)).attr("cy", y(p19.v));
+      tag.attr("x", x(2019) - 14).attr("y", y(p19.v) - 16);
+    }
+  }
+  layout();
+  let lw = stage.clientWidth;
+  new ResizeObserver(() => { if (Math.abs(stage.clientWidth - lw) > 4 || heroDone) { lw = stage.clientWidth; layout(); } }).observe(stage);
+  const yearEl = document.getElementById("hero-year");
+  const lastYear = String(K.periode_derniere || "").slice(0, 4) || String(y1);
+  const counters = [
+    ["g1-a", K.mtl_demande_dernier, v => fmtMoney(v)],
+    ["g1-b", K.mtl_paye_dernier, v => fmtMoney(v)],
+    ["g1-gap", K.mtl_ecart_dernier, v => "+" + fmtMoney(v)],
+    ["g2-a", K.hausse_reloues_2025, v => fmtPct(v / 100, 1, true)],
+    ["g2-b", K.hausse_non_reloues_2025, v => fmtPct(v / 100, 1, true)],
+    ["g2-gap", K.hausse_reloues_2025 / K.hausse_non_reloues_2025, v => `× ${fmtNum(v, 1)}`]
+  ];
+  if (reduce) { yearEl.textContent = lastYear; heroDone = true; return; }
+  const easeIO = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  const easeOut = k => 1 - Math.pow(1 - k, 3);
+  const start = performance.now();
+  const C0 = 1000, CDUR = 1500;
+  let yearDone = false;
+  function frame(now) {
+    const el = now - start;
+    const ky = Math.min(1, Math.max(0, (el / 1000 - T0) / DUR));
+    if (!yearDone) {
+      yearEl.textContent = String(Math.round(y0 + (y1 - y0) * easeIO(ky)));
+      if (ky >= 1) { yearDone = true; setTimeout(() => { yearEl.style.opacity = "0"; setTimeout(() => { yearEl.textContent = lastYear; yearEl.style.opacity = ""; }, 500); }, 400); }
+    }
+    const kc = Math.min(1, Math.max(0, (el - C0) / CDUR));
+    if (el >= C0) counters.forEach(([id, v, f]) => { const e = document.getElementById(id); if (e) e.textContent = f(v * easeOut(kc)); });
+    if (!yearDone || kc < 1) requestAnimationFrame(frame);
+    else { heroDone = true; renderText(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ------------------------------ textes */
+const T = {
+  fr: {
+    share: "Copier le lien", copied: "Lien copié, avec tes filtres", copyFail: "Copie impossible : sélectionne l'adresse dans la barre du navigateur",
+    eyebrow: "Étude de données · Montréal · 1992-2026", ctaRead: "Lire l'analyse ↓", ctaXl: "Télécharger l'Excel ↗", ctaDb: "Base SQL ↗",
+    ctxK: "Le contexte", ctxT: "Un même logement, deux loyers",
+    ctxI: "Pour comprendre qui paie la hausse, il faut séparer deux prix que les moyennes mélangent : celui que paie un locataire déjà installé et celui que l'on demande à un nouveau locataire.",
+    qT: "La question : la hausse des loyers touche-t-elle tout le monde de la même façon ?",
+    qP: "Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun vérifié en Python, en SQL et dans Excel.",
+    skK: "Comment j'ai répondu", skT: "Quatre outils, une seule chaîne de données", skI: "Chaque chiffre de cette page est calculé en Python, recalculé en SQL et dans Excel ; la construction du site s'arrête au moindre écart.",
+    c1K: "Constat 1", c1T: "Depuis 2019, la hausse a changé de régime", c2K: "Constat 2", c3K: "Constat 3 · la réponse",
+    heroChartT: "Loyer moyen d'un 2 chambres, en dollars de 2025", heroChartS: "Loyer d'octobre corrigé de l'inflation (IPC Montréal)",
+    s1T: "Toutes les tailles de logement ont suivi la même cassure",
+    nominal: "Dollars courants", real: "Dollars de 2025", tableView: "Voir les données en tableau",
+    dollars: "Dollars", index: "Indice 2019 = 100",
+    citiesT: "Loyer moyen d'un 2 chambres, six grandes villes", barsT: "Hausse du loyer moyen, 2019 à 2025", barsS: "2 chambres, dollars courants",
+    vacT: "Taux d'inoccupation, Montréal", vacS: "Immeubles de 6 logements et plus, en %",
+    yoyT: "Variation annuelle du loyer moyen, Montréal", yoyS: "2 chambres, dollars courants, en %",
+    simT: "Et ton loyer à toi ?",
+    simI: "Le simulateur reprend la feuille « Simulateur » du modèle Excel, cellule pour cellule. Modifie les cases jaunes, puis clique sur un résultat pour voir sa formule. Le calcul se fait dans ton navigateur : rien n'est envoyé ni enregistré.",
+    dlX: "Télécharger le modèle Excel", dlD: "Données (JSON)",
+    xlsxNote: "Le classeur contient aussi une carte du Canada, une carte des villes, un tableau de bord piloté par 3 cellules et des scénarios jusqu'en 2030. Aucune macro. Disponible en français et en anglais.",
+    mT: "Méthode", f1: "4 tableaux de Statistique Canada et le rapport de la SCHL, recoupés", f2: "Contrôles qualité, modèle en étoile, loyers réels",
+    f3: "Cartes, tableau de bord, scénarios, simulateur", f4t: "Carte interactive", f4: "Provinces et 42 régions métropolitaines",
+    mModel: "Modèle de données", mCalc: "Calculs", mLim: "Limites", mSrc: "Sources",
+    impT: "Ce que ça change, concrètement", impI: "Les mêmes chiffres ne mènent pas à la même décision selon qui les lit.",
+    sqlT: "Interroge les données en SQL", sqlI: "La base du projet (modèle en étoile, __N_TABLES__ tables et __N_VUES__ vues) se charge dans ton navigateur avec SQLite. Choisis une des requêtes qui ont servi à l'analyse, modifie-la ou écris la tienne, puis exécute-la.",
+    simX: "Voir le modèle Excel complet →", run: "Exécuter", f2b: "__N_SQL__ requêtes, vérifiées contre Python",
+    fiaK: "Contexte, sources et fiabilité", fiaT: "D'où viennent les chiffres — et pourquoi s'y fier ?",
+    fiaI: "Trois questions qu'un lecteur exigeant doit poser à n'importe quelle analyse : d'où viennent les données, que valent-elles, et à quoi sert la réponse.",
+    fia1T: "D'où viennent les données", fia2T: "Est-ce fiable ?", fia3T: "Pourquoi cette analyse est pertinente",
+    fia1: `<li>Quatre tableaux publics de <b>Statistique Canada</b> (34-10-0133-01, 34-10-0127-01, 18-10-0005-01, 46-10-0092-01) et le <b>Rapport sur le marché locatif 2025</b> de la SCHL — les références des prêteurs, des municipalités et des médias.</li><li>Extraites le 4 novembre 2026 sous Licence du gouvernement ouvert. Les données brutes sont conservées telles quelles dans le dépôt : toute la chaîne se rejoue depuis la source.</li><li>La série maîtresse (2 chambres, Montréal, vecteur v3824161) est identique dans trois extractions distinctes du même tableau.</li>`,
+    fia2: `<li>Enquêtes officielles, méthodologie publiée, 34 ans de recul : la meilleure mesure publique du marché locatif canadien.</li><li>Ses limites sont dites, pas cachées (liste complète sous « Méthode ») : loyers demandés et payés en <b>estimations expérimentales</b> (valeurs fragiles signalées) ; loyer payé publié pour 16 régions sur 42 ; champ SCHL limité aux immeubles privés de 3 logements et plus.</li><li>Garde-fou du projet : chaque chiffre est calculé en Python puis <b>recalculé en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>`,
+    fia3: `<li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, un pipeline contrôlé, et les mêmes chiffres dans trois outils — le métier de l'intelligence d'affaires, démontré de bout en bout.</li><li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li><li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>`,
+    scnH: "Défile pour traverser les données",
+    scn1: "34 ans de loyers à Montréal : en 2019, <b>la courbe casse</b>.",
+    scn2: "Et l'écart entre annonces et loyers payés se retrouve <b>partout au pays</b>.",
+    scn3: "Pourquoi ? <b>Place à l'analyse.</b>",
+    units: { studio: "Studio", "1ch": "1 chambre", "2ch": "2 chambres", "3ch": "3 chambres" },
+    geo: { Montreal: "Montréal", Quebec: "Québec", "Ottawa-Gatineau": "Ottawa-Gatineau", Toronto: "Toronto", Calgary: "Calgary", Vancouver: "Vancouver" },
+  },
+  en: {
+    share: "Copy link", copied: "Link copied, filters included", copyFail: "Copy failed: select the address in your browser bar",
+    eyebrow: "Data study · Montreal · 1992-2026", ctaRead: "Read the analysis ↓", ctaXl: "Download the Excel file ↗", ctaDb: "SQL database ↗",
+    ctxK: "Context", ctxT: "One apartment, two rents",
+    ctxI: "To see who pays for rising rents, you have to separate two prices that averages blend together: what a sitting tenant pays and what a new tenant is asked to pay.",
+    qT: "The question: do rising rents hit everyone the same way?",
+    qP: "To answer it: 34 years of CMHC rents, asking and paid rents in 42 metro areas, and the CPI of 10 provinces. Three findings follow, each checked in Python, SQL and Excel.",
+    skK: "How I answered", skT: "Four tools, one data chain", skI: "Every figure on this page is computed in Python and recomputed in SQL and Excel; the site build stops on any mismatch.",
+    c1K: "Finding 1", c1T: "Since 2019, rent growth has shifted gear", c2K: "Finding 2", c3K: "Finding 3 · the answer",
+    heroChartT: "Average two-bedroom rent, in 2025 dollars", heroChartS: "October rent adjusted for inflation (Montreal CPI)",
+    s1T: "Every unit size shows the same break",
+    nominal: "Current dollars", real: "2025 dollars", tableView: "Show data as a table",
+    dollars: "Dollars", index: "Index 2019 = 100",
+    citiesT: "Average two-bedroom rent, six large cities", barsT: "Increase in average rent, 2019 to 2025", barsS: "Two bedrooms, current dollars",
+    vacT: "Vacancy rate, Montreal", vacS: "Buildings with 6+ units, %",
+    yoyT: "Annual change in average rent, Montreal", yoyS: "Two bedrooms, current dollars, %",
+    simT: "What about your rent?",
+    simI: "The simulator mirrors the “Simulateur” sheet of the Excel model, cell by cell. Edit the yellow cells, then click a result to see its formula. Everything runs in your browser: nothing is sent or stored.",
+    dlX: "Download the Excel model", dlD: "Data (JSON)",
+    xlsxNote: "The workbook also includes a map of Canada, a city map, a dashboard driven by 3 cells and scenarios to 2030. No macros. Available in English and in French.",
+    mT: "Method", f1: "4 Statistics Canada tables and the CMHC report, cross-checked", f2: "Quality checks, star schema, real rents",
+    f3: "Maps, dashboard, scenarios, simulator", f4t: "Interactive map", f4: "Provinces and 42 metropolitan areas",
+    mModel: "Data model", mCalc: "Calculations", mLim: "Limitations", mSrc: "Sources",
+    impT: "What it means in practice", impI: "The same figures lead to different decisions depending on who reads them.",
+    sqlT: "Query the data in SQL", sqlI: "The project database (star schema, __N_TABLES__ tables and __N_VUES__ views) loads in your browser with SQLite. Pick one of the queries used in the analysis, edit it or write your own, then run it.",
+    simX: "See the full Excel model →", run: "Run", f2b: "__N_SQL__ queries, checked against Python",
+    fiaK: "Context, sources and reliability", fiaT: "Where the figures come from — and why trust them",
+    fiaI: "Three questions a demanding reader should ask of any analysis: where does the data come from, how good is it, and what is the answer for.",
+    fia1T: "Where the data comes from", fia2T: "Is it reliable?", fia3T: "Why this analysis matters",
+    fia1: `<li>Four public <b>Statistics Canada</b> tables (34-10-0133-01, 34-10-0127-01, 18-10-0005-01, 46-10-0092-01) and CMHC's <b>Rental Market Report 2025</b> — the references used by lenders, cities and the media.</li><li>Extracted November 4, 2026 under the Open Government Licence. The raw data sits untouched in the repository: the whole chain replays from the source.</li><li>The master series (two-bedroom, Montreal, vector v3824161) is identical across three separate extracts of the same table.</li>`,
+    fia2: `<li>Official surveys, published methodology, 34 years of depth: the best public measure of the Canadian rental market.</li><li>Its limits are stated, not hidden (full list under "Method"): asking and paid rents are <b>experimental estimates</b> (fragile values flagged); the paid rent is published for 16 of 42 metro areas; CMHC covers private buildings with 3+ units.</li><li>The project's guardrail: every figure is computed in Python, then <b>recomputed in SQL and in Excel</b>; the slightest gap stops the site build. No unverified figure can get published.</li>`,
+    fia3: `<li><b>BI, IT and data analytics</b>: a business question, a star schema, a controlled pipeline, and the same figures in three tools — the business-intelligence craft, demonstrated end to end.</li><li><b>Real estate</b>: the gap between in-place and market rent prices the income a turnover unlocks; the effort ratio bounds what demand can pay. Two direct inputs for pricing, underwriting and investment.</li><li><b>Decisions</b>: quoting 7.2% or 14.5% for "the 2025 increase" leads to opposite conclusions. Telling the two apart is exactly what an analysis is for.</li>`,
+    scnH: "Scroll to travel through the data",
+    scn1: "34 years of Montreal rents: in 2019, <b>the curve breaks</b>.",
+    scn2: "And the gap between listings and rents paid shows up <b>across the country</b>.",
+    scn3: "Why? <b>On to the analysis.</b>",
+    units: { studio: "Bachelor", "1ch": "1 bedroom", "2ch": "2 bedrooms", "3ch": "3 bedrooms" },
+    geo: { Montreal: "Montreal", Quebec: "Quebec City", "Ottawa-Gatineau": "Ottawa-Gatineau", Toronto: "Toronto", Calgary: "Calgary", Vancouver: "Vancouver" },
+  }
+};
+const t = k => T[state.lang][k];
+const loc = () => state.lang === "fr" ? "fr-CA" : "en-CA";
+const fmtMoney = v => new Intl.NumberFormat(loc(), { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(v);
+const fmtPct = (v, d = 1, sign = false) => (sign && v > 0 ? "+" : "") + new Intl.NumberFormat(loc(), { style: "percent", maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
+const fmtNum = (v, d = 0) => new Intl.NumberFormat(loc(), { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
+
+/* ------------------------------ données dérivées */
+const UNITS = ["studio", "1ch", "2ch", "3ch"];
+const UCOL = { studio: "--u-studio", "1ch": "--u-1ch", "2ch": "--u-2ch", "3ch": "--u-3ch" };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rentsBy = d3.group(DATA.rents, d => d.unit_id);
+const rentAt = (u, y) => (DATA.rents.find(r => r.unit_id === u && r.year === y) || {}).nom;
+const cpiAt = y => (DATA.cpi.find(c => c.year === y) || {}).cpi;
+const twoReal = rentsBy.get("2ch").map(d => ({ year: d.year, v: d.real }));
+const realAt = y => twoReal.find(d => d.year === y).v;
+const cagr = (a, b, n) => Math.pow(b / a, 1 / n) - 1;
+const OLD = { a: 1992, b: 2019 }, NEW = { a: 2019, b: 2025 };
+const paceOld = cagr(realAt(OLD.a), realAt(OLD.b), OLD.b - OLD.a);
+const paceNew = cagr(realAt(NEW.a), realAt(NEW.b), NEW.b - NEW.a);
+const cityGeos = ["Montreal", "Quebec", "Ottawa-Gatineau", "Toronto", "Calgary", "Vancouver"];
+
+/* ------------------------------ textes calculés */
+function renderText() {
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { const v = t(el.dataset.i18n); if (v) { if (/^(scn|fia)/.test(el.dataset.i18n)) el.innerHTML = v; else el.textContent = v; } });
+  document.getElementById("lang-fr").setAttribute("aria-pressed", state.lang === "fr");
+  document.getElementById("lang-en").setAttribute("aria-pressed", state.lang === "en");
+  const fr = state.lang === "fr";
+  const real6 = fmtPct(K.hausse_reelle_2019_2025 / 100, 0, true);
+  const real27 = fmtPct(K.hausse_reelle_1992_2019 / 100, 0, true);
+  document.getElementById("h1").innerHTML = fr
+    ? `Qui paie <em>vraiment</em> la hausse des loyers à Montréal&nbsp;?`
+    : `Who <em>really</em> pays for rising rents in Montreal?`;
+  if (!heroPlayed) wrapWords(document.getElementById("h1"));
+  document.getElementById("lede").innerHTML = fr
+    ? `Réponse courte : <b>ceux qui déménagent</b>. Au ${K.periode_derniere.slice(-1)}<sup>e</sup> trimestre de ${K.periode_derniere.slice(0, 4)}, un 2 chambres affiché à Montréal coûte <b>${fmtMoney(K.mtl_ecart_dernier)} de plus par mois</b> que le loyer payé par les locataires déjà en place. Voici comment je l'ai établi, avec 34 ans de données officielles.`
+    : `Short answer: <b>people who move</b>. In ${K.periode_derniere}, an advertised two-bedroom in Montreal costs <b>${fmtMoney(K.mtl_ecart_dernier)} more per month</b> than the rent paid by sitting tenants. Here is how I established it, with 34 years of official data.`;
+  document.getElementById("g-where").textContent = fr ? `Montréal · appartement de 2 chambres · ${K.periode_derniere}` : `Montreal · two-bedroom apartment · ${K.periode_derniere}`;
+  const gset = (id, v) => { document.getElementById(id).textContent = v; };
+  gset("g1-t", fr ? "Ce que coûte un déménagement" : "What moving costs"); gset("g1-s", "StatCan 46-10-0092");
+  gset("g1-al", fr ? "Loyer affiché" : "Asking rent"); gset("g1-a", fmtMoney(K.mtl_demande_dernier));
+  gset("g1-bl", fr ? "Loyer payé" : "Rent paid"); gset("g1-b", fmtMoney(K.mtl_paye_dernier));
+  gset("g1-gap", "+" + fmtMoney(K.mtl_ecart_dernier));
+  gset("g2-t", fr ? "Hausse des loyers en 2025" : "Rent increase in 2025"); gset("g2-s", fr ? "SCHL, 2 chambres" : "CMHC, two-bedroom");
+  gset("g2-al", fr ? "Logement reloué" : "Re-let unit"); gset("g2-a", fmtPct(K.hausse_reloues_2025 / 100, 1, true));
+  gset("g2-bl", fr ? "Locataire en place" : "Sitting tenant"); gset("g2-b", fmtPct(K.hausse_non_reloues_2025 / 100, 1, true));
+  gset("g2-gap", fr ? `× ${fmtNum(K.hausse_reloues_2025 / K.hausse_non_reloues_2025, 1)}` : `× ${fmtNum(K.hausse_reloues_2025 / K.hausse_non_reloues_2025, 1)}`);
+  const CTX = fr ? [
+    ["01", "Le loyer payé et le loyer demandé", "Le <b>loyer payé</b> est celui des locataires déjà installés. Le <b>loyer demandé</b> est le prix affiché dans les annonces : c'est ce que paie quelqu'un qui cherche un logement. Statistique Canada publie les deux depuis 2025 (estimations expérimentales).", "Statistique Canada, tableau 46-10-0092-01"],
+    ["02", "Pourquoi ils s'écartent au Québec", "Au renouvellement d'un bail, la hausse est encadrée : le Tribunal administratif du logement publie un pourcentage de base, 3,1 % pour les baux qui commencent entre avril 2026 et avril 2027. Pour un nouveau bail, le propriétaire propose le loyer ; le locataire peut le contester dans les 10 jours s'il dépasse le loyer le plus bas des 12 derniers mois, inscrit à la section G du bail.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Gouvernement du Québec, janvier 2026</a> · <a href="https://educaloi.qc.ca/actualites-juridiques/loyer-paye-par-lancien-locataire-vous-avez-le-droit-de-savoir" target="_blank" rel="noopener">Éducaloi</a>'],
+    ["03", "Pourquoi c'est une question d'affaires", "Pour un prêteur ou un investisseur, l'écart entre loyers en place et loyers de marché mesure le revenu qu'un immeuble peut gagner à chaque départ. Pour une ville, il mesure le coût de la mobilité : changer d'emploi ou de quartier devient cher.", "Lecture proposée dans ce projet"]
+  ] : [
+    ["01", "Rent paid versus asking rent", "<b>Rent paid</b> is what sitting tenants pay. <b>Asking rent</b> is the advertised price: what someone looking for a unit pays. Statistics Canada has published both since 2025 (experimental estimates).", "Statistics Canada, table 46-10-0092-01"],
+    ["02", "Why they diverge in Quebec", "At lease renewal, increases are regulated: the Tribunal administratif du logement publishes a base rate, 3.1% for leases starting between April 2026 and April 2027. For a new lease, the landlord proposes the rent; the tenant can contest it within 10 days if it exceeds the lowest rent of the past 12 months, shown in section G of the lease.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Government of Quebec, January 2026</a> · <a href="https://educaloi.qc.ca/actualites-juridiques/loyer-paye-par-lancien-locataire-vous-avez-le-droit-de-savoir" target="_blank" rel="noopener">Éducaloi</a>'],
+    ["03", "Why it is a business question", "For a lender or investor, the gap between in-place and market rents measures the income a building can earn at each turnover. For a city, it measures the cost of mobility: changing jobs or neighbourhoods becomes expensive.", "Interpretation proposed in this project"]
+  ];
+  document.getElementById("ctx").innerHTML = CTX.map(([n, h, p, src], i) => `<article class="ctxcard rv" style="--d:${i * 0.12}s"><span class="n">${n}</span><h3>${h}</h3><p>${p}</p><p class="src">${src}</p></article>`).join("");
+  document.getElementById("c1-intro").textContent = fr
+    ? `Après inflation, le loyer moyen d'un 2 chambres a augmenté de ${real6} entre 2019 et 2025 (${fmtMoney(K.loyer_2ch_2019)} à ${fmtMoney(K.loyer_2ch_2025)} en dollars courants). De 1992 à 2019, la hausse réelle avait été de ${real27}. Un test statistique confirme que la cassure est réelle.`
+    : `After inflation, the average two-bedroom rent rose ${real6} between 2019 and 2025 (${fmtMoney(K.loyer_2ch_2019)} to ${fmtMoney(K.loyer_2ch_2025)} in current dollars). From 1992 to 2019, the real increase was ${real27}. A statistical test confirms the break is real.`;
+  document.getElementById("chow").innerHTML = fr
+    ? `<span class="tagp">Python · test de Chow</span><span>Rupture estimée par les données : <b>__CHOW_RUPT__</b></span><span>p-value corrigée (autocorrélation, recherche de l'année) : <b>__CHOW_P__</b></span><a href="python.html#chow">Voir le test →</a>`
+    : `<span class="tagp">Python · Chow test</span><span>Break year picked by the data: <b>__CHOW_RUPT__</b></span><span>Corrected p-value (autocorrelation, search over years): <b>__CHOW_P__</b></span><a href="python.html#chow">See the test →</a>`;
+  document.getElementById("pace-old").textContent = fmtPct(paceOld, 1, true) + (fr ? " / an" : " / yr");
+  document.getElementById("pace-new").textContent = fmtPct(paceNew, 1, true) + (fr ? " / an" : " / yr");
+  document.getElementById("pace-old-l").textContent = fr ? "hausse réelle moyenne, 1992–2019" : "average real increase, 1992–2019";
+  document.getElementById("pace-new-l").textContent = fr ? "hausse réelle moyenne, 2019–2025" : "average real increase, 2019–2025";
+
+  const units25 = UNITS.map(u => {
+    const s = rentsBy.get(u); const a = s.find(d => d.year === 2019).real, b = s.find(d => d.year === 2025).real;
+    return [u, b / a - 1];
+  });
+  const lo = d3.min(units25, d => d[1]), hi = d3.max(units25, d => d[1]);
+  document.getElementById("s1-intro").textContent = fr
+    ? `Du studio au 3 chambres, la hausse réelle depuis 2019 se situe entre ${fmtPct(lo, 0, true)} et ${fmtPct(hi, 0, true)}. Bascule entre dollars courants et dollars de 2025 pour voir l'effet de l'inflation, et masque des séries en cliquant sur les pastilles.`
+    : `From bachelor to three-bedroom units, the real increase since 2019 ranges from ${fmtPct(lo, 0, true)} to ${fmtPct(hi, 0, true)}. Switch between current and 2025 dollars to see the effect of inflation, and hide series with the chips.`;
+
+  const h = K.hausse_2019_2025_par_ville;
+  document.getElementById("s2T").textContent = fr
+    ? "Montréal a dépassé Québec et rattrape les grandes villes plus vite que toutes les autres"
+    : "Montreal has overtaken Quebec City and is catching up faster than any other large city";
+  document.getElementById("s2-intro").textContent = fr
+    ? `Depuis 2019, le loyer moyen d'un 2 chambres a augmenté de ${fmtPct(h.Montreal / 100, 0, true)} à Montréal, contre ${fmtPct(h.Toronto / 100, 0, true)} à Toronto et ${fmtPct(h.Vancouver / 100, 0, true)} à Vancouver.`
+    : `Since 2019, the average two-bedroom rent has risen ${fmtPct(h.Montreal / 100, 0, true)} in Montreal, compared with ${fmtPct(h.Toronto / 100, 0, true)} in Toronto and ${fmtPct(h.Vancouver / 100, 0, true)} in Vancouver.`;
+  document.getElementById("cities-sub").textContent = state.cities === "idx"
+    ? (fr ? "Base 100 en 2019, dollars courants" : "2019 = 100, current dollars")
+    : (fr ? "Dollars courants par mois" : "Current dollars per month");
+  document.getElementById("ratio-note").textContent = fr
+    ? `Un 2 chambres montréalais coûtait ${fmtPct(K.ratio_mtl_tor_2015 / 100, 0)} du loyer torontois en 2015, et ${fmtPct(K.ratio_mtl_tor_2025 / 100, 0)} en 2025.`
+    : `A Montreal two-bedroom cost ${fmtPct(K.ratio_mtl_tor_2015 / 100, 0)} of the Toronto rent in 2015, and ${fmtPct(K.ratio_mtl_tor_2025 / 100, 0)} in 2025.`;
+
+  document.getElementById("s3T").textContent = fr
+    ? "En 2025, plus de logements libres, et pourtant la plus forte hausse depuis 1992"
+    : "In 2025, more vacant units, yet the largest increase since 1992";
+  const yoyMax = d3.max(rentsBy.get("2ch").filter(d => d.year < 2025 && d.yoy != null), d => d.yoy);
+  document.getElementById("s3-intro").textContent = fr
+    ? `Le taux d'inoccupation des immeubles de 6 logements et plus est passé de ${fmtNum(K.inoccupation_mtl_2024, 1)} % à ${fmtNum(K.inoccupation_mtl_2025, 1)} % (${fmtNum(K.inoccupation_3plus_2025, 1)} % pour l'ensemble des immeubles de 3 logements et plus, selon la SCHL), et le loyer moyen d'un 2 chambres a pourtant augmenté de ${fmtNum(K.hausse_annuelle_2025, 1)} %, contre un maximum de ${fmtNum(yoyMax, 1)} % sur la période 1993–2024.`
+    : `The vacancy rate in buildings with 6+ units rose from ${fmtNum(K.inoccupation_mtl_2024, 1)}% to ${fmtNum(K.inoccupation_mtl_2025, 1)}% (${fmtNum(K.inoccupation_3plus_2025, 1)}% for all buildings with 3+ units, per CMHC), yet the average two-bedroom rent increased ${fmtNum(K.hausse_annuelle_2025, 1)}%, against a maximum of ${fmtNum(yoyMax, 1)}% over 1993–2024.`;
+  document.getElementById("s3-callout").textContent = fr
+    ? `Pourquoi 14,5 % ici et ${fmtNum(K.hausse_meme_echantillon_2025, 1)} % dans le rapport de la SCHL ? La moyenne brute utilisée sur ce site inclut tous les logements de l'enquête, y compris les immeubles neufs, nombreux en 2025 selon la SCHL. La SCHL mesure aussi la hausse sur les mêmes immeubles d'une année à l'autre : ${fmtNum(K.hausse_meme_echantillon_2025, 1)} %. Les deux chiffres sont justes ; ils ne répondent pas à la même question.`
+    : `Why 14.5% here and ${fmtNum(K.hausse_meme_echantillon_2025, 1)}% in the CMHC report? The raw average used on this site includes every unit in the survey, including new buildings, which CMHC says were numerous in 2025. CMHC also measures the increase on the same buildings year over year: ${fmtNum(K.hausse_meme_echantillon_2025, 1)}%. Both figures are right; they answer different questions.`;
+
+  document.getElementById("hero-note").textContent = fr
+    ? `Moyenne de tous les logements loués en octobre, y compris les immeubles neufs entrés dans l'enquête. À logement constant, la SCHL mesure des hausses plus faibles (2025 : ${fmtNum(K.hausse_meme_echantillon_2025, 1)} % contre ${fmtNum(K.hausse_annuelle_2025, 1)} %).`
+    : `Average of all units rented in October, including new buildings entering the survey. On a same-unit basis, CMHC measures smaller increases (2025: ${fmtNum(K.hausse_meme_echantillon_2025, 1)}% vs ${fmtNum(K.hausse_annuelle_2025, 1)}%).`;
+  document.getElementById("reloc-t").textContent = fr ? "Le vrai prix du marché est celui d'un logement qui change de locataire" : "The real market price is the price of a unit that changes tenants";
+  document.getElementById("reloc-i").textContent = fr
+    ? `La SCHL publie aussi le loyer des logements reloués à un nouveau locataire. En 2025, l'écart avec la moyenne a atteint ${fmtMoney(K.prime_relocation_2025)} par mois pour un 2 chambres.`
+    : `CMHC also publishes the rent of units re-let to a new tenant. In 2025, the gap with the average reached ${fmtMoney(K.prime_relocation_2025)} per month for a two-bedroom unit.`;
+  document.getElementById("k1").textContent = fmtMoney(K.loyer_2ch_2025);
+  document.getElementById("k1l").textContent = fr ? "loyer moyen d'un 2 chambres, tous locataires, 2025" : "average two-bedroom rent, all tenants, 2025";
+  document.getElementById("k2").textContent = fmtMoney(K.loyer_reloues_2ch_2025);
+  document.getElementById("k2l").textContent = fr ? `loyer moyen d'un 2 chambres reloué en 2025, soit ${fmtPct(K.prime_relocation_pct_2025 / 100, 0, true)}` : `average rent of a re-let two-bedroom in 2025, ${fmtPct(K.prime_relocation_pct_2025 / 100, 0, true)}`;
+  document.getElementById("k3").textContent = fmtPct(K.hausse_reloues_2025 / 100, 1, true) + " / " + fmtPct(K.hausse_non_reloues_2025 / 100, 1, true);
+  document.getElementById("k3l").textContent = fr ? "hausse 2025 : logements reloués / locataires en place" : "2025 increase: re-let units / sitting tenants";
+  document.getElementById("reloc-ct").textContent = fr ? "Loyer moyen d'un 2 chambres à Montréal, 2022 à 2025" : "Average two-bedroom rent in Montreal, 2022 to 2025";
+  document.getElementById("reloc-cs").textContent = fr ? "Dollars courants par mois, octobre" : "Current dollars per month, October";
+  document.getElementById("reloc-map").innerHTML = fr
+    ? `Données plus récentes (${K.periode_derniere}, Statistique Canada) : à Montréal, un 2 chambres affiché coûte ${fmtMoney(K.mtl_demande_dernier)}, soit ${fmtMoney(K.mtl_ecart_dernier)} de plus que le loyer payé (${fmtMoney(K.mtl_paye_dernier)}). Sur un an, le loyer demandé a baissé de ${fmtNum(-K.mtl_var_demande, 1)} % et le loyer payé a monté de ${fmtNum(K.mtl_var_paye, 1)} % : l'écart se resserre. <a href="carte.html">Comparer avec 42 villes sur la carte →</a>`
+    : `More recent data (${K.periode_derniere}, Statistics Canada): in Montreal, an advertised two-bedroom costs ${fmtMoney(K.mtl_demande_dernier)}, ${fmtMoney(K.mtl_ecart_dernier)} more than the rent paid (${fmtMoney(K.mtl_paye_dernier)}). Over one year, asking rent fell ${fmtNum(-K.mtl_var_demande, 1)}% while paid rent rose ${fmtNum(K.mtl_var_paye, 1)}%: the gap is narrowing. <a href="carte.html">Compare 42 cities on the map →</a>`;
+  document.getElementById("reloc-legend").innerHTML = `<span><i style="--c:var(--warm)"></i>${fr ? "Logements reloués (SCHL)" : "Re-let units (CMHC)"}</span><span><i style="--c:var(--mtl)"></i>${fr ? "Tous les locataires (StatCan)" : "All tenants (StatCan)"}</span>`;
+
+  const ann = n => fmtMoney(n);
+  const impl = fr ? [
+    { who: "Locataire", h: "Déménager coûte maintenant très cher",
+      p: `Un 2 chambres reloué coûtait ${ann(K.loyer_reloues_2ch_2025)} en 2025, soit ${ann(K.prime_relocation_2025)} de plus par mois que le loyer moyen payé (${ann(K.prime_relocation_2025 * 12)} par an). Les locataires en place ont vu leur loyer monter de ${fmtNum(K.hausse_non_reloues_2025, 1)} %, ceux qui ont emménagé de ${fmtNum(K.hausse_reloues_2025, 1)} %.`,
+      d: "Comparer une offre au loyer des logements reloués, pas à la moyenne, avant de quitter un bail." },
+    { who: "Prêteur ou investisseur", h: "L'écart au roulement est un revenu potentiel, et un risque",
+      p: `Un écart de ${fmtNum(K.prime_relocation_pct_2025, 0)} % entre loyers en place et loyers de relocation mesure le revenu qu'un immeuble existant peut gagner quand ses locataires partent. En parallèle, la SCHL note que l'inoccupation a surtout augmenté dans les immeubles neufs.`,
+      d: "Évaluer un immeuble sur ses loyers en place et son taux de roulement, pas sur la moyenne du marché." },
+    { who: "Gestionnaire ou propriétaire", h: "La pression porte sur le parc ancien",
+      p: "Selon la SCHL, la hausse de 2025 s'est accélérée surtout dans les logements anciens et moins chers, alors que l'offre neuve se loue au-dessus de la moyenne. La construction neuve ne détend donc pas directement ce segment.",
+      d: "Fixer les loyers du parc ancien à partir du loyer des logements reloués, pas de la moyenne du marché, et suivre l'inoccupation par âge d'immeuble." }
+  ] : [
+    { who: "Tenant", h: "Moving has become very expensive",
+      p: `A re-let two-bedroom cost ${ann(K.loyer_reloues_2ch_2025)} in 2025, ${ann(K.prime_relocation_2025)} more per month than the average rent paid (${ann(K.prime_relocation_2025 * 12)} a year). Sitting tenants saw ${fmtNum(K.hausse_non_reloues_2025, 1)}% increases, new tenants ${fmtNum(K.hausse_reloues_2025, 1)}%.`,
+      d: "Compare an offer with re-let rents, not with the average, before leaving a lease." },
+    { who: "Lender or investor", h: "The turnover gap is potential income, and a risk",
+      p: `A ${fmtNum(K.prime_relocation_pct_2025, 0)}% gap between in-place and re-let rents measures what an existing building can earn when tenants leave. At the same time, CMHC notes that vacancy rose mostly in new buildings.`,
+      d: "Value a building on its in-place rents and turnover rate, not on the market average." },
+    { who: "Property manager or owner", h: "The pressure is on the older stock",
+      p: "According to CMHC, the 2025 increase accelerated mostly in older, lower-cost units, while new supply rents above the average. New construction therefore does not directly relieve this segment.",
+      d: "Price older units from re-let rents, not from the market average, and track vacancy by building age." }
+  ];
+  document.getElementById("impl").innerHTML = impl.map(c => `<article class="card"><span class="who">${c.who}</span><h3>${c.h}</h3><p>${c.p}</p><p class="dec"><b>${fr ? "Décision" : "Decision"}</b>${c.d}</p></article>`).join("");
+  const SK = fr ? [
+    ["excel.html", "Excel", "Classeur sans macro", "Deux cartes en graphiques Excel, tableau de bord, scénarios 2030, __XL_FORMULAS__ formules."],
+    ["sql.html", "SQL", "Base en étoile et __N_SQL__ requêtes", "__N_TABLES__ tables, __N_VUES__ vues, fonctions de fenêtre, CTE. Exécutables dans ton navigateur."],
+    ["python.html", "Python", "Pipeline et analyses", "Un évaluateur de loyer public, le test de rupture, l'API de Statistique Canada."],
+    ["carte.html", "Carte", "Carte interactive du Canada", "Loyers demandés et payés dans 42 villes, hausse des loyers par province."]
+  ] : [
+    ["excel.html", "Excel", "Macro-free workbook", "Two maps built as Excel charts, dashboard, 2030 scenarios, __XL_FORMULAS__ formulas."],
+    ["sql.html", "SQL", "Star schema and __N_SQL__ queries", "__N_TABLES__ tables, __N_VUES__ views, window functions, CTEs. Runnable in your browser."],
+    ["python.html", "Python", "Pipeline and analyses", "A public rent evaluator, the break test, the Statistics Canada API."],
+    ["carte.html", "Map", "Interactive map of Canada", "Asking and paid rents in 42 cities, rent increases by province."]
+  ];
+  document.getElementById("skills").innerHTML = SK.map(([h, tool, b, sm]) => `<a class="skill" href="${h}"><span class="tool">${tool}</span><b>${b}</b><small>${sm}</small><span class="go">${fr ? "Voir la page" : "See the page"} →</span></a>`).join("");
+  const IC = {
+    cal: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+    pin: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+    db: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>',
+    xl: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg>',
+    py: '<svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>' };
+  const FACTS = fr ? [["#contexte", "cal", "<b>34 ans</b> de loyers officiels, SCHL et Statistique Canada"], ["carte.html", "pin", "<b>42 régions</b> comparées sur une carte interactive"],
+    ["sql.html", "db", "<b>Base SQL</b> : __N_TABLES__ tables, modèles conceptuel et logique"], ["excel.html", "xl", "<b>Classeur Excel</b> avec cartes, sans macro"],
+    ["python.html", "py", "<b>Python</b> : un évaluateur de loyer public et un test de rupture"]]
+    : [["#contexte", "cal", "<b>34 years</b> of official rents, CMHC and Statistics Canada"], ["carte.html", "pin", "<b>42 areas</b> compared on an interactive map"],
+    ["sql.html", "db", "<b>SQL database</b>: __N_TABLES__ tables, conceptual and logical models"], ["excel.html", "xl", "<b>Excel workbook</b> with maps, no macros"],
+    ["python.html", "py", "<b>Python</b>: a public rent evaluator and a break test"]];
+  document.getElementById("facts").innerHTML = FACTS.map(([h, ic, t_], i) => `<a href="${h}"${heroPlayed ? "" : ` class="hero-in" style="--d:${1.05 + i * 0.07}s"`}>${IC[ic]}${t_}</a>`).join("");
+  const calc = fr ? [
+    "Loyer réel = loyer d'octobre × IPC 2025 / IPC de l'année (IPC Montréal, moyenne annuelle).",
+    `Rythme annuel = taux de croissance annuel composé : (fin / début)^(1/n) − 1.`,
+    "Indice 2019 = 100 : loyer de l'année / loyer 2019 × 100, pour comparer des villes de niveaux différents.",
+    "Écart au roulement = loyer des logements reloués − loyer moyen de tous les locataires (SCHL, 2 chambres)."
+  ] : [
+    "Real rent = October rent × CPI 2025 / CPI of the year (Montreal CPI, annual average).",
+    "Annual pace = compound annual growth rate: (end / start)^(1/n) − 1.",
+    "Index 2019 = 100: rent of the year / 2019 rent × 100, to compare cities at different levels.",
+    "Turnover gap = rent of re-let units − average rent of all tenants (CMHC, two-bedroom)."
+  ];
+  const lim = fr ? [
+    "Champ de l'enquête SCHL : immeubles locatifs privés de 3 logements et plus. Le logement social et les condos loués sont exclus.",
+    "Le loyer moyen inclut les locataires en place depuis longtemps. Un logement à louer coûte nettement plus : environ 1 920 $ pour un 2 chambres affiché selon la Communauté métropolitaine de Montréal (2026).",
+    "Les loyers sont mesurés en octobre ; l'IPC est une moyenne annuelle.",
+    "Le taux d'inoccupation (6 logements et plus) et le loyer (3 logements et plus) ne couvrent pas exactement le même parc.",
+    "Les loyers des logements reloués et la hausse à échantillon constant viennent du rapport 2025 de la SCHL ; ils ne sont disponibles que pour les années publiées (2022 à 2025)."
+  ] : [
+    "CMHC survey scope: private rental buildings with 3+ units. Social housing and rented condos are excluded.",
+    "Average rent includes long-term tenants. Units for rent cost much more: about $1,920 for an advertised two-bedroom according to the Montreal Metropolitan Community (2026).",
+    "Rents are measured in October; CPI is an annual average.",
+    "The vacancy rate (6+ units) and the rent (3+ units) cover slightly different stock.",
+    "Re-let rents and the same-sample increase come from the CMHC 2025 report; they are only available for the published years (2022 to 2025)."
+  ];
+  document.getElementById("calc-list").innerHTML = calc.map(x => `<li>${x}</li>`).join("");
+  document.getElementById("lim-list").innerHTML = lim.map(x => `<li>${x}</li>`).join("");
+  const SRC_EN = {
+    "34-10-0133-01": "CMHC, average rents for areas of 10,000 people and over",
+    "34-10-0127-01": "CMHC, vacancy rates, apartment buildings of six units and over",
+    "18-10-0005-01": "Consumer Price Index, annual average",
+    "46-10-0092-01": "Asking and paid rent prices (experimental estimates)",
+    "18-10-0005-01 (provinces)": "Consumer Price Index, rent and all-items, by province"
+  };
+  const srcs = DATA.meta.sources.map(s => s.id.startsWith("SCHL")
+    ? `<li><a href="${s.url}" target="_blank" rel="noopener">${fr ? "SCHL, Rapport sur le marché locatif 2025" : "CMHC, Rental Market Report 2025"}</a>: ${fr ? "loyers des logements reloués, hausse à échantillon constant" : "re-let rents, same-sample increase"}</li>`
+    : `<li><a href="${s.url}" target="_blank" rel="noopener">${fr ? "Statistique Canada" : "Statistics Canada"}, ${s.id}</a>: ${fr ? s.title : (SRC_EN[s.id] || s.title)}</li>`);
+  srcs.push(`<li><a href="https://observatoire.cmm.qc.ca/wp-content/uploads/2026/06/20260415_logement_locatif_metro_2025.pdf" target="_blank" rel="noopener">CMM, ${fr ? "capsule économique, juin 2026" : "economic brief, June 2026"}</a></li>`);
+  document.getElementById("src-list").innerHTML = srcs.join("");
+  document.getElementById("footer-text").textContent = fr
+    ? "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande."
+    : "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks.";
+  renderUnitChips();
+}
+
+/* ------------------------------ graphiques : utilitaires */
+const tip = document.getElementById("tip");
+function showTip(container, html, x, y) {
+  tip.innerHTML = html; tip.hidden = false;
+  const cr = container.getBoundingClientRect();
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let left = cr.left + window.scrollX + x + 14, top = cr.top + window.scrollY + y - h - 10;
+  if (left + w > window.scrollX + document.documentElement.clientWidth - 8) left = cr.left + window.scrollX + x - w - 14;
+  if (top < window.scrollY + 8) top = cr.top + window.scrollY + y + 14;
+  tip.style.left = left + "px"; tip.style.top = top + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+function frame(el, h, m) {
+  const W = Math.max(280, el.clientWidth);
+  el.innerHTML = "";
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${h}`).attr("role", "img");
+  return { svg, W, H: h, iw: W - m.l - m.r, ih: h - m.t - m.b, g: svg.append("g").attr("transform", `translate(${m.l},${m.t})`) };
+}
+function yAxis(g, y, iw, fmt, n = 5) {
+  const ax = g.append("g").attr("class", "axis");
+  y.ticks(n).forEach(v => {
+    ax.append("line").attr("class", "gridline").attr("x1", 0).attr("x2", iw).attr("y1", y(v)).attr("y2", y(v));
+    ax.append("text").attr("x", -8).attr("y", y(v)).attr("dy", "0.32em").attr("text-anchor", "end").text(fmt(v));
+  });
+}
+function xAxis(g, x, ih, years) {
+  const ax = g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`);
+  ax.append("line").attr("x1", x.range()[0]).attr("x2", x.range()[1]).attr("stroke", css("--line"));
+  years.forEach(v => ax.append("text").attr("x", x(v)).attr("y", 16).attr("text-anchor", "middle").text(v));
+}
+const isSmall = el => el.clientWidth < 520;
+
+/* line chart with crosshair. series: [{key, label, color, values:[{year,v}], width, labelEnd}] */
+function lineChart(el, series, o) {
+  const small = isSmall(el);
+  const m = { t: 14, r: o.endLabels ? (small ? 74 : 96) : 16, b: 26, l: o.ml || 48 };
+  const f = frame(el, o.h || (small ? 250 : 300), m);
+  const all = series.flatMap(s => s.values);
+  const x = d3.scaleLinear().domain(d3.extent(all, d => d.year)).range([0, f.iw]);
+  const ext = d3.extent(all, d => d.v);
+  const y = d3.scaleLinear().domain(o.yDomain || [o.zero ? 0 : ext[0] * 0.92, ext[1] * 1.04]).nice().range([f.ih, 0]);
+  if (o.bands) o.bands(f.g, x, y, f);
+  yAxis(f.g, y, f.iw, o.yFmt, small ? 4 : 5);
+  const span = x.domain();
+  const ticks = d3.range(Math.ceil(span[0] / 5) * 5, span[1] + 1, small ? 10 : 5);
+  xAxis(f.g, x, f.ih, ticks);
+  if (o.refLine != null) f.g.append("line").attr("x1", 0).attr("x2", f.iw).attr("y1", y(o.refLine)).attr("y2", y(o.refLine)).attr("stroke", css("--ink-3")).attr("stroke-dasharray", "2 3");
+  const line = d3.line().x(d => x(d.year)).y(d => y(d.v)).defined(d => d.v != null);
+  const ordered = [...series].sort((a, b) => (a.width || 2) - (b.width || 2));
+  ordered.forEach(s => {
+    f.g.append("path").datum(s.values).attr("fill", "none").attr("stroke", s.color).attr("stroke-width", s.width || 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("d", line);
+    const last = s.values[s.values.length - 1];
+    f.g.append("circle").attr("cx", x(last.year)).attr("cy", y(last.v)).attr("r", 3.5).attr("fill", s.color).attr("stroke", css("--surface")).attr("stroke-width", 2);
+  });
+  if (o.endLabels) {
+    const lab = series.map(s => { const l = s.values[s.values.length - 1]; return { s, y: y(l.v) }; }).sort((a, b) => a.y - b.y);
+    for (let i = 1; i < lab.length; i++) if (lab[i].y - lab[i - 1].y < 13) lab[i].y = lab[i - 1].y + 13;
+    lab.forEach(({ s, y: yy }) => f.g.append("text").attr("class", "lbl" + (s.strong ? " strong" : "")).attr("x", f.iw + 8).attr("y", yy).attr("dy", "0.32em").text((small && s.short ? s.short : s.label) + (o.endValue && !small ? " " + o.endValue(s.values[s.values.length - 1].v) : "")));
+  }
+  if (o.annotate) o.annotate(f.g, x, y, f);
+  // crosshair
+  const cross = f.g.append("line").attr("class", "cross").attr("y1", 0).attr("y2", f.ih).style("display", "none");
+  const dots = f.g.append("g");
+  f.g.append("rect").attr("width", f.iw).attr("height", f.ih).attr("fill", "transparent").style("cursor", "crosshair")
+    .on("pointermove", ev => {
+      const [mx] = d3.pointer(ev);
+      const yr = Math.round(x.invert(mx));
+      const rows = series.map(s => ({ s, d: s.values.find(v => v.year === yr) })).filter(r => r.d && r.d.v != null).sort((a, b) => b.d.v - a.d.v);
+      if (!rows.length) return;
+      cross.style("display", null).attr("x1", x(yr)).attr("x2", x(yr));
+      dots.selectAll("circle").data(rows).join("circle").attr("cx", x(yr)).attr("cy", r => y(r.d.v)).attr("r", 4).attr("fill", r => r.s.color).attr("stroke", css("--surface")).attr("stroke-width", 2);
+      const html = `<div class="t">${yr}</div>` + rows.map(r => `<div class="r"><span><i style="--c:${r.s.color}"></i>${r.s.label}</span><b>${o.tipFmt(r.d.v, r.d)}</b></div>`).join("");
+      const sx = el.clientWidth / f.W;
+      showTip(el, html, (m.l + x(yr)) * sx, (m.t + y(rows[0].d.v)) * sx);
+    })
+    .on("pointerleave", () => { cross.style("display", "none"); dots.selectAll("*").remove(); hideTip(); });
+  f.svg.attr("aria-label", o.aria || "");
+}
+
+/* ------------------------------ graphiques */
+function drawHero() {
+  const el = document.getElementById("c-hero");
+  const fr = state.lang === "fr";
+  lineChart(el, [{ key: "2ch", label: t("units")["2ch"], color: css("--mtl"), width: 2.5, values: twoReal }], {
+    h: isSmall(el) ? 240 : 280, yFmt: v => fmtNum(v) + " $", ml: 54,
+    tipFmt: (v, d) => fmtMoney(v),
+    aria: fr ? "Loyer réel d'un 2 chambres à Montréal, 1992 à 2025" : "Real two-bedroom rent in Montreal, 1992 to 2025",
+    bands: (g, x, y, f) => {
+      g.append("rect").attr("x", x(2019)).attr("y", 0).attr("width", x(2025) - x(2019)).attr("height", f.ih).attr("fill", css("--warm-soft"));
+    },
+    annotate: (g, x, y, f) => {
+      const a = realAt(2019), b = realAt(2025), s = realAt(1992);
+      g.append("line").attr("x1", x(1992)).attr("x2", x(2019)).attr("y1", y(s)).attr("y2", y(a)).attr("stroke", css("--ink-3")).attr("stroke-dasharray", "4 4");
+      const small = isSmall(el);
+      g.append("text").attr("class", "ann big").attr("x", x(2005)).attr("y", y((s + a) / 2) - 28).attr("text-anchor", "middle").text(fmtPct(K.hausse_reelle_1992_2019 / 100, 0, true) + (fr ? " en 27 ans" : " in 27 years"));
+      g.append("text").attr("class", "ann big").attr("x", x(2019) - 6).attr("y", y(b) + 4).attr("text-anchor", "end").attr("fill", css("--warm-ink")).style("fill", css("--warm-ink")).text(fmtPct(K.hausse_reelle_2019_2025 / 100, 0, true) + (fr ? " en 6 ans" : " in 6 years"));
+      if (!small) g.append("text").attr("class", "ann").attr("x", x(2019) + 4).attr("y", 12).text("2019–2025");
+    }
+  });
+}
+
+function renderUnitChips() {
+  const box = document.getElementById("unit-chips");
+  box.innerHTML = UNITS.map(u => `<button type="button" class="chip" data-u="${u}" aria-pressed="${state.units.includes(u)}" style="--c:var(${UCOL[u]})"><span class="sw"></span>${t("units")[u]}</button>`).join("");
+  box.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    const u = b.dataset.u;
+    if (state.units.includes(u)) { if (state.units.length > 1) state.units = state.units.filter(x => x !== u); }
+    else state.units = UNITS.filter(x => x === u || state.units.includes(x));
+    sync(); renderUnitChips(); drawUnits();
+  });
+}
+
+function drawUnits() {
+  const el = document.getElementById("c-units");
+  const key = state.mode === "real" ? "real" : "nom";
+  document.getElementById("m-nom").setAttribute("aria-pressed", state.mode === "nom");
+  document.getElementById("m-real").setAttribute("aria-pressed", state.mode === "real");
+  const series = state.units.map(u => ({ key: u, label: t("units")[u], color: css(UCOL[u]), values: rentsBy.get(u).map(d => ({ year: d.year, v: d[key], yoy: d.yoy })) }));
+  lineChart(el, series, {
+    endLabels: true, endValue: v => fmtNum(v) + " $", yFmt: v => fmtNum(v) + " $", ml: 54, zero: state.mode === "nom",
+    tipFmt: v => fmtMoney(v),
+    bands: (g, x, y, f) => g.append("rect").attr("x", x(2019)).attr("y", 0).attr("width", x(2025) - x(2019)).attr("height", f.ih).attr("fill", css("--warm-soft")),
+    aria: "Loyers moyens à Montréal par type de logement"
+  });
+  // tableau
+  const yrs = DATA.rents.filter(d => d.unit_id === "2ch").map(d => d.year).reverse();
+  const head = `<tr><th>${state.lang === "fr" ? "Année" : "Year"}</th>${UNITS.map(u => `<th>${t("units")[u]}</th>`).join("")}</tr>`;
+  const body = yrs.map(y => `<tr><td>${y}</td>${UNITS.map(u => `<td>${fmtNum(rentsBy.get(u).find(d => d.year === y)[key])} $</td>`).join("")}</tr>`).join("");
+  document.getElementById("t-units").innerHTML = `<table class="data">${head}${body}</table>`;
+}
+
+function drawCities() {
+  const el = document.getElementById("c-cities");
+  document.getElementById("c-abs").setAttribute("aria-pressed", state.cities === "abs");
+  document.getElementById("c-idx").setAttribute("aria-pressed", state.cities === "idx");
+  const idx = state.cities === "idx";
+  const series = cityGeos.map(g => {
+    const rows = DATA.cities.filter(d => d.geo === g && (!idx || d.year >= 2015));
+    const base = DATA.cities.find(d => d.geo === g && d.year === 2019).nom;
+    const mtl = g === "Montreal";
+    return { key: g, label: t("geo")[g], short: g === "Ottawa-Gatineau" ? "Ottawa-Gat." : null, strong: mtl, color: mtl ? css("--warm") : css("--other"), width: mtl ? 3 : 1.5,
+      values: rows.map(d => ({ year: d.year, v: idx ? d.nom / base * 100 : d.nom, nom: d.nom })) };
+  });
+  lineChart(el, series, {
+    endLabels: true, yFmt: v => idx ? fmtNum(v) : fmtNum(v) + " $", ml: 50, zero: !idx, refLine: idx ? 100 : null,
+    tipFmt: (v, d) => idx ? `${fmtNum(v)} · ${fmtNum(d.nom)} $` : fmtMoney(v),
+    aria: "Loyer d'un 2 chambres dans six villes"
+  });
+}
+
+function drawBars() {
+  const el = document.getElementById("c-bars");
+  const h = K.hausse_2019_2025_par_ville;
+  const rows = cityGeos.map(g => ({ g, v: h[g] / 100 })).sort((a, b) => b.v - a.v);
+  const m = { t: 6, r: 52, b: 6, l: 112 };
+  const f = frame(el, rows.length * 34 + 12, m);
+  const x = d3.scaleLinear().domain([0, d3.max(rows, d => d.v)]).range([0, f.iw]);
+  const y = d3.scaleBand().domain(rows.map(d => d.g)).range([0, f.ih]).padding(0.32);
+  rows.forEach(d => {
+    const mtl = d.g === "Montreal";
+    const bw = Math.max(2, x(d.v));
+    f.g.append("path").attr("d", `M0,${y(d.g)} h${bw - 4} a4,4 0 0 1 4,4 v${y.bandwidth() - 8} a4,4 0 0 1 -4,4 h${-(bw - 4)} Z`).attr("fill", mtl ? css("--warm") : css("--other"))
+      .on("pointermove", ev => { const [mx, my] = d3.pointer(ev, f.svg.node()); const sx = el.clientWidth / f.W; showTip(el, `<div class="t">${t("geo")[d.g]}</div><div class="r"><span>2019 → 2025</span><b>${fmtPct(d.v, 1, true)}</b></div>`, mx * sx, my * sx); })
+      .on("pointerleave", hideTip);
+    f.g.append("text").attr("class", "lbl" + (mtl ? " strong" : "")).attr("x", -8).attr("y", y(d.g) + y.bandwidth() / 2).attr("dy", "0.32em").attr("text-anchor", "end").text(t("geo")[d.g]);
+    f.g.append("text").attr("class", "lbl" + (mtl ? " strong" : "")).attr("x", bw + 6).attr("y", y(d.g) + y.bandwidth() / 2).attr("dy", "0.32em").text(fmtPct(d.v, 0, true));
+  });
+  f.svg.attr("aria-label", "Hausse du loyer 2019-2025 par ville");
+}
+
+function barYears(el, data, o) {
+  const small = isSmall(el);
+  const m = { t: 18, r: 10, b: 26, l: 40 };
+  const f = frame(el, small ? 220 : 250, m);
+  const x = d3.scaleBand().domain(data.map(d => d.year)).range([0, f.iw]).padding(0.25);
+  const y = d3.scaleLinear().domain([Math.min(0, d3.min(data, d => d.v)), d3.max(data, d => d.v) * 1.12]).nice().range([f.ih, 0]);
+  yAxis(f.g, y, f.iw, v => fmtNum(v, 0) + " %", 4);
+  const ax = f.g.append("g").attr("class", "axis").attr("transform", `translate(0,${f.ih})`);
+  data.filter(d => d.year % (small ? 10 : 5) === 0).forEach(d => ax.append("text").attr("x", x(d.year) + x.bandwidth() / 2).attr("y", 16).attr("text-anchor", "middle").text(d.year));
+  f.g.append("line").attr("x1", 0).attr("x2", f.iw).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", css("--ink-3"));
+  data.forEach(d => {
+    const hi = d.year === 2025;
+    const top = y(Math.max(0, d.v)), h = Math.abs(y(d.v) - y(0));
+    const r = Math.min(3, x.bandwidth() / 2, h);
+    const path = d.v >= 0
+      ? `M${x(d.year)},${y(0)} v${-(h - r)} a${r},${r} 0 0 1 ${r},${-r} h${x.bandwidth() - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${h - r} Z`
+      : `M${x(d.year)},${y(0)} v${h - r} a${r},${r} 0 0 0 ${r},${r} h${x.bandwidth() - 2 * r} a${r},${r} 0 0 0 ${r},${-r} v${-(h - r)} Z`;
+    f.g.append("path").attr("d", path).attr("fill", hi ? css("--warm") : css(o.color));
+    f.g.append("rect").attr("x", x(d.year) - 1).attr("width", x.bandwidth() + 2).attr("y", 0).attr("height", f.ih).attr("fill", "transparent")
+      .on("pointermove", ev => { const [mx, my] = d3.pointer(ev, f.svg.node()); const sx = el.clientWidth / f.W; showTip(el, `<div class="t">${d.year}</div><div class="r"><span>${o.name}</span><b>${fmtNum(d.v, 1)} %</b></div>`, mx * sx, my * sx); })
+      .on("pointerleave", hideTip);
+    if (hi) f.g.append("text").attr("class", "lbl strong").attr("x", x(d.year) + x.bandwidth()).attr("y", y(d.v) - 6).attr("text-anchor", "end").text(fmtNum(d.v, 1) + " %");
+  });
+  f.svg.attr("aria-label", o.name);
+}
+function drawVacYoy() {
+  const fr = state.lang === "fr";
+  const vac = DATA.vacancy.filter(d => d.geo === "Montreal").map(d => ({ year: d.year, v: d.v }));
+  barYears(document.getElementById("c-vac"), vac, { color: "--mtl", name: fr ? "Inoccupation" : "Vacancy" });
+  const yoy = rentsBy.get("2ch").filter(d => d.year >= 1998).map(d => ({ year: d.year, v: d.yoy }));
+  barYears(document.getElementById("c-yoy"), yoy, { color: "--mtl", name: fr ? "Variation du loyer" : "Rent change" });
+}
+
+/* ------------------------------ simulateur (miroir de la feuille Excel) */
+const UNIT_XL = { studio: "Studio", "1ch": "1 chambre", "2ch": "2 chambres", "3ch": "3 chambres" };
+function simCalc() {
+  const s = state.sim, ref = 2025, thr = 0.30;
+  const b15 = rentAt(s.unit, ref), b18 = rentAt(s.unit, s.year);
+  const b16 = s.rent - b15, b17 = b15 ? s.rent / b15 - 1 : 0, b19 = b18 ? b15 / b18 - 1 : 0;
+  const b20 = cpiAt(ref) / cpiAt(s.year) - 1, b21 = (1 + b19) / (1 + b20) - 1;
+  const b22 = s.income > 0 ? s.rent * 12 / s.income : 0;
+  const b23 = s.income <= 0 ? "na" : (b22 <= thr ? "ok" : "over");
+  return { ref, thr, b15, b16, b17, b18, b19, b20, b21, b22, b23 };
+}
+const XL = {
+  C5: "Entrée", C6: "Entrée (liste déroulante)", C7: "Entrée (entier entre 1992 et 2025)", C8: "Entrée",
+  C11: "=SUMIFS(Loyers_Montant,Loyers_Annee,2025,Loyers_Type,$C$6)",
+  C12: "=C5-C11",
+  C13: "=C5/C11-1",
+  C14: "=C11/SUMIFS(Loyers_Montant,Loyers_Annee,$C$7,Loyers_Type,$C$6)-1",
+  C15: "=INDEX(IPC_Valeur,MATCH(2025,IPC_Annee,0))/INDEX(IPC_Valeur,MATCH($C$7,IPC_Annee,0))-1",
+  C16: "=(1+C14)/(1+C15)-1",
+  C17: '=IF(C8>0,C5*12/C8,"Non calculé")',
+  C18: '=IFS(C8<=0,"Non calculé",C5*12/C8<=0.3,"Sous le seuil",TRUE,"Au-dessus du seuil")',
+  C19: '=SUMIFS(SCHL_Valeur,SCHL_Annee,2025,SCHL_Indic,"loyer_moyen_reloues_2ch")',
+  C20: "=C19-C5"
+};
+function drawSim() {
+  const fr = state.lang === "fr", s = state.sim, r = simCalc();
+  const L = fr ? {
+    B4: "ENTRÉES", B5: "Loyer mensuel actuel ($)", B6: "Type de logement", B7: "Année de début du bail", B8: "Revenu annuel brut du ménage ($)",
+    B10: "RÉSULTATS (DONNÉES D'OCTOBRE 2025)", B11: "Loyer moyen SCHL, ce type, 2025", B12: "Écart entre ton loyer et cette moyenne", B13: "Écart en %",
+    B14: "Hausse du loyer moyen depuis le début du bail", B15: "Inflation (IPC Montréal) sur la même période", B16: "Hausse réelle du loyer moyen",
+    B17: "Taux d'effort (loyer × 12 / revenu)", B18: "Statut d'abordabilité (seuil SCHL : 30 %)",
+    B19: "Loyer moyen d'un 2 chambres reloué en 2025 (SCHL)", B20: "Ce que coûterait un déménagement",
+    st: { na: "Non calculé", ok: "Sous le seuil", over: "Au-dessus du seuil" }
+  } : {
+    B4: "INPUTS", B5: "Current monthly rent ($)", B6: "Unit type", B7: "Lease start year", B8: "Gross annual household income ($)",
+    B10: "RESULTS (OCTOBER 2025 DATA)", B11: "CMHC average rent, this type, 2025", B12: "Gap between your rent and that average", B13: "Gap in %",
+    B14: "Average rent increase since the lease began", B15: "Inflation (Montreal CPI) over the same period", B16: "Real increase in average rent",
+    B17: "Rent-to-income ratio (rent × 12 / income)", B18: "Affordability status (CMHC threshold: 30%)",
+    B19: "Average re-let two-bedroom rent in 2025 (CMHC)", B20: "What moving would cost",
+    st: { na: "Not calculated", ok: "Below the threshold", over: "Above the threshold" }
+  };
+  const stColor = { na: "var(--ink-3)", ok: "#0ca30c", over: "#d03b3b" };
+  const rows = [
+    [4, "sec"], [5, "in", `<input id="in-rent" type="number" min="0" step="10" inputmode="numeric" value="${s.rent}" aria-label="${L.B5}">`],
+    [6, "in", `<select id="in-unit" aria-label="${L.B6}">${UNITS.map(u => `<option value="${u}" ${u === s.unit ? "selected" : ""}>${t("units")[u]}</option>`).join("")}</select>`],
+    [7, "in", `<input id="in-year" type="number" min="1992" max="2025" step="1" value="${s.year}" aria-label="${L.B7}">`],
+    [8, "in", `<input id="in-inc" type="number" min="0" step="1000" inputmode="numeric" value="${s.income}" aria-label="${L.B8}">`],
+    [10, "sec"], [11, "v", fmtMoney(r.b15)], [12, "v", (r.b16 > 0 ? "+" : "") + fmtMoney(r.b16)], [13, "v", fmtPct(r.b17, 1, true)],
+    [14, "v", fmtPct(r.b19, 1, true)], [15, "v", fmtPct(r.b20, 1, true)], [16, "v", fmtPct(r.b21, 1, true)],
+    [17, "v", s.income > 0 ? fmtPct(r.b22, 1) : L.st.na], [18, "v", `<span class="status" style="--c:${stColor[r.b23]}">${L.st[r.b23]}</span>`],
+    [19, "v", fmtMoney(K.loyer_reloues_2ch_2025)],
+    [20, "v", (K.loyer_reloues_2ch_2025 - s.rent > 0 ? "+" : "") + fmtMoney(K.loyer_reloues_2ch_2025 - s.rent)]
+  ];
+  const tb = document.getElementById("sheet");
+  tb.innerHTML = `<colgroup><col class="c-rh"><col><col class="c-b"></colgroup><tr><th></th><th>B</th><th>C</th></tr>` + rows.map(([n, k, v]) => {
+    const ref = "C" + n;
+    if (k === "sec") return `<tr><td class="rh">${n}</td><td class="sec" colspan="2"><span class="c">${L["B" + n]}</span></td></tr>`;
+    if (k === "in") return `<tr><td class="rh">${n}</td><td><span class="c">${L["B" + n]}</span></td><td class="in ${state.sel === ref ? "sel" : ""}" data-ref="${ref}">${v}</td></tr>`;
+    return `<tr><td class="rh">${n}</td><td><span class="c">${L["B" + n]}</span></td><td class="${state.sel === ref ? "sel" : ""}" data-ref="${ref}" tabindex="0"><span class="c v">${v}</span></td></tr>`;
+  }).join("");
+  document.getElementById("f-ref").textContent = state.sel;
+  document.getElementById("f-text").textContent = XL[state.sel] || "";
+  tb.querySelectorAll("td[data-ref]").forEach(td => {
+    const pick = () => { state.sel = td.dataset.ref; tb.querySelectorAll("td.sel").forEach(x => x.classList.remove("sel")); td.classList.add("sel"); document.getElementById("f-ref").textContent = state.sel; document.getElementById("f-text").textContent = XL[state.sel] || ""; };
+    td.addEventListener("click", pick); td.addEventListener("focusin", pick);
+    td.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+  const upd = () => {
+    const rent = +document.getElementById("in-rent").value, year = +document.getElementById("in-year").value, inc = +document.getElementById("in-inc").value;
+    if (rent >= 0) s.rent = rent;
+    if (year >= 1992 && year <= 2025) s.year = Math.round(year);
+    if (inc >= 0) s.income = inc;
+    s.unit = document.getElementById("in-unit").value;
+    sync(); const keep = document.activeElement && document.activeElement.id; drawSim(); if (keep) { const e = document.getElementById(keep); if (e) { e.focus(); } }
+  };
+  ["in-rent", "in-year", "in-inc"].forEach(id => document.getElementById(id).addEventListener("change", upd));
+  document.getElementById("in-unit").addEventListener("change", upd);
+  ["in-rent", "in-year", "in-inc"].forEach(id => document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") upd(); }));
+
+  const U = t("units")[s.unit].toLowerCase();
+  const more = r.b16 >= 0;
+  const v = document.getElementById("verdict");
+  v.innerHTML = fr ? `
+    <p>Tu paies <b class="num">${fmtMoney(Math.abs(r.b16))}</b> ${more ? "de plus" : "de moins"} par mois que le loyer moyen d'un ${U} à Montréal en 2025 (${fmtMoney(r.b15)}).</p>
+    <p>Depuis ${s.year}, le loyer moyen de ce type de logement a augmenté de <b class="num">${fmtPct(r.b19, 0, true)}</b>, soit ${fmtPct(r.b21, 0, true)} au-delà de l'inflation.</p>
+    ${s.income > 0 ? `<p>Ton loyer représente <b class="num">${fmtPct(r.b22, 0)}</b> de ton revenu brut. La SCHL considère un logement abordable sous 30 %.</p>` : ""}
+    ${s.unit === "2ch" ? `<p>Si tu cherchais un 2 chambres en 2025, le loyer moyen des logements reloués était de <b class="num">${fmtMoney(K.loyer_reloues_2ch_2025)}</b> (SCHL) : ${fmtMoney(Math.abs(K.loyer_reloues_2ch_2025 - s.rent))} ${K.loyer_reloues_2ch_2025 >= s.rent ? "de plus" : "de moins"} que ton loyer actuel.</p>` : ""}
+    <p class="note">La moyenne inclut les locataires de longue date : un logement à louer aujourd'hui coûte en général plus cher.</p>` : `
+    <p>You pay <b class="num">${fmtMoney(Math.abs(r.b16))}</b> ${more ? "more" : "less"} per month than the average ${U} rent in Montreal in 2025 (${fmtMoney(r.b15)}).</p>
+    <p>Since ${s.year}, the average rent for this unit type has risen <b class="num">${fmtPct(r.b19, 0, true)}</b>, which is ${fmtPct(r.b21, 0, true)} above inflation.</p>
+    ${s.income > 0 ? `<p>Your rent is <b class="num">${fmtPct(r.b22, 0)}</b> of your gross income. CMHC considers housing affordable below 30%.</p>` : ""}
+    ${s.unit === "2ch" ? `<p>If you were looking for a two-bedroom in 2025, the average re-let rent was <b class="num">${fmtMoney(K.loyer_reloues_2ch_2025)}</b> (CMHC): ${fmtMoney(Math.abs(K.loyer_reloues_2ch_2025 - s.rent))} ${K.loyer_reloues_2ch_2025 >= s.rent ? "more" : "less"} than your current rent.</p>` : ""}
+    <p class="note">The average includes long-term tenants: a unit for rent today usually costs more.</p>`;
+}
+
+function drawReloc() {
+  const el = document.getElementById("c-reloc");
+  const fr = state.lang === "fr";
+  const tv = DATA.turnover.filter(d => d.indicateur === "loyer_moyen_reloues_2ch").map(d => ({ year: d.year, v: d.valeur }));
+  const all = rentsBy.get("2ch").filter(d => d.year >= 2022).map(d => ({ year: d.year, v: d.nom }));
+  const small = isSmall(el);
+  const m = { t: 16, r: 12, b: 26, l: 50 };
+  const f = frame(el, small ? 240 : 260, m);
+  const years = all.map(d => d.year);
+  const x0 = d3.scaleBand().domain(years).range([0, f.iw]).padding(0.28);
+  const x1 = d3.scaleBand().domain(["all", "tv"]).range([0, x0.bandwidth()]).padding(0.08);
+  const y = d3.scaleLinear().domain([0, d3.max(tv, d => d.v) * 1.1]).nice().range([f.ih, 0]);
+  yAxis(f.g, y, f.iw, v => fmtNum(v) + " $", 4);
+  const ax = f.g.append("g").attr("class", "axis").attr("transform", `translate(0,${f.ih})`);
+  years.forEach(yr => ax.append("text").attr("x", x0(yr) + x0.bandwidth() / 2).attr("y", 16).attr("text-anchor", "middle").text(yr));
+  const bar = (xx, w, v) => { const h = f.ih - y(v), r = Math.min(4, w / 2, h); return `M${xx},${f.ih} v${-(h - r)} a${r},${r} 0 0 1 ${r},${-r} h${w - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${h - r} Z`; };
+  years.forEach(yr => {
+    const a = all.find(d => d.year === yr).v, b = tv.find(d => d.year === yr).v;
+    [["all", a, "--mtl"], ["tv", b, "--warm"]].forEach(([k, v, c]) => {
+      const xx = x0(yr) + x1(k);
+      f.g.append("path").attr("d", bar(xx, x1.bandwidth(), v)).attr("fill", css(c));
+      if (!small || yr === 2025) f.g.append("text").attr("class", "lbl" + (k === "tv" ? " strong" : "")).attr("x", xx + x1.bandwidth() / 2).attr("y", y(v) - 5).attr("text-anchor", "middle").text(fmtNum(v));
+    });
+    f.g.append("rect").attr("x", x0(yr)).attr("width", x0.bandwidth()).attr("y", 0).attr("height", f.ih).attr("fill", "transparent")
+      .on("pointermove", ev => { const [mx, my] = d3.pointer(ev, f.svg.node()); const sx = el.clientWidth / f.W;
+        showTip(el, `<div class="t">${yr}</div><div class="r"><span><i style="--c:${css("--warm")}"></i>${fr ? "Reloués" : "Re-let"}</span><b>${fmtMoney(b)}</b></div><div class="r"><span><i style="--c:${css("--mtl")}"></i>${fr ? "Tous" : "All"}</span><b>${fmtMoney(a)}</b></div><div class="r"><span>${fr ? "Écart" : "Gap"}</span><b>${fmtMoney(b - a)}</b></div>`, mx * sx, my * sx); })
+      .on("pointerleave", hideTip);
+  });
+  f.svg.attr("aria-label", fr ? "Loyer des logements reloués comparé au loyer moyen" : "Re-let rent compared with average rent");
+}
+
+/* ------------------------------ état dans l'adresse */
+function shareURL() {
+  const p = new URLSearchParams();
+  if (state.lang === "en") p.set("lang", "en");
+  if (state.mode === "nom") p.set("m", "nom");
+  if (state.units.length !== 4) p.set("u", state.units.join(","));
+  if (state.cities === "abs") p.set("c", "abs");
+  const s = state.sim;
+  if (s.rent !== 1250) p.set("loyer", s.rent);
+  if (s.unit !== "2ch") p.set("type", s.unit);
+  if (s.year !== 2019) p.set("bail", s.year);
+  if (s.income !== 60000) p.set("revenu", s.income);
+  const q = p.toString();
+  return location.origin + location.pathname + (q ? "?" + q : "") + location.hash;
+}
+function sync() { try { if (location.protocol.startsWith("http")) history.replaceState(null, "", shareURL()); } catch (e) {} }
+function toast(msg) { const el = document.getElementById("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2400); }
+
+/* ------------------------------ événements */
+document.getElementById("lang-fr").onclick = () => { state.lang = "fr"; sync(); renderAll(); };
+document.getElementById("lang-en").onclick = () => { state.lang = "en"; sync(); renderAll(); };
+document.getElementById("m-nom").onclick = () => { state.mode = "nom"; sync(); drawUnits(); };
+document.getElementById("m-real").onclick = () => { state.mode = "real"; sync(); drawUnits(); };
+document.getElementById("c-abs").onclick = () => { state.cities = "abs"; sync(); renderText(); drawCities(); };
+document.getElementById("c-idx").onclick = () => { state.cities = "idx"; sync(); renderText(); drawCities(); };
+document.getElementById("share").onclick = () => {
+  const url = shareURL();
+  try { navigator.clipboard.writeText(url).then(() => toast(t("copied")), () => toast(t("copyFail"))); } catch (e) { toast(t("copyFail")); }
+};
+
+function drawCharts() { drawHero(); drawUnits(); drawCities(); drawBars(); drawVacYoy(); drawReloc(); }
+function renderAll() { renderText(); drawCharts(); drawSim(); }
+renderAll();
+heroIntro();
+let rw = 0;
+new ResizeObserver(() => { const w = document.body.clientWidth; if (Math.abs(w - rw) > 4) { rw = w; drawCharts(); } }).observe(document.body);
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawCharts); } catch (e) {}
+new MutationObserver(drawCharts).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+/* ------------------------------ scène de défilement : graphique -> carte -> analyse */
+(() => {
+  const scene = document.getElementById("voyage");
+  if (!scene) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+  const SC = JSON.parse(document.getElementById("scene-data").textContent);
+  const clamp01 = v => Math.min(1, Math.max(0, v));
+  const ease = k => 1 - Math.pow(1 - k, 3);
+
+  /* --- couche graphique : loyer réel d'un 2 chambres, 1992-2026 */
+  const CW = 980, CH = 560, M = { t: 70, r: 80, b: 70, l: 80 };
+  const xs = d3.scaleLinear().domain(d3.extent(twoReal, d => d.year)).range([M.l, CW - M.r]);
+  const ysc = d3.scaleLinear().domain(d3.extent(twoReal, d => d.v)).nice().range([CH - M.b, M.t]);
+  const chartEl = document.getElementById("sc-chart");
+  const csvg = d3.select(chartEl).append("svg").attr("viewBox", `0 0 ${CW} ${CH}`);
+  const lastT = twoReal[twoReal.length - 1];
+  csvg.append("path").attr("d", d3.area().x(d => xs(d.year)).y0(CH - M.b).y1(d => ysc(d.v)).curve(d3.curveMonotoneX)(twoReal))
+    .attr("fill", "url(#scgrad)").attr("opacity", 0.18);
+  const defs = csvg.append("defs");
+  const grad = defs.append("linearGradient").attr("id", "scgrad").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 1);
+  grad.append("stop").attr("offset", "0%").attr("stop-color", "var(--warm)");
+  grad.append("stop").attr("offset", "100%").attr("stop-color", "transparent");
+  [1992, 2019, 2026].forEach(y => csvg.append("text").attr("class", "scax").attr("x", xs(y)).attr("y", CH - M.b + 26).attr("text-anchor", "middle").text(y));
+  const brk = csvg.append("g").attr("opacity", 0);
+  brk.append("line").attr("x1", xs(2019)).attr("x2", xs(2019)).attr("y1", M.t - 8).attr("y2", CH - M.b)
+    .attr("stroke", "var(--warm)").attr("stroke-dasharray", "5 5").attr("stroke-width", 1.6);
+  brk.append("text").attr("class", "scbreak").attr("x", xs(2019)).attr("y", M.t - 18).attr("text-anchor", "middle").text("2019");
+  const cpath = csvg.append("path").attr("d", d3.line().x(d => xs(d.year)).y(d => ysc(d.v)).curve(d3.curveMonotoneX)(twoReal))
+    .attr("fill", "none").attr("stroke", "var(--mtl)").attr("stroke-width", 4).attr("stroke-linecap", "round").node();
+  const dot = csvg.append("circle").attr("r", 7).attr("fill", "var(--warm)")
+    .attr("stroke", "var(--bg)").attr("stroke-width", 2.5).node();
+  const L = cpath.getTotalLength();
+  cpath.style.strokeDasharray = L;
+
+  /* --- couche carte : contours + régions où le loyer payé est publié */
+  const mapEl = document.getElementById("sc-map");
+  const msvg = d3.select(mapEl).append("svg").attr("viewBox", `0 0 ${SC.w} ${SC.h}`);
+  const gm = msvg.append("g");
+  SC.rings.forEach(r => {
+    let d = "M" + r[0] + "," + r[1];
+    for (let i = 2; i < r.length; i += 2) d += "L" + r[i] + "," + r[i + 1];
+    gm.append("path").attr("class", "ring").attr("d", d + "Z");
+  });
+  const gv = [...SC.villes].sort((a, b) => ((a.mtl ? 1 : 0) - (b.mtl ? 1 : 0)) || (a.x - b.x));
+  const gmax = d3.max(gv, d => Math.abs(d.g)) || 1;
+  const refill = () => {
+    const ramp = ["--map-2", "--map-3", "--map-4", "--map-5"].map(c => css(c));
+    const colv = d3.scaleQuantize().domain([0, gmax]).range(ramp);
+    circles.forEach((c, i) => c.setAttribute("fill", gv[i].mtl ? (css("--warm") || "#e0457b") : colv(Math.abs(gv[i].g))));
+  };
+  const circles = gv.map(v => msvg.append("circle")
+    .attr("cx", v.x).attr("cy", v.y).attr("r", v.mtl ? 16 : 8 + 7 * Math.abs(v.g) / gmax).node());
+  refill();
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refill); } catch (e) {}
+  new MutationObserver(refill).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  const mtl = gv.find(v => v.mtl);
+  const fmtG = () => (state.lang === "en" ? "Montreal " : "Montréal ") + (mtl.g > 0 ? "+" : "") +
+    new Intl.NumberFormat(state.lang === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(mtl.g) + (state.lang === "en" ? "%" : " %");
+  const mlbl = msvg.append("text").attr("class", "sclbl").attr("x", mtl.x + 22).attr("y", mtl.y - 14).text(fmtG()).node();
+  document.addEventListener("langchange", () => { mlbl.textContent = fmtG(); });
+
+  /* --- pilotage par le défilement */
+  const caps = [1, 2, 3].map(i => document.getElementById("sc-cap" + i));
+  const hint = scene.querySelector(".scene-hint");
+  let ticking = false;
+  function upd() {
+    const r = scene.getBoundingClientRect();
+    const total = r.height - innerHeight;
+    if (total <= 0) return;
+    const pr = clamp01(-r.top / total);
+    if (r.bottom < -40 || r.top > innerHeight + 40) return;
+    const draw = ease(clamp01(pr / 0.3));
+    cpath.style.strokeDashoffset = L * (1 - draw);
+    const pt = cpath.getPointAtLength(L * draw);
+    dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+    dot.setAttribute("opacity", draw > 0.01 && pr < 0.36 ? 1 : 0);
+    brk.attr("opacity", clamp01((pr - 0.2) / 0.08));
+    const zoom = ease(clamp01((pr - 0.32) / 0.2));
+    chartEl.style.transformOrigin = `${xs(2019) / CW * 100}% 42%`;
+    chartEl.style.transform = `scale(${1 + zoom * 5.2})`;
+    chartEl.style.opacity = String(1 - zoom);
+    chartEl.style.visibility = zoom >= 1 ? "hidden" : "visible";
+    const mapIn = clamp01((pr - 0.46) / 0.2);
+    const mapOut = ease(clamp01((pr - 0.94) / 0.06));
+    mapEl.style.opacity = String(Math.min(ease(mapIn), 1 - 0.6 * mapOut));
+    mapEl.style.transform = `scale(${0.78 + 0.22 * ease(mapIn) + 0.3 * mapOut})`;
+    circles.forEach((c, i) => c.classList.toggle("on", pr > 0.5 + i * 0.016));
+    mlbl.classList.toggle("on", pr > 0.52 + circles.length * 0.016);
+    caps[0].classList.toggle("on", pr > 0.02 && pr < 0.36);
+    caps[1].classList.toggle("on", pr >= 0.52 && pr < 0.88);
+    caps[2].classList.toggle("on", pr >= 0.88);
+    hint.style.opacity = pr < 0.04 ? 1 : 0;
+  }
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { upd(); ticking = false; }); } }, { passive: true });
+  addEventListener("resize", upd, { passive: true });
+  upd();
+})();
+</script>

@@ -1,0 +1,216 @@
+<title>Excel · Loyers Montréal</title>
+<meta name="description" content="Classeur Excel sans macro : carte du Canada et carte des villes en graphiques Excel, tableau de bord, scénarios 2030 et simulateur.">
+__HEADER__
+<main id="main">
+  <div class="heroband"><div class="wrap phero">
+    <p class="eyebrow hero-in" data-i18n="ey">Compétence · Excel</p>
+    <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Un classeur qui <mark>répond à la question</mark>, avec ses propres cartes</h1>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">Sept feuilles visibles — six d'analyse et un mode d'emploi — six tableaux sources, __XL_FORMULAS__ formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
+    <ul class="proves hero-in" style="--d:.24s" data-i18n="chips">
+      <li>SOMME.SI.ENS</li><li>SI.CONDITIONS</li><li>MAX.SI.ENS</li><li>INDEX / EQUIV</li><li>CENTILE</li><li>NPM</li><li>Plages nommées</li><li>Validation des données</li><li>Graphiques cartographiques</li>
+    </ul>
+    <p class="hero-in" style="--d:.3s;margin-top:20px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/modele_loyers_montreal.xlsx" download data-i18n="dl">Télécharger le classeur — français ↗</a><a class="btn" href="assets/modele_loyers_montreal_en.xlsx" download data-i18n="dlEn">Workbook — English ↗</a></p>
+  </div></div>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s1K">Feuille « Accueil »</p>
+      <h2 data-i18n="s1T">La question et la réponse, dès l'ouverture</h2>
+      <p class="intro" data-i18n="s1I">Le classeur s'ouvre sur la question du projet et quatre chiffres qui y répondent, tous recalculés par formules à partir des tableaux sources. Un bouton par feuille sert de menu. Les captures suivent la langue choisie : classeur français ici, classeur anglais en version anglaise de la page.</p>
+      <figure class="figure">
+        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy">
+        <figcaption data-i18n="s1C">460 $ d'écart entre annonce et loyer payé à Montréal ; +17,2 % pour un logement reloué contre +6,0 % pour un locataire en place. Capture du classeur réel.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s2K">Feuille « Carte provinces »</p>
+      <h2 data-i18n="s2T">La carte du Canada, en graphique Excel</h2>
+      <p class="intro" data-i18n="s2I">Une carte faite avec un graphique Excel standard : les contours des provinces forment une série de lignes, chaque province est une bulle dont la couleur et la taille suivent sa valeur. Elle s'ouvre dans toutes les versions d'Excel, sans connexion et sans complément.</p>
+      <figure class="figure">
+        <img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy">
+        <figcaption data-i18n="s2C">Hausse de l'IPC du loyer en 2025 : le Québec, sélectionné, est en rose et premier des 10 provinces. Change l'année à 2024 : l'Alberta prend la tête.</figcaption>
+      </figure>
+      <div class="steps" style="margin-top:14px">
+        <div class="stepc" data-i18n="st1"><span class="n">1 · PYTHON</span><h3>Des contours projetés</h3><p>Le module <code>geo.py</code> projette les contours des provinces (projection conique conforme de Lambert, paramètres de Statistique Canada) et les simplifie en 800 points.</p></div>
+        <div class="stepc" data-i18n="st2"><span class="n">2 · FORMULES</span><h3>Une valeur, une classe</h3><p>CHOISIR prend l'indicateur choisi ; CENTILE découpe les 10 valeurs en quintiles ; EQUIV donne la classe de couleur de chaque province.</p></div>
+        <div class="stepc" data-i18n="st3"><span class="n">3 · GRAPHIQUE</span><h3>Cinq séries, une sélection</h3><p>Une série par classe : une province n'a de coordonnée que dans sa classe, sinon NA(), qu'Excel ne trace pas. La province choisie a sa propre série, en rose.</p></div>
+      </div>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g1T">La valeur selon l'indicateur choisi</h3>
+<pre class="code" data-lang="xl">__XLF_PROV_V__</pre>
+<pre class="code" data-lang="xl" style="margin-top:8px">__XLF_SEUIL__</pre></div>
+        <div class="stepc"><h3 data-i18n="g2T">La série d'une classe de couleur</h3>
+<pre class="code" data-lang="xl">__XLF_PROV_CLASS__</pre>
+<p style="margin-top:8px" data-i18n="g2P">Les étiquettes « QC +7,8 % » sont des séries dont le nom vient d'une cellule ; FIXE affiche la virgule de l'Excel de l'utilisateur.</p>
+<pre class="code" data-lang="xl">__XLF_PROV_LABEL__</pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s3K">Feuille « Carte villes »</p>
+      <h2 data-i18n="s3T">Combien coûte un déménagement, ville par ville</h2>
+      <p class="intro" data-i18n="s3I">Les __N_PAYE__ régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
+      <figure class="figure">
+        <img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy">
+        <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart sur __N_PAYE__. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
+      </figure>
+<pre class="code" data-lang="xl">__XLF_VILLE_CLASS__</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s4K">Feuille « Tableau de bord »</p>
+      <h2 data-i18n="s4T">Piloté par trois cellules</h2>
+      <p class="intro" data-i18n="s4I">Année de début, année de fin et type de logement : trois plages nommées (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) protégées par une validation des données. Les quatre indicateurs et les quatre graphiques se recalculent.</p>
+      <figure class="figure">
+        <img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy">
+        <figcaption data-i18n="s4C">Période 2019 à 2025, 2 chambres : +27,2 % après inflation, soit 4,1 % par an.</figcaption>
+      </figure>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g3T">Hausse réelle sur la période</h3><p data-i18n="g3P">Le rapport des loyers divisé par le rapport des indices de prix : l'inflation est retirée en une seule formule.</p>
+<pre class="code" data-lang="xl">__XLF_DASH_E9__</pre></div>
+        <div class="stepc"><h3 data-i18n="g4T">Tri des villes sans macro</h3><p data-i18n="g4P">RANG classe les hausses, puis INDEX/EQUIV reconstitue la liste triée qui alimente le graphique en barres.</p>
+<pre class="code" data-lang="xl">__XLF_CALC_RANK__
+__XLF_CALC_SORT__</pre></div>
+      </div>
+      <p class="note" data-i18n="s4N">Les formules sont enregistrées en anglais dans le fichier ; une version française d'Excel les affiche traduites (SUMIFS devient SOMME.SI.ENS, IFS devient SI.CONDITIONS, PERCENTILE devient CENTILE).</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s5K">Feuille « Scénarios »</p>
+      <h2 data-i18n="s5T">Quand le loyer moyen rattrapera-t-il les annonces ?</h2>
+      <p class="intro" data-i18n="s5I">Trois hypothèses de croissance tirées des données (tendance 1992-2019, hausse 2025 des locataires en place, rythme 2019-2025), ajustables. La fonction NPM calcule le nombre d'années pour que le loyer moyen (__K_LOYER_2025__) atteigne le loyer affiché aujourd'hui (__K_DEMANDE__).</p>
+      <figure class="figure">
+        <img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy">
+        <figcaption data-i18n="s5C">Au rythme des locataires en place, le loyer moyen n'atteindrait le niveau actuel des annonces qu'en __K_RATTRAPAGE__. Des scénarios pour raisonner ; aucun n'est une prévision.</figcaption>
+      </figure>
+<pre class="code" data-lang="xl">__XLF_SC_NPER__</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s6K">Feuille « Simulateur »</p>
+      <h2 data-i18n="s6T">Ton loyer face au marché</h2>
+      <figure class="figure"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy">
+        <figcaption data-i18n="s6C">Le site en reprend la logique, cellule pour cellule, <a href="index.html#simulateur">sur la page Analyse</a>.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="block" id="excel365">
+    <div class="wrap">
+      <p class="kicker" data-i18n="s7K">Feuille « Excel 365 »</p>
+      <h2 data-i18n="s7T">Un portefeuille de logements lu avec les fonctions dynamiques</h2>
+      <p class="intro" data-i18n="s7I">La liste fictive d'une agence (huit logements, la même que l'exemple du programme Python) analysée avec RECHERCHEX, LET, FILTRE, TRIER et UNIQUE : loyer du marché pour chaque type, hausse du marché depuis le début du bail, position face au marché, gain d'une relocation au prix des annonces, puis les logements sous le marché classés par écart et le revenu annuel qu'une relocation libérerait. Les cases jaunes se modifient : la feuille recalcule le portefeuille. C'est la seule feuille qui demande Excel 2021 ou Microsoft 365.</p>
+      <div class="gallery" style="margin-top:14px">
+        <div class="stepc"><h3 data-i18n="g7T">RECHERCHEX à deux critères, dans un LET</h3>
+<pre class="code" data-lang="xl">__XLF_365_LET__</pre>
+<p style="margin-top:8px" data-i18n="g7P">Le loyer du marché pour le type <i>et</i> l'année du bail, sans colonne d'aide : la recherche porte sur un produit de deux conditions. LET nomme les étapes.</p></div>
+        <div class="stepc"><h3 data-i18n="g8T">FILTRE puis TRIER, en une formule</h3>
+<pre class="code" data-lang="xl">__XLF_365_SORT__</pre>
+<p style="margin-top:8px" data-i18n="g8P">Les logements dont l'écart au marché dépasse −5 %, classés du plus grand écart au plus petit. Le revenu annuel libéré suit la même logique :</p>
+<pre class="code" data-lang="xl">__XLF_365_GAINS__</pre></div>
+      </div>
+      <p class="note" data-i18n="s7N">Les formules à résultat multiple sont figées sur huit lignes (formules matricielles) pour que le fichier s'ouvre sans réparation dans toute version ; dans Excel 365, retirer les accolades suffit pour qu'elles se propagent d'elles-mêmes. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="qT">Qualité du classeur</h2>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="q1T">Vérifications</h3>
+          <ul>
+            <li data-i18n="q11">Recalcul complet dans LibreOffice à chaque construction : aucune erreur visible. Les seuls NA() sont dans la feuille masquée « Calculs », où ils servent à masquer des points de graphique.</li>
+            <li data-i18n="q12">Aucune cellule vide dans les tableaux sources : la construction s'arrête sinon. Les régions sans loyer payé publié sont exclues plutôt que marquées « n.d. ».</li>
+            <li data-i18n="q13">Les chiffres de l'accueil concordent avec le pipeline Python et les requêtes SQL : 460 $, +27,2 %, Québec premier en 2025.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="q2T">Conventions</h3>
+          <ul>
+            <li data-i18n="q21">Cases jaunes : entrées. Texte bleu : données sources. Vert : valeurs lues dans une autre feuille. Noir : calculs.</li>
+            <li data-i18n="q22">Sources en tableaux Excel nommés (<code>tbl_loyers</code>, <code>tbl_trimestriel</code>…), citées dans le bandeau de chaque feuille.</li>
+            <li data-i18n="q23">Une feuille « Mode d'emploi » liste chaque fonction du classeur, de la plus simple à la plus avancée, avec l'endroit où la voir et trois exercices de prise en main.</li>
+            <li data-i18n="q24">Compatibilité d'abord : les feuilles d'analyse n'utilisent que des fonctions disponibles depuis Excel 2019. Une seule feuille, « Excel 365 », montre les fonctions dynamiques (RECHERCHEX, LET, FILTRE, TRIER, UNIQUE).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap pager"><a href="carte.html" data-i18n="pgL">← Carte</a><a href="sql.html" data-i18n="pgR">SQL →</a></div>
+</main>
+__FOOTER__
+<script>__COMMON_JS__</script>
+<script>
+window.PAGE_EN = {
+  "@title": `Excel · Montreal Rents`,
+  ey: `Skill · Excel`,
+  h1: `A workbook that <mark>answers the question</mark>, with its own maps`,
+  lede: `Seven visible sheets — six of analysis plus a how-to — six source tables, __XL_FORMULAS_EN__ formulas, no macros, no empty cells. Pick a year: the Canada map recolours. Pick a city: its card, rank and curve follow. Simple functions (SUMIFS, IFS) carry the essentials; the advanced ones (PERCENTILE, NPER, NA()-driven series) build the maps and scenarios. The workbook ships in French and in English — same formulas, same figures.`,
+  chips: `<li>SUMIFS</li><li>IFS</li><li>MAXIFS</li><li>INDEX / MATCH</li><li>PERCENTILE</li><li>NPER</li><li>Named ranges</li><li>Data validation</li><li>Map charts</li>`,
+  dl: `Classeur — français ↗`, dlEn: `Download the workbook — English ↗`,
+  s1K: `"Accueil" sheet (home)`,
+  s1T: `The question and the answer, right when it opens`,
+  s1I: `The workbook opens on the project's question and four figures that answer it, all recomputed by formulas from the source tables. One button per sheet serves as a menu. The screenshots follow the chosen language: these come from the English workbook.`,
+  s1C: `A $460 gap between listings and rent paid in Montreal; +17.2% for a re-let unit against +6.0% for a sitting tenant. Screenshot of the real workbook.`,
+  s2K: `"Carte provinces" sheet (province map)`,
+  s2T: `The map of Canada, as a plain Excel chart`,
+  s2I: `A map built with a standard Excel chart: province outlines form a line series, and each province is a bubble whose colour and size track its value. It opens in every version of Excel, offline, no add-in.`,
+  s2C: `Rent CPI increase in 2025: Quebec, selected, is pink and first of the 10 provinces. Switch the year to 2024: Alberta takes the lead.`,
+  st1: `<span class="n">1 · PYTHON</span><h3>Projected outlines</h3><p>The <code>geo.py</code> module projects the province outlines (Lambert conformal conic projection, Statistics Canada parameters) and simplifies them to 800 points.</p>`,
+  st2: `<span class="n">2 · FORMULAS</span><h3>One value, one class</h3><p>CHOOSE picks the selected indicator; PERCENTILE cuts the 10 values into quintiles; MATCH gives each province its colour class.</p>`,
+  st3: `<span class="n">3 · CHART</span><h3>Five series, one selection</h3><p>One series per class: a province only has coordinates in its own class, otherwise NA(), which Excel does not plot. The selected province gets its own series, in pink.</p>`,
+  g1T: `The value for the selected indicator`,
+  g2T: `The series of one colour class`,
+  g2P: `The "QC +7,8 %" labels are series whose name comes from a cell; FIXED displays the decimal separator of the user's Excel.`,
+  s3K: `"Carte villes" sheet (city map)`,
+  s3T: `What moving costs, city by city`,
+  s3I: `The __N_PAYE__ metro areas where Statistics Canada publishes both the asking rent and the rent paid, on two maps (East and West). Pick a city: its dot turns pink, and its card, rank and quarterly curve update.`,
+  s3C: `Montreal: $1,820 asked against $1,360 paid, 4th widest gap of __N_PAYE__. Areas without a published paid rent are left out of the workbook: no "n/a" cells.`,
+  s4K: `"Tableau de bord" sheet (dashboard)`,
+  s4T: `Driven by three cells`,
+  s4I: `Start year, end year and unit type: three named ranges (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) guarded by data validation. The four indicators and four charts recompute.`,
+  s4C: `2019 to 2025, two-bedroom: +27.2% after inflation, or 4.1% a year.`,
+  g3T: `Real increase over the period`,
+  g3P: `The rent ratio divided by the price-index ratio: inflation removed in a single formula.`,
+  g4T: `Sorting cities without a macro`,
+  g4P: `RANK orders the increases, then INDEX/MATCH rebuilds the sorted list that feeds the bar chart.`,
+  s4N: `Formulas are stored in English in the file; a French Excel shows them translated (SUMIFS becomes SOMME.SI.ENS, IFS becomes SI.CONDITIONS, PERCENTILE becomes CENTILE).`,
+  s5K: `"Scénarios" sheet (scenarios)`,
+  s5T: `When will the average rent catch up with listings?`,
+  s5I: `Three growth assumptions drawn from the data (1992-2019 trend, 2025 sitting-tenant increase, 2019-2025 pace), all adjustable. The NPER function computes how many years the average rent (__K_LOYER_2025_EN__) needs to reach today's asking rent (__K_DEMANDE_EN__).`,
+  s5C: `At the sitting-tenant pace, the average rent would only reach today's asking level in __K_RATTRAPAGE_EN__. Scenarios to reason with; none is a forecast.`,
+  s6K: `"Simulateur" sheet (simulator)`,
+  s6T: `Your rent against the market`,
+  s6C: `The site mirrors its logic, cell for cell, <a href="index.html#simulateur">on the Analysis page</a>.`,
+  qT: `Workbook quality`,
+  q1T: `Checks`,
+  q11: `Full recalculation in LibreOffice at every build: no visible errors. The only NA() live in the hidden "Calculs" sheet, where they hide chart points.`,
+  q12: `No empty cells in the source tables: the build stops otherwise. Areas without a published paid rent are excluded rather than flagged "n/a".`,
+  q13: `The home-sheet figures match the Python pipeline and the SQL queries: $460, +27.2%, Quebec first in 2025.`,
+  q2T: `Conventions`,
+  q21: `Yellow cells: inputs. Blue text: source data. Green: values read from another sheet. Black: calculations.`,
+  q22: `Sources as named Excel tables (<code>tbl_loyers</code>, <code>tbl_trimestriel</code>…), cited in each sheet's banner.`,
+  q23: `A "Mode d'emploi" (how-to) sheet lists every function in the workbook, from the simplest to the most advanced, with where to see it and three warm-up exercises.`,
+  q24: `Compatibility first: the analysis sheets use only functions available since Excel 2019. A single sheet, "Excel 365", shows the dynamic functions (XLOOKUP, LET, FILTER, SORT, UNIQUE).`,
+  s7K: `"Excel 365" sheet`, s7T: `A housing portfolio read with dynamic array functions`,
+  s7I: `A fictional agency list (eight units, the same as the Python program example) analysed with XLOOKUP, LET, FILTER, SORT and UNIQUE: market rent for each type, market increase since the lease began, position against the market, gain from a re-let at asking prices, then the units below market ranked by gap and the yearly income a re-let would free. The yellow cells are editable: the sheet recomputes the portfolio. It is the only sheet that requires Excel 2021 or Microsoft 365.`,
+  g7T: `Two-criteria XLOOKUP inside a LET`,
+  g7P: `The market rent for the type <i>and</i> the lease year, with no helper column: the lookup runs on the product of two conditions. LET names the steps.`,
+  g8T: `FILTER then SORT, in one formula`,
+  g8P: `Units whose gap to market is beyond −5%, ranked from the largest gap to the smallest. The yearly income freed follows the same logic:`,
+  s7N: `Multi-result formulas are fixed to eight rows (array formulas) so the file opens without repair in any version; in Excel 365, removing the braces lets them spill on their own. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
+  pgL: `← Map`, pgR: `SQL →`
+};
+</script>

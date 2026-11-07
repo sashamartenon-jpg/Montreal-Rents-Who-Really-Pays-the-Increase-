@@ -1,0 +1,394 @@
+<title>Carte · Loyers Montréal</title>
+<meta name="description" content="Carte interactive des loyers au Canada : loyers demandés et payés dans 42 régions métropolitaines, hausse des loyers par province.">
+__HEADER__
+<style>
+.mapwrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.mapcard { position: relative; }
+#map svg { display: block; width: 100%; height: auto; }
+.prov { stroke: var(--surface); stroke-width: .8; transition: opacity .15s; }
+.prov.na { fill: var(--map-na); }
+.prov.hover, .prov.sel { stroke: var(--warm); stroke-width: 2; }
+.city { stroke: var(--surface); stroke-width: 1.2; cursor: pointer; }
+.city.na { fill: var(--map-na); stroke: var(--ink-3); stroke-dasharray: 2 1.5; }
+.city.hl { stroke: var(--warm); stroke-width: 3; }
+.citylbl { font: 600 11px var(--font-body); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.citylbl.mtl { fill: var(--warm-ink); font-size: 12.5px; }
+.maplegend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font: .76rem var(--font-mono); color: var(--ink-3); margin-top: 8px; }
+.ramp { display: flex; }
+.ramp span { width: 34px; height: 10px; }
+.ramp-l { display: flex; justify-content: space-between; width: 170px; }
+.list { max-height: 560px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 6px; align-items: center; padding: 5px 6px; border-radius: 6px; cursor: pointer; font-size: .86rem; }
+.list li:hover, .list li.sel { background: var(--mtl-soft); }
+.list li.sel { outline: 2px solid var(--warm); outline-offset: -2px; }
+.list li .r { font: .72rem var(--font-mono); color: var(--ink-3); text-align: right; }
+.list li .nm { min-width: 0; }
+.list li .nm b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list li .bar { height: 5px; border-radius: 3px; background: var(--mtl); margin-top: 3px; }
+.list li.mtl .bar { background: var(--warm); }
+.list li .v { text-align: right; font: 500 .82rem var(--font-mono); font-variant-numeric: tabular-nums; }
+.list li.na { color: var(--ink-3); } .list li.na .bar { opacity: .35; }
+.detail { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
+.detail h3 { font: 600 1.05rem var(--font-display); margin: 0 0 2px; }
+.detail .sub { font-size: .78rem; color: var(--ink-3); margin: 0 0 8px; }
+.detail dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; margin: 0 0 8px; font-size: .84rem; }
+.detail dt { color: var(--ink-2); }
+.detail dd { margin: 0; text-align: right; font: 500 .84rem var(--font-mono); }
+.zoombtns { margin-left: auto; }
+.ctrlrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 12px; }
+select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+.flagE { color: var(--ink-3); font-size: .7rem; }
+.heroband + .wrap .kpis { margin-top: 22px; }
+.yearbar { display: flex; align-items: center; gap: 12px; margin: -2px 0 12px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.yearbar input[type=range] { flex: 1; accent-color: var(--warm); min-width: 120px; }
+.yearbar output { font: 700 1.3rem var(--font-display); color: var(--warm-ink); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+.yearticks { display: flex; justify-content: space-between; font: .7rem var(--font-mono); color: var(--ink-3); flex: 1; }
+.yearcol { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+@media (max-width: 900px) { .mapwrap { grid-template-columns: minmax(0, 1fr); } .list { max-height: 340px; } .zoombtns { margin-left: 0; } }
+</style>
+<main id="main">
+  <div class="heroband"><div class="wrap phero">
+    <p class="eyebrow" data-i18n="ey">Carte interactive · Canada</p>
+    <h1 data-i18n="h1">Où les loyers pèsent-ils le plus sur <mark>ceux qui déménagent</mark> ?</h1>
+    <p data-i18n="lede">Deux lectures du même marché. En vue « Villes », l'écart entre le loyer <b>demandé</b> aux nouveaux locataires et le loyer <b>payé</b> par ceux déjà en place, dans 42 régions métropolitaines. En vue « Provinces », la hausse des loyers mesurée par l'indice des prix, année par année de 2020 à 2025. Lance l'animation : les provinces de l'Atlantique mènent de 2020 à 2023, l'Alberta en 2024, le Québec en 2025.</p>
+  </div></div>
+
+  <div class="wrap">
+    <div class="kpis">
+      <div class="kpi hot"><b id="k1"></b><small id="k1l"></small></div>
+      <div class="kpi"><b id="k2"></b><small id="k2l"></small></div>
+      <div class="kpi"><b id="k3"></b><small id="k3l"></small></div>
+    </div>
+  </div>
+
+  <section class="wrap" style="padding-bottom:36px">
+    <div class="ctrlrow">
+      <div class="seg" role="group" aria-label="Vue">
+        <button type="button" id="v-villes" aria-pressed="true" data-i18n="vV">Villes</button>
+        <button type="button" id="v-prov" aria-pressed="false" data-i18n="vP">Provinces</button>
+      </div>
+      <label for="metric" style="position:absolute;left:-9999px" data-i18n="metL">Indicateur</label>
+      <select class="sel" id="metric"></select>
+      <div class="seg zoombtns" role="group" aria-label="Zoom">
+        <button type="button" data-z="canada" aria-pressed="false">Canada</button>
+        <button type="button" data-z="est" aria-pressed="true" data-i18n="zE">Est</button>
+        <button type="button" data-z="qc" aria-pressed="false" data-i18n="zQ">Sud du Québec</button>
+      </div>
+    </div>
+    <div class="yearbar" id="yearbar" hidden>
+      <button type="button" class="btn primary" id="play">▶ Lecture</button>
+      <div class="yearcol"><input type="range" id="year" min="2020" max="2025" step="1" value="2025" aria-label="Année">
+        <div class="yearticks" aria-hidden="true"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div></div>
+      <output id="year-out" for="year">2025</output>
+    </div>
+    <div class="mapwrap">
+      <div class="panel mapcard">
+        <p class="chart-title" id="map-title"></p>
+        <p class="chart-sub" id="map-sub"></p>
+        <div id="map" role="img" aria-label="Carte du Canada"></div>
+        <div class="maplegend" id="legend"></div>
+      </div>
+      <div class="panel">
+        <p class="chart-title" id="list-title"></p>
+        <ol class="list" id="list"></ol>
+        <div class="detail" id="detail"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 data-i18n="rT">Comment lire la carte</h2>
+      <div class="cols">
+        <div>
+          <h3 data-i18n="r1T">Ce que mesurent les indicateurs</h3>
+          <ul>
+            <li data-i18n="r11"><b>Loyer demandé</b> : prix moyen des annonces d'appartements de 2 chambres. C'est ce que paie quelqu'un qui cherche un logement.</li>
+            <li data-i18n="r12"><b>Loyer payé</b> : loyer moyen payé par les locataires en place. L'écart entre les deux mesure ce que coûte un déménagement.</li>
+            <li data-i18n="r13"><b>IPC du loyer</b> : évolution du prix des mêmes logements loués, par province. Il suit les hausses imposées aux locataires, pas le prix des annonces.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="r2T">Limites</h3>
+          <ul>
+            <li data-i18n="r21">Les loyers demandés et payés sont des estimations expérimentales de Statistique Canada. Les valeurs cotées E (à utiliser avec prudence) sont signalées par un astérisque ; les valeurs cotées F ne sont pas affichées.</li>
+            <li data-i18n="r22">Au dernier trimestre (__PERIODE__), le loyer payé est publié pour __N_PAYE__ régions sur 42.</li>
+            <li data-i18n="r23">Les cercles sont placés au centre de chaque ville principale ; les contours viennent de Natural Earth (paquet sane-topojson). Les territoires n'ont pas de données d'IPC provinciales.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note" data-i18n="rN">Sources : Statistique Canada, tableaux 46-10-0092-01 (loyers demandés et payés, appartements de 2 chambres, trimestriel) et 18-10-0005-01 (IPC, loyer et ensemble, par province). Données extraites le 4 novembre 2026.</p>
+    </div>
+  </section>
+
+  <div class="wrap pager"><a href="index.html" data-i18n="pgL">← Analyse</a><a href="excel.html" data-i18n="pgR">Excel →</a></div>
+</main>
+__FOOTER__
+<div class="tip" id="tip" hidden></div>
+<script id="carte" type="application/json">__CARTE_JSON__</script>
+<script id="geo" type="application/json">__GEO_JSON__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>__COMMON_JS__</script>
+<script>
+window.PAGE_EN = {
+  "@title": `Map · Montreal Rents`,
+  ey: `Interactive map · Canada`,
+  h1: `Where do rents weigh most on <mark>people who move</mark>?`,
+  lede: `Two readings of the same market. In the "Cities" view, the gap between the rent <b>asked</b> of new tenants and the rent <b>paid</b> by sitting ones, across 42 metro areas. In the "Provinces" view, rent increases as measured by the price index, year by year from 2020 to 2025. Press play: the Atlantic provinces lead from 2020 to 2023, Alberta in 2024, Quebec in 2025.`,
+  vV: `Cities`, vP: `Provinces`, metL: `Indicator`, zE: `East`, zQ: `Southern Quebec`,
+  rT: `How to read the map`,
+  r1T: `What the indicators measure`,
+  r11: `<b>Asking rent</b>: average advertised price of two-bedroom apartments. It is what someone looking for a unit pays.`,
+  r12: `<b>Rent paid</b>: average rent paid by sitting tenants. The gap between the two measures what moving costs.`,
+  r13: `<b>Rent CPI</b>: price change of the same rented units, by province. It tracks the increases tenants face, not listing prices.`,
+  r2T: `Limitations`,
+  r21: `Asking and paid rents are experimental estimates from Statistics Canada. E-rated values (use with caution) are flagged with an asterisk; F-rated values are not shown.`,
+  r22: `In the latest quarter (__PERIODE_EN__), the paid rent is published for __N_PAYE__ of 42 metro areas.`,
+  r23: `Circles sit at the centre of each main city; outlines come from Natural Earth (sane-topojson package). The territories have no provincial CPI data.`,
+  rN: `Sources: Statistics Canada, tables 46-10-0092-01 (asking and paid rents, two-bedroom apartments, quarterly) and 18-10-0005-01 (CPI, rent and all-items, by province). Data extracted November 4, 2026.`,
+  pgL: `← Analysis`, pgR: `Excel →`
+};
+const C = JSON.parse(document.getElementById("carte").textContent);
+const GEO = JSON.parse(document.getElementById("geo").textContent);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const EN = () => window.LANG === "en";
+const tr = (fr, en) => EN() ? en : fr;
+const nf = (v, d = 0) => new Intl.NumberFormat(EN() ? "en-CA" : "fr-CA", { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
+const money = v => EN() ? "$" + nf(v) : nf(v) + " $";
+const pct = (v, d = 1, s = true) => (s && v > 0 ? "+" : "") + nf(v, d) + (EN() ? "%" : " %");
+const per = p => EN() ? "Q" + p.slice(-1) + " " + p.slice(0, 4) : p;
+const ND = () => tr("n.d.", "n/a");
+const ord = n => n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10 > 3 || [11, 12, 13].includes(n % 100) ? 0 : n % 10] || "th");
+const last = C.periodes[C.periodes.length - 1], first = C.periodes[0];
+const MTL = C.villes.find(v => v.id === 7), QC = C.provinces.find(p => p.code === "QC");
+const provRank = [...C.provinces].filter(p => p.code !== "CA").sort((a, b) => b.hausse_loyer_2025 - a.hausse_loyer_2025);
+const geoName = f => EN() && f.properties.nom_en ? f.properties.nom_en : f.properties.nom;
+
+function renderKpis() {
+  document.getElementById("k1").textContent = money(MTL.ecart);
+  document.getElementById("k1l").textContent = tr(
+    `de plus pour un 2 chambres affiché à Montréal (${money(MTL.demande)}) que le loyer payé par les locataires en place (${money(MTL.paye)}), ${per(last)}`,
+    `more for an advertised two-bedroom in Montreal (${money(MTL.demande)}) than the rent paid by sitting tenants (${money(MTL.paye)}), ${per(last)}`);
+  document.getElementById("k2").textContent = `${pct(MTL.var_demande)} / ${pct(MTL.var_paye)}`;
+  document.getElementById("k2l").textContent = tr(
+    `Montréal, sur un an : loyer demandé / loyer payé. Les annonces baissent, les loyers en place montent.`,
+    `Montreal, year over year: asking rent / rent paid. Listings are easing; in-place rents keep rising.`);
+  document.getElementById("k3").textContent = pct(QC.hausse_loyer_2025);
+  document.getElementById("k3l").textContent = tr(
+    `hausse de l'IPC du loyer au Québec en 2025, ${provRank.indexOf(QC) + 1}re des 10 provinces (Canada : ${pct(C.provinces.find(p => p.code === "CA").hausse_loyer_2025)})`,
+    `rent CPI increase in Quebec in 2025, ranked ${ord(provRank.indexOf(QC) + 1)} of 10 provinces (Canada: ${pct(C.provinces.find(p => p.code === "CA").hausse_loyer_2025)})`);
+  document.getElementById("play").textContent = S.timer ? tr("❚❚ Pause", "❚❚ Pause") : tr("▶ Lecture", "▶ Play");
+}
+
+const METRICS = () => ({
+  villes: [
+    { k: "ecart_pct", label: tr("Écart loyer demandé / payé (%)", "Gap, asking vs paid rent (%)"), fmt: v => pct(v), title: tr("Combien coûte un déménagement", "What moving costs"), sub: tr(`Loyer demandé comparé au loyer payé, 2 chambres, ${per(last)}`, `Asking rent against rent paid, two-bedroom, ${per(last)}`) },
+    { k: "demande", label: tr("Loyer demandé (2 chambres)", "Asking rent (two-bedroom)"), fmt: money, title: tr("Loyer demandé dans les annonces", "Asking rent in listings"), sub: tr(`Appartements de 2 chambres, ${per(last)}`, `Two-bedroom apartments, ${per(last)}`) },
+    { k: "var_demande", label: tr("Variation du loyer demandé sur un an", "Change in asking rent, year over year"), fmt: v => pct(v), title: tr("Le loyer demandé monte-t-il encore ?", "Is the asking rent still rising?"), sub: tr(`${per(first)} → ${per(last)}, 2 chambres`, `${per(first)} → ${per(last)}, two-bedroom`) },
+  ],
+  prov: [
+    { k: "annuelle", label: tr("Hausse annuelle de l'IPC du loyer", "Annual rent CPI increase"), fmt: v => pct(v), title: () => tr(`Hausse des loyers en ${S.year}, par province`, `Rent increase in ${S.year}, by province`),
+      sub: () => { const top = [...C.provinces].filter(p => p.code !== "CA").sort((a, b) => annual(b, S.year) - annual(a, S.year))[0];
+        return tr(`IPC du loyer, ${S.year} contre ${S.year - 1} · plus forte hausse : ${top.nom} (${pct(annual(top, S.year))}) · échelle commune à 2020-2025`,
+                  `Rent CPI, ${S.year} vs ${S.year - 1} · strongest increase: ${top.nom} (${pct(annual(top, S.year))}) · common scale for 2020-2025`); } },
+    { k: "hausse_loyer", label: tr("Hausse de l'IPC du loyer, 2019-2025", "Rent CPI increase, 2019-2025"), fmt: v => pct(v), title: tr("Hausse des loyers depuis 2019, par province", "Rent increase since 2019, by province"), sub: tr("Indice des prix du loyer, 2025 contre 2019", "Rent price index, 2025 vs 2019") },
+    { k: "hausse_reelle", label: tr("Hausse réelle du loyer, 2019-2025", "Real rent increase, 2019-2025"), fmt: v => pct(v), title: tr("Hausse des loyers au-delà de l'inflation", "Rent increases beyond inflation"), sub: tr("IPC du loyer rapporté à l'IPC d'ensemble, 2025 contre 2019", "Rent CPI against all-items CPI, 2025 vs 2019") },
+  ]
+});
+const ZOOMS = { canada: [[-141, 41.7], [-52.6, 70]], est: [[-84, 42], [-52.6, 50.5]], qc: [[-77, 44.8], [-69.6, 48.8]] };
+const S = { view: "villes", metric: "ecart_pct", zoom: "est", sel: 7, year: 2025, timer: null };
+const YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
+const annual = (p, y) => Math.round((p.serie_loyer[y - 2019] / p.serie_loyer[y - 2020] - 1) * 1000) / 10;
+const txt = x => typeof x === "function" ? x() : x;
+
+function itemsFor() {
+  const m = S.metric;
+  if (S.view === "villes") return C.villes.filter(v => v.lat != null).map(v => ({ id: v.id, nom: v.nom, sub: v.prov, v: v[m], raw: v, mtl: v.id === 7 }));
+  return C.provinces.filter(p => p.code !== "CA").map(p => ({ id: p.code, nom: p.nom, sub: p.code, v: m === "annuelle" ? annual(p, S.year) : p[m], raw: p, mtl: p.code === "QC" }));
+}
+function colorScale(items) {
+  // animation : une seule échelle pour toutes les années, sinon les couleurs ne seraient pas comparables d'une année à l'autre
+  const vals = S.view === "prov" && S.metric === "annuelle"
+    ? C.provinces.filter(p => p.code !== "CA").flatMap(p => YEARS.map(y => annual(p, y)))
+    : items.map(d => d.v).filter(v => v != null);
+  const ramp = ["--map-1", "--map-2", "--map-3", "--map-4", "--map-5"].map(css);
+  return d3.scaleQuantize().domain(d3.extent(vals)).nice().range(ramp);
+}
+
+const tip = document.getElementById("tip");
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.pageX + 14, y = ev.pageY - h - 10;
+  if (x + w > window.scrollX + document.documentElement.clientWidth - 8) x = ev.pageX - w - 14;
+  if (y < window.scrollY + 8) y = ev.pageY + 16;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+function draw() {
+  const el = document.getElementById("map");
+  const W = Math.max(300, el.clientWidth), H = Math.round(W * (S.zoom === "canada" ? 0.78 : 0.62));
+  el.innerHTML = "";
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+  const [[w, s], [e, n]] = ZOOMS[S.zoom];
+  const proj = d3.geoConicConformal().parallels([49, 77]).rotate([S.zoom === "canada" ? 96 : 72, 0])
+    .fitExtent([[8, 8], [W - 8, H - 8]], { type: "MultiPoint", coordinates: [[w, s], [e, n], [w, n], [e, s], [(w + e) / 2, s], [(w + e) / 2, n]] });
+  const path = d3.geoPath(proj);
+  svg.append("rect").attr("width", W).attr("height", H).attr("fill", "transparent").on("click", () => {});
+  const items = itemsFor(), col = colorScale(items), byId = new Map(items.map(d => [d.id, d]));
+  const M = METRICS()[S.view].find(x => x.k === S.metric);
+  const gp = svg.append("g");
+  gp.selectAll("path").data(GEO.features).join("path")
+    .attr("d", path)
+    .attr("class", f => {
+      const it = S.view === "prov" ? byId.get(f.properties.code) : null;
+      return "prov" + (S.view === "prov" && (!it || it.v == null) ? " na" : "") + (S.view === "prov" && S.sel === f.properties.code ? " sel" : "");
+    })
+    .attr("fill", f => {
+      if (S.view !== "prov") return css("--map-0");
+      const it = byId.get(f.properties.code);
+      return it && it.v != null ? col(it.v) : css("--map-na");
+    })
+    .style("cursor", S.view === "prov" ? "pointer" : "default")
+    .on("pointermove", (ev, f) => {
+      if (S.view !== "prov") return;
+      const it = byId.get(f.properties.code);
+      showTip(`<div class="t">${f.properties.nom}</div><div class="r"><span>${M.label}</span><b>${it && it.v != null ? M.fmt(it.v) : ND()}</b></div>`, ev);
+    })
+    .on("pointerleave", hideTip)
+    .on("click", (ev, f) => { if (S.view === "prov" && byId.get(f.properties.code)) select(f.properties.code); });
+
+  if (S.view === "villes") {
+    const r = S.zoom === "canada" ? 5 : S.zoom === "est" ? 7 : 10;
+    const pts = items.map(d => ({ ...d, xy: proj([d.raw.lon, d.raw.lat]) })).filter(d => d.xy && d.xy[0] > -20 && d.xy[0] < W + 20 && d.xy[1] > -20 && d.xy[1] < H + 20);
+    pts.sort((a, b) => (a.v == null) - (b.v == null) || (a.id === S.sel) - (b.id === S.sel));
+    const gc = svg.append("g");
+    gc.selectAll("circle").data(pts).join("circle")
+      .attr("cx", d => d.id === 8 ? d.xy[0] + r * 0.6 : d.id === 23 ? d.xy[0] - r * 0.6 : d.xy[0])
+      .attr("cy", d => d.xy[1]).attr("r", d => d.id === S.sel || d.mtl ? r * 1.35 : r)
+      .attr("class", d => "city" + (d.v == null ? " na" : "") + (d.id === S.sel || d.mtl ? " hl" : ""))
+      .attr("fill", d => d.v == null ? css("--map-na") : col(d.v))
+      .on("pointermove", (ev, d) => showTip(cityTip(d.raw), ev)).on("pointerleave", hideTip)
+      .on("click", (ev, d) => select(d.id));
+    const narrow = W < 520;
+    const big = narrow && S.zoom !== "qc" ? [7] : S.zoom === "qc" ? pts.map(d => d.id) : S.zoom === "est" ? [7, 27, 9, 2, 16] : [7, 27, 41, 32, 33, 29, 2];
+    const shortName = n => n.replace(/ \(.*\)/, "").replace(" - Cambridge - Waterloo", "").replace("Belleville - Quinte West", "Belleville").replace("St. Catharines - Niagara", "St. Catharines");
+    gc.selectAll("text").data(pts.filter(d => big.includes(d.id) || d.id === S.sel)).join("text")
+      .attr("class", d => "citylbl" + (d.mtl ? " mtl" : ""))
+      .attr("x", d => d.xy[0] + r + 4).attr("y", d => d.xy[1] + (d.id === 23 ? -6 : d.id === 8 ? 10 : 4))
+      .text(d => shortName(d.nom) + (S.zoom !== "canada" && d.v != null ? " · " + M.fmt(d.v) : ""));
+  } else {
+    const small = new Set(["PE", "NS", "NB"]);
+    const OFF = { SK: [0, 14], MB: [0, -6], NL: [10, -26], QC: [0, 20], ON: [10, 22] };
+    const lab = svg.append("g").selectAll("g").data(GEO.features.filter(f => byId.get(f.properties.code) && (S.zoom !== "canada" || !small.has(f.properties.code))))
+      .join("g").attr("transform", f => { const c = path.centroid(f), o = OFF[f.properties.code] || [0, 0]; return `translate(${c[0] + o[0]},${c[1] + o[1]})`; })
+      .style("display", f => { const c = path.centroid(f); return isFinite(c[0]) && c[0] > 0 && c[0] < W && c[1] > 0 && c[1] < H ? null : "none"; });
+    lab.append("text").attr("class", "citylbl").attr("text-anchor", "middle").attr("y", -2).style("font-size", "10px").text(f => f.properties.code);
+    lab.append("text").attr("class", "citylbl").attr("text-anchor", "middle").attr("y", 11).text(f => M.fmt(byId.get(f.properties.code).v));
+  }
+  // légende
+  const th = col.thresholds ? col.thresholds() : [];
+  const dom = col.domain();
+  document.getElementById("legend").innerHTML =
+    `<div><div class="ramp">${col.range().map(c => `<span style="background:${c}"></span>`).join("")}</div>
+     <div class="ramp-l"><span>${M.fmt(dom[0])}</span><span>${M.fmt(dom[1])}</span></div></div>
+     <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:${css("--map-na")};border:1px dashed ${css("--ink-3")}"></span>${tr("non publié", "not published")}</span>
+     <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;border:2.5px solid ${css("--warm")}"></span>${S.view === "villes" ? tr("Montréal / sélection", "Montreal / selection") : tr("sélection", "selection")}</span>`;
+  document.getElementById("map-title").textContent = txt(M.title);
+  document.getElementById("map-sub").textContent = txt(M.sub);
+  document.getElementById("yearbar").hidden = !(S.view === "prov" && S.metric === "annuelle");
+  drawList(items, M);
+  drawDetail();
+}
+function cityTip(v) {
+  const row = (l, x) => `<div class="r"><span>${l}</span><b>${x}</b></div>`;
+  return `<div class="t">${v.nom}</div>` + row(tr("Loyer demandé", "Asking rent"), v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()) +
+    row(tr("Loyer payé", "Rent paid"), v.paye ? money(v.paye) : ND()) + row(tr("Écart", "Gap"), v.ecart != null ? `${money(v.ecart)} (${pct(v.ecart_pct)})` : ND()) +
+    row(tr("Demandé sur un an", "Asking, year over year"), v.var_demande != null ? pct(v.var_demande) : ND());
+}
+function drawList(items, M) {
+  const sorted = [...items].sort((a, b) => ((a.v == null) - (b.v == null)) || ((b.v ?? 0) - (a.v ?? 0)));
+  const ok = sorted.filter(d => d.v != null), max = d3.max(ok, d => Math.abs(d.v)) || 1;
+  document.getElementById("list-title").textContent = `${S.view === "villes" ? tr("Régions métropolitaines", "Metro areas") : "Provinces"} · ${M.label[0].toLowerCase() + M.label.slice(1)}`;
+  const ul = document.getElementById("list");
+  ul.innerHTML = sorted.map((d, i) => `<li data-id="${d.id}" class="${d.mtl ? "mtl " : ""}${d.v == null ? "na " : ""}${d.id === S.sel ? "sel" : ""}" tabindex="0">
+    <span class="r">${d.v == null ? "–" : i + 1}</span>
+    <span class="nm"><b>${d.nom.replace(/ \(.*\)/, "")}</b><span class="bar" style="width:${d.v == null ? 0 : Math.max(2, Math.abs(d.v) / max * 100)}%"></span></span>
+    <span class="v">${d.v == null ? ND() : M.fmt(d.v)}${d.raw.cote === "E" && S.metric !== "var_demande" ? '<span class="flagE">*</span>' : ""}</span></li>`).join("");
+  ul.querySelectorAll("li").forEach(li => {
+    const id = S.view === "villes" ? +li.dataset.id : li.dataset.id;
+    li.onclick = () => select(id);
+    li.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(id); } };
+  });
+  const s = ul.querySelector("li.sel"); if (s) s.scrollIntoView({ block: "nearest" });
+}
+function spark(series, labels, keys, mark) {
+  const W = 280, H = 90, m = { t: 8, r: 8, b: 18, l: 38 };
+  const all = series.flat().filter(v => v != null);
+  if (!all.length) return "";
+  const x = d3.scalePoint().domain(labels).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain(d3.extent(all)).nice().range([H - m.b, m.t]);
+  const line = d3.line().defined(v => v != null).x((v, i) => x(labels[i])).y(v => y(v));
+  const ticks = y.ticks(3).map(t => `<text x="${m.l - 5}" y="${y(t)}" dy="0.32em" text-anchor="end" style="fill:var(--ink-3);font:10px var(--font-mono)">${nf(t)}</text><line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" style="stroke:var(--grid)"/>`).join("");
+  const xl = [labels[0], labels[labels.length - 1]].map((l, i) => `<text x="${x(l)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}" style="fill:var(--ink-3);font:10px var(--font-mono)">${l}</text>`).join("");
+  const paths = series.map((s, i) => `<path d="${line(s)}" fill="none" stroke="${css(keys[i])}" stroke-width="2.2" stroke-linecap="round"/>`).join("");
+  const mk = mark && x(mark) != null ? `<line x1="${x(mark)}" x2="${x(mark)}" y1="${m.t}" y2="${H - m.b}" style="stroke:var(--warm);stroke-dasharray:3 3"/><text x="${x(mark)}" y="${m.t + 2}" dx="-4" text-anchor="end" style="fill:var(--warm-ink);font:600 10px var(--font-mono)">${mark}</text>` : "";
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${ticks}${mk}${xl}${paths}</svg>`;
+}
+function drawDetail() {
+  const d = document.getElementById("detail");
+  if (S.view === "villes") {
+    const v = C.villes.find(x => x.id === S.sel); if (!v) { d.innerHTML = ""; return; }
+    d.innerHTML = `<h3>${v.nom}</h3><p class="sub">${v.prov} · ${tr("appartements de 2 chambres", "two-bedroom apartments")}</p>
+      <dl><dt>${tr("Loyer demandé", "Asking rent")}, ${per(last)}</dt><dd>${v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()}</dd>
+      <dt>${tr("Loyer payé", "Rent paid")}, ${per(last)}</dt><dd>${v.paye ? money(v.paye) : ND()}</dd>
+      <dt>${tr("Écart", "Gap")}</dt><dd>${v.ecart != null ? money(v.ecart) + " (" + pct(v.ecart_pct) + ")" : ND()}</dd>
+      <dt>${tr("Loyer demandé, sur un an", "Asking rent, year over year")}</dt><dd>${v.var_demande != null ? pct(v.var_demande) : ND()}</dd>
+      <dt>${tr("Loyer payé, sur un an", "Rent paid, year over year")}</dt><dd>${v.var_paye != null ? pct(v.var_paye) : ND()}</dd></dl>
+      <div class="legend"><span><i style="--c:var(--warm)"></i>${tr("Demandé", "Asking")}</span><span><i style="--c:var(--mtl)"></i>${tr("Payé", "Paid")}</span></div>
+      ${spark([v.serie_demande, v.serie_paye], C.periodes, ["--warm", "--mtl"])}`;
+  } else {
+    const p = C.provinces.find(x => x.code === S.sel); if (!p) { d.innerHTML = ""; return; }
+    const yrs = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
+    d.innerHTML = `<h3>${p.nom}</h3><p class="sub">${tr("Indice des prix du loyer (2002 = 100)", "Rent price index (2002 = 100)")}</p>
+      <dl><dt>${tr("Hausse en", "Increase in")} ${S.year}</dt><dd>${pct(annual(p, S.year))}</dd><dt>${tr("Hausse en 2025", "Increase in 2025")}</dt><dd>${pct(p.hausse_loyer_2025)}</dd><dt>${tr("Hausse 2019-2025", "Increase 2019-2025")}</dt><dd>${pct(p.hausse_loyer)}</dd>
+      <dt>${tr("Inflation 2019-2025", "Inflation 2019-2025")}</dt><dd>${pct(p.hausse_inflation)}</dd><dt>${tr("Hausse réelle", "Real increase")}</dt><dd>${pct(p.hausse_reelle)}</dd></dl>
+      ${spark([p.serie_loyer, C.provinces.find(x => x.code === "CA").serie_loyer], yrs, ["--warm", "--other"], S.metric === "annuelle" ? String(S.year) : null)}
+      <div class="legend"><span><i style="--c:var(--warm)"></i>${p.nom}</span><span><i style="--c:var(--other)"></i>Canada</span></div>`;
+  }
+}
+function select(id) { S.sel = id; draw(); }
+function stopPlay() { if (S.timer) { clearInterval(S.timer); S.timer = null; } document.getElementById("play").textContent = tr("▶ Lecture", "▶ Play"); }
+function setYear(y) { S.year = y; document.getElementById("year").value = y; document.getElementById("year-out").textContent = y; draw(); }
+document.getElementById("year").oninput = e => { stopPlay(); setYear(+e.target.value); };
+document.getElementById("play").onclick = () => {
+  if (S.timer) { stopPlay(); return; }
+  if (S.year >= 2025) setYear(2020);
+  document.getElementById("play").textContent = "❚❚ Pause";
+  S.timer = setInterval(() => { if (S.year >= 2025) { stopPlay(); return; } setYear(S.year + 1); }, 1300);
+};
+function fillMetricSelect() {
+  document.getElementById("metric").innerHTML = METRICS()[S.view].map(m => `<option value="${m.k}"${m.k === S.metric ? " selected" : ""}>${m.label}</option>`).join("");
+}
+function setView(v) {
+  stopPlay();
+  S.view = v; S.metric = METRICS()[v][0].k; S.sel = v === "villes" ? 7 : "QC";
+  if (v === "prov") S.zoom = "canada";
+  document.getElementById("v-villes").setAttribute("aria-pressed", v === "villes");
+  document.getElementById("v-prov").setAttribute("aria-pressed", v === "prov");
+  fillMetricSelect();
+  syncZoom(); draw();
+}
+function syncZoom() { document.querySelectorAll("[data-z]").forEach(b => b.setAttribute("aria-pressed", b.dataset.z === S.zoom)); }
+document.getElementById("v-villes").onclick = () => setView("villes");
+document.getElementById("v-prov").onclick = () => setView("prov");
+document.getElementById("metric").onchange = e => { stopPlay(); S.metric = e.target.value; draw(); };
+document.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { S.zoom = b.dataset.z; syncZoom(); draw(); });
+setView("villes");
+renderKpis();
+let rw = 0;
+new ResizeObserver(() => { const w = document.getElementById("map").clientWidth; if (Math.abs(w - rw) > 4) { rw = w; draw(); } }).observe(document.getElementById("map"));
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw); } catch (e) {}
+document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect(); draw(); });
+</script>
