@@ -5,7 +5,7 @@ __HEADER__
   <div class="heroband"><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · SQL</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>__N_SQL__ requêtes</mark>, zéro chiffre non vérifié</h1>
-    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes, __N_VUES__ vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et comparé au résultat Python : au moindre écart, la construction du site s'arrête.</p>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes, __N_VUES__ vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et recoupé avec le classeur Excel : au moindre écart, la construction du site s'arrête.</p>
     <ul class="proves" data-i18n="chips">
       <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
     </ul>
@@ -143,7 +143,7 @@ __HEADER__
         <div>
           <h3 data-i18n="ch2T">Comment les résultats sont vérifiés</h3>
           <ul>
-            <li data-i18n="ch21"><code>src/build_db.py</code> reconstruit la base, exécute les __N_SQL__ fichiers <code>sql/*.sql</code> et compare les résultats clés au pipeline Python, ainsi que deux requêtes entre elles.</li>
+            <li data-i18n="ch21"><code>src/build_db.py</code> reconstruit la base, exécute les __N_SQL__ fichiers <code>sql/*.sql</code> et compare les résultats clés aux indicateurs publiés sur le site, ainsi que deux requêtes entre elles.</li>
             <li data-i18n="ch22">Un écart (même de 0,05 point) interrompt la construction : aucun chiffre non vérifié ne peut être publié.</li>
           </ul>
         </div>
@@ -151,7 +151,7 @@ __HEADER__
     </div>
   </section>
 
-  <div class="wrap pager"><a href="excel.html" data-i18n="pgL">← Excel</a><a href="python.html" data-i18n="pgR">Python →</a></div>
+  <div class="wrap pager"><a href="excel.html" data-i18n="pgL">← Excel</a><a href="index.html" data-i18n="pgR">Analyse →</a></div>
 </main>
 __FOOTER__
 <script id="sqlres" type="application/json">__SQL_JSON__</script>
@@ -161,7 +161,7 @@ window.PAGE_EN = {
   "@title": `SQL · Montreal Rents`,
   ey: `Skill · SQL`,
   h1: `A modelled database, <mark>__N_SQL__ queries</mark>, zero unverified figures`,
-  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints, __N_VUES__ analytical views and a data dictionary. Every figure on this site is recomputed in SQL and compared to the Python result: the slightest gap stops the site build.`,
+  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints, __N_VUES__ analytical views and a data dictionary. Every figure on this site is recomputed in SQL and cross-checked against the Excel workbook: the slightest gap stops the site build.`,
   ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to PostgreSQL`,
   ixI: `Two things expected from an analyst who writes SQL at work: knowing why a query is fast, and moving a database from one engine to another without changing its meaning.`,
   ix1T: `With and without an index: same result, two paths`,
@@ -212,9 +212,9 @@ window.PAGE_EN = {
   ch11: `The database fits in one file versioned in the repository and opens in the browser, no server.`,
   ch12: `The queries stay in standard SQL: they also run on DuckDB, PostgreSQL or SQL Server with minor adjustments (POWER, concatenation).`,
   ch2T: `How the results are verified`,
-  ch21: `<code>src/build_db.py</code> rebuilds the database, runs the __N_SQL__ <code>sql/*.sql</code> files and compares the key results to the Python pipeline, as well as two queries against each other.`,
+  ch21: `<code>src/build_db.py</code> rebuilds the database, runs the __N_SQL__ <code>sql/*.sql</code> files and compares the key results to the indicators published on the site, as well as two queries against each other.`,
   ch22: `Any gap (even 0.05 of a point) stops the build: no unverified figure can get published.`,
-  pgL: `← Excel`, pgR: `Python →`
+  pgL: `← Excel`, pgR: `Analysis →`
 };
 const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
 const LVL = { "Débutant": "Beginner", "Intermédiaire": "Intermediate", "Avancé": "Advanced" };

@@ -264,7 +264,7 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 /* fabrication */
 
 /* méthode */
-.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
 .flow > * { text-decoration: none; color: var(--ink); }
 .flow a.flowlink:hover { border-color: var(--mtl); }
 .flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
@@ -278,6 +278,10 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
 .star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
 .star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* texte justifié (lecture longue) */
+main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
 footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
@@ -399,7 +403,7 @@ h1, h2, h3 { font-family: var(--font-display); }
 .gcard .row .r { text-align: right; }
 .gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 .gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
-.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
 .hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
 .hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
 .hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
@@ -407,7 +411,6 @@ h1, h2, h3 { font-family: var(--font-display); }
 @media (max-width: 900px) {
   .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
   .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
-  .hero-strip a:last-child { grid-column: 1 / -1; }
 }
 
 /* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
@@ -562,7 +565,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <header class="top">
   <div class="wrap topbar">
     <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
-    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html" aria-current="page">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a><a href="python.html">Python</a></nav>
+    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html" aria-current="page">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
 </header>
@@ -1103,8 +1106,7 @@ document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect()
     "index.html": { fr: "Analyse", en: "Analysis" },
     "carte.html": { fr: "Carte", en: "Map" },
     "excel.html": { fr: "Excel", en: "Excel" },
-    "sql.html": { fr: "SQL", en: "SQL" },
-    "python.html": { fr: "Python", en: "Python" }
+    "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
   const FOOT = {
@@ -1118,9 +1120,12 @@ document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect()
   const saved = new Map();
   let frTitle = document.title;
 
+  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
+    const br = document.querySelector("a.brand");
+    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];

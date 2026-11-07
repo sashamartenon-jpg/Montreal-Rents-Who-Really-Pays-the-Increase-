@@ -264,7 +264,7 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 /* fabrication */
 
 /* méthode */
-.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
 .flow > * { text-decoration: none; color: var(--ink); }
 .flow a.flowlink:hover { border-color: var(--mtl); }
 .flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
@@ -278,6 +278,10 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
 .star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
 .star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* texte justifié (lecture longue) */
+main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
 footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
@@ -399,7 +403,7 @@ h1, h2, h3 { font-family: var(--font-display); }
 .gcard .row .r { text-align: right; }
 .gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 .gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
-.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
 .hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
 .hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
 .hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
@@ -407,7 +411,6 @@ h1, h2, h3 { font-family: var(--font-display); }
 @media (max-width: 900px) {
   .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
   .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
-  .hero-strip a:last-child { grid-column: 1 / -1; }
 }
 
 /* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
@@ -562,7 +565,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <header class="top">
   <div class="wrap topbar">
     <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
-    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html">Carte</a><a href="excel.html" aria-current="page">Excel</a><a href="sql.html">SQL</a><a href="python.html">Python</a></nav>
+    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html">Carte</a><a href="excel.html" aria-current="page">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
 </header>
@@ -583,7 +586,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s1T">La question et la réponse, dès l'ouverture</h2>
       <p class="intro" data-i18n="s1I">Le classeur s'ouvre sur la question du projet et quatre chiffres qui y répondent, tous recalculés par formules à partir des tableaux sources. Un bouton par feuille sert de menu. Les captures suivent la langue choisie : classeur français ici, classeur anglais en version anglaise de la page.</p>
       <figure class="figure">
-        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy" width="1381" height="960" decoding="async">
+        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy" width="1329" height="961" decoding="async">
         <figcaption data-i18n="s1C">460 $ d'écart entre annonce et loyer payé à Montréal ; +17,2 % pour un logement reloué contre +6,0 % pour un locataire en place. Capture du classeur réel.</figcaption>
       </figure>
     </div>
@@ -599,7 +602,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
         <figcaption data-i18n="s2C">Hausse de l'IPC du loyer en 2025 : le Québec, sélectionné, est en rose et premier des 10 provinces. Change l'année à 2024 : l'Alberta prend la tête.</figcaption>
       </figure>
       <div class="steps" style="margin-top:14px">
-        <div class="stepc" data-i18n="st1"><span class="n">1 · PYTHON</span><h3>Des contours projetés</h3><p>Le module <code>geo.py</code> projette les contours des provinces (projection conique conforme de Lambert, paramètres de Statistique Canada) et les simplifie en 800 points.</p></div>
+        <div class="stepc" data-i18n="st1"><span class="n">1 · DONNÉES</span><h3>Des contours projetés</h3><p>Un script du projet (<code>geo.py</code>) projette les contours des provinces (projection conique conforme de Lambert, paramètres de Statistique Canada) et les simplifie en 800 points.</p></div>
         <div class="stepc" data-i18n="st2"><span class="n">2 · FORMULES</span><h3>Une valeur, une classe</h3><p>CHOISIR prend l'indicateur choisi ; CENTILE découpe les 10 valeurs en quintiles ; EQUIV donne la classe de couleur de chaque province.</p></div>
         <div class="stepc" data-i18n="st3"><span class="n">3 · GRAPHIQUE</span><h3>Cinq séries, une sélection</h3><p>Une série par classe : une province n'a de coordonnée que dans sa classe, sinon NA(), qu'Excel ne trace pas. La province choisie a sa propre série, en rose.</p></div>
       </div>
@@ -674,7 +677,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     <div class="wrap">
       <p class="kicker" data-i18n="s7K">Feuille « Excel 365 »</p>
       <h2 data-i18n="s7T">Un portefeuille de logements lu avec les fonctions dynamiques</h2>
-      <p class="intro" data-i18n="s7I">La liste fictive d'une agence (huit logements, la même que l'exemple du programme Python) analysée avec RECHERCHEX, LET, FILTRE, TRIER et UNIQUE : loyer du marché pour chaque type, hausse du marché depuis le début du bail, position face au marché, gain d'une relocation au prix des annonces, puis les logements sous le marché classés par écart et le revenu annuel qu'une relocation libérerait. Les cases jaunes se modifient : la feuille recalcule le portefeuille. C'est la seule feuille qui demande Excel 2021 ou Microsoft 365.</p>
+      <p class="intro" data-i18n="s7I">La liste fictive d'une agence (huit logements) analysée avec RECHERCHEX, LET, FILTRE, TRIER et UNIQUE : loyer du marché pour chaque type, hausse du marché depuis le début du bail, position face au marché, gain d'une relocation au prix des annonces, puis les logements sous le marché classés par écart et le revenu annuel qu'une relocation libérerait. Les cases jaunes se modifient : la feuille recalcule le portefeuille. C'est la seule feuille qui demande Excel 2021 ou Microsoft 365.</p>
       <div class="gallery" style="margin-top:14px">
         <div class="stepc"><h3 data-i18n="g7T">RECHERCHEX à deux critères, dans un LET</h3>
 <pre class="code" data-lang="xl">=LET(debut,E7,marche_bail,XLOOKUP(1,(Loyers_Annee=debut)*(Loyers_Type=C7),Loyers_Montant),F7/marche_bail-1)</pre>
@@ -697,7 +700,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
           <ul>
             <li data-i18n="q11">Recalcul complet dans LibreOffice à chaque construction : aucune erreur visible. Les seuls NA() sont dans la feuille masquée « Calculs », où ils servent à masquer des points de graphique.</li>
             <li data-i18n="q12">Aucune cellule vide dans les tableaux sources : la construction s'arrête sinon. Les régions sans loyer payé publié sont exclues plutôt que marquées « n.d. ».</li>
-            <li data-i18n="q13">Les chiffres de l'accueil concordent avec le pipeline Python et les requêtes SQL : 460 $, +27,2 %, Québec premier en 2025.</li>
+            <li data-i18n="q13">Les chiffres de l'accueil concordent avec la base SQL du projet : 460 $, +27,2 %, Québec premier en 2025.</li>
           </ul>
         </div>
         <div>
@@ -771,7 +774,7 @@ window.PAGE_EN = {
   s2T: `The map of Canada, as a plain Excel chart`,
   s2I: `A map built with a standard Excel chart: province outlines form a line series, and each province is a bubble whose colour and size track its value. It opens in every version of Excel, offline, no add-in.`,
   s2C: `Rent CPI increase in 2025: Quebec, selected, is pink and first of the 10 provinces. Switch the year to 2024: Alberta takes the lead.`,
-  st1: `<span class="n">1 · PYTHON</span><h3>Projected outlines</h3><p>The <code>geo.py</code> module projects the province outlines (Lambert conformal conic projection, Statistics Canada parameters) and simplifies them to 800 points.</p>`,
+  st1: `<span class="n">1 · DATA</span><h3>Projected outlines</h3><p>A project script (<code>geo.py</code>) projects the province outlines (Lambert conformal conic projection, Statistics Canada parameters) and simplifies them to 800 points.</p>`,
   st2: `<span class="n">2 · FORMULAS</span><h3>One value, one class</h3><p>CHOOSE picks the selected indicator; PERCENTILE cuts the 10 values into quintiles; MATCH gives each province its colour class.</p>`,
   st3: `<span class="n">3 · CHART</span><h3>Five series, one selection</h3><p>One series per class: a province only has coordinates in its own class, otherwise NA(), which Excel does not plot. The selected province gets its own series, in pink.</p>`,
   g1T: `The value for the selected indicator`,
@@ -801,14 +804,14 @@ window.PAGE_EN = {
   q1T: `Checks`,
   q11: `Full recalculation in LibreOffice at every build: no visible errors. The only NA() live in the hidden "Calculs" sheet, where they hide chart points.`,
   q12: `No empty cells in the source tables: the build stops otherwise. Areas without a published paid rent are excluded rather than flagged "n/a".`,
-  q13: `The home-sheet figures match the Python pipeline and the SQL queries: $460, +27.2%, Quebec first in 2025.`,
+  q13: `The home-sheet figures match the project's SQL database: $460, +27.2%, Quebec first in 2025.`,
   q2T: `Conventions`,
   q21: `Yellow cells: inputs. Blue text: source data. Green: values read from another sheet. Black: calculations.`,
   q22: `Sources as named Excel tables (<code>tbl_loyers</code>, <code>tbl_trimestriel</code>…), cited in each sheet's banner.`,
   q23: `A "Mode d'emploi" (how-to) sheet lists every function in the workbook, from the simplest to the most advanced, with where to see it and three warm-up exercises.`,
   q24: `Compatibility first: the analysis sheets use only functions available since Excel 2019. A single sheet, "Excel 365", shows the dynamic functions (XLOOKUP, LET, FILTER, SORT, UNIQUE).`,
   s7K: `"Excel 365" sheet`, s7T: `A housing portfolio read with dynamic array functions`,
-  s7I: `A fictional agency list (eight units, the same as the Python program example) analysed with XLOOKUP, LET, FILTER, SORT and UNIQUE: market rent for each type, market increase since the lease began, position against the market, gain from a re-let at asking prices, then the units below market ranked by gap and the yearly income a re-let would free. The yellow cells are editable: the sheet recomputes the portfolio. It is the only sheet that requires Excel 2021 or Microsoft 365.`,
+  s7I: `A fictional agency list (eight units) analysed with XLOOKUP, LET, FILTER, SORT and UNIQUE: market rent for each type, market increase since the lease began, position against the market, gain from a re-let at asking prices, then the units below market ranked by gap and the yearly income a re-let would free. The yellow cells are editable: the sheet recomputes the portfolio. It is the only sheet that requires Excel 2021 or Microsoft 365.`,
   g7T: `Two-criteria XLOOKUP inside a LET`,
   g7P: `The market rent for the type <i>and</i> the lease year, with no helper column: the lookup runs on the product of two conditions. LET names the steps.`,
   g8T: `FILTER then SORT, in one formula`,
@@ -925,8 +928,7 @@ window.PAGE_EN = {
     "index.html": { fr: "Analyse", en: "Analysis" },
     "carte.html": { fr: "Carte", en: "Map" },
     "excel.html": { fr: "Excel", en: "Excel" },
-    "sql.html": { fr: "SQL", en: "SQL" },
-    "python.html": { fr: "Python", en: "Python" }
+    "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
   const FOOT = {
@@ -940,9 +942,12 @@ window.PAGE_EN = {
   const saved = new Map();
   let frTitle = document.title;
 
+  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
+    const br = document.querySelector("a.brand");
+    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];

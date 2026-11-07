@@ -17,15 +17,13 @@ Réponse courte : ceux qui déménagent. Au 2ᵉ trimestre 2026, un 2 chambres a
 
 | Couche | Outil | Fichiers |
 |---|---|---|
-| Acquisition et vérification | Python, API WDS de Statistique Canada | `src/fetch_statcan.py` |
-| Préparation, contrôles qualité | Python (pandas) | `src/pipeline.py` |
+| Acquisition et préparation | Chaîne de construction automatisée : extraction des tableaux officiels (API WDS), contrôles qualité, tables propres | `src/fetch_statcan.py`, `src/pipeline.py` |
 | Modélisation | MCD (Merise) confronté à la base, MLD généré depuis la base | `src/modeles.py`, `docs/assets/sql/` |
 | Base de données | SQL : 12 tables (6 faits, 6 dimensions, 3ᵉ forme normale), clés primaires composées, clés étrangères, contraintes CHECK, 5 vues, dictionnaire contrôlé | `sql/schema/`, `data/ref/dictionnaire.csv` |
 | Requêtes analytiques | SQL (SQLite) : 12 requêtes classées par niveau (débutant → avancé) : contrôle qualité, LAG, ROW_NUMBER, RANK, PARTITION BY, moyennes mobiles, CTE, requêtes sur des vues | `sql/*.sql`, `src/build_db.py` |
-| Statistique | Python (numpy, scipy) : test de Chow avec recherche de la rupture, p-value par simulation Monte Carlo (résidus AR(1)), régressions, décomposition | `src/rupture.py`, `src/figures.py` |
-| Programme public | Python (bibliothèque standard) : évaluateur de loyer en ligne de commande, un logement ou un fichier d'annonces complet, sortie texte ou JSON | `src/evalue_loyer.py`, `docs/assets/programme_evaluateur.zip` |
+| Statistique | Test de Chow avec recherche de la rupture et p-value corrigée par 20 000 simulations (résidus AR(1)) ; calculé par la chaîne de construction | `src/rupture.py` |
 | Classeur | Excel sans macro : carte du Canada et carte des villes en graphiques Excel, tableau de bord, scénarios (NPM), simulateur, feuille « Mode d'emploi » (chaque fonction, du simple SOMME.SI.ENS aux séries à NA(), et les équivalents 365). Aucune cellule vide ni erreur visible | `docs/assets/modele_loyers_montreal.xlsx`, `src/build_excel.py`, `src/geo.py` |
-| Diffusion | Site de 5 pages (HTML, CSS, JavaScript, D3.js, sql.js) : carte animée, console SQL, animations au défilement. Accessibilité vérifiée (axe-core : 0 violation WCAG 2.1 AA sur les 5 pages, clair et sombre), navigation clavier, animations coupées avec `prefers-reduced-motion` | `src/index.template.html`, `src/pages/` → `docs/` |
+| Visualisation et diffusion | Site de 4 pages (HTML, CSS, JavaScript, D3.js, sql.js) : carte animée, console SQL, animations au défilement. Accessibilité vérifiée (axe-core : 0 violation WCAG 2.1 AA sur les 4 pages, clair et sombre), navigation clavier, animations coupées avec `prefers-reduced-motion` | `src/index.template.html`, `src/pages/` → `docs/` |
 
 ## Contrôles automatiques
 
@@ -34,7 +32,7 @@ La construction s'arrête dans chacun des cas suivants :
 - une clé étrangère est orpheline ;
 - le dictionnaire ne décrit pas exactement chaque colonne de la base (nom et type) ;
 - le MCD ne correspond plus aux tables ;
-- une des 12 requêtes SQL ne redonne pas le chiffre calculé en Python, ou deux requêtes se contredisent ;
+- une des 12 requêtes SQL ne redonne pas le chiffre de référence du projet, ou deux requêtes se contredisent ;
 - un tableau source du classeur Excel contient une cellule vide.
 
 ## Structure
@@ -45,24 +43,16 @@ data/ref/        contours des provinces (Natural Earth, via sane-topojson, MIT),
 data/clean/      tables propres
 sql/schema/      création des tables et des vues
 sql/             12 requêtes commentées
-src/             fetch_statcan · pipeline · build_db · modeles · build_excel (+ geo) · render_excel · figures (+ rupture) · evalue_loyer · build_site
-data/exemples/   liste d'annonces fictive pour essayer l'évaluateur
-src/pages/       pages Carte, Excel, SQL, Python ; code commun et animations
+src/             fetch_statcan · pipeline · build_db · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
+src/pages/       pages Carte, Excel, SQL ; code commun et animations
 docs/            site publié par GitHub Pages, dont assets/base_loyers_montreal.zip (base, modèles, requêtes)
 guides/          publication, post LinkedIn
 ```
 
 ## Reproduire
 
-L'évaluateur se lance aussi seul, sans rien installer :
-
 ```bash
-python src/evalue_loyer.py --loyer 1450 --type 2ch --annee-bail 2021 --revenu 60000
-python src/evalue_loyer.py --fichier data/exemples/annonces_exemple.csv
-```
-
-```bash
-pip install pandas numpy scipy openpyxl matplotlib playwright pglast nbformat nbclient nbconvert ipykernel
+pip install pandas numpy scipy openpyxl matplotlib playwright pglast
 python src/fetch_statcan.py   # vérifie data/raw contre les tableaux officiels (--mettre-a-jour pour les remplacer)
 python src/pipeline.py
 python src/build_db.py
@@ -70,8 +60,6 @@ python src/postgres.py        # version PostgreSQL du schéma, des vues et des d
 python src/modeles.py         # MCD, MLD et paquet de la base
 python src/build_excel.py
 python src/render_excel.py    # captures des feuilles (LibreOffice requis)
-python src/figures.py
-python src/make_notebook.py   # exécute le notebook et l'exporte en HTML dans docs/notebooks
 python src/build_site.py https://sashamartenon-jpg.github.io/Montreal-Rents-Who-Really-Pays-the-Increase-
 ```
 

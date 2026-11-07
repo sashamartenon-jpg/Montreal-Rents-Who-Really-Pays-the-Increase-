@@ -271,7 +271,7 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 /* fabrication */
 
 /* méthode */
-.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 18px; }
 .flow > * { text-decoration: none; color: var(--ink); }
 .flow a.flowlink:hover { border-color: var(--mtl); }
 .flow div, .flow a { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: .86rem; position: relative; }
@@ -285,6 +285,10 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .star .f { border: 2px solid var(--mtl); background: var(--mtl-soft); border-radius: 6px; padding: 8px; text-align: center; grid-row: 1 / span 2; grid-column: 2; }
 .star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
 .star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
+
+/* texte justifié (lecture longue) */
+main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
 footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
@@ -406,7 +410,7 @@ h1, h2, h3 { font-family: var(--font-display); }
 .gcard .row .r { text-align: right; }
 .gcard .row .chip2 { display: inline-block; align-self: center; font: 600 .78rem var(--font-body); background: rgba(255, 255, 255, .92); color: var(--warm-ink); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 .gcard .ticks { height: 18px; margin-top: 10px; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 1px, transparent 1px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 40%, #000 40%); mask: linear-gradient(180deg, transparent 0 40%, #000 40%); }
-.hero-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
+.hero-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 18px; padding-block: 18px 30px; border-top: 1px solid rgba(255, 255, 255, .28); }
 .hero-strip a { color: rgba(255, 255, 255, .88); text-decoration: none; font-size: .86rem; line-height: 1.35; padding-top: 14px; border-top: 2px solid transparent; margin-top: -1px; transition: color .2s, border-color .2s; }
 .hero-strip a:first-child, .hero-strip a:hover { color: #fff; border-top-color: #9be3c4; }
 .hero-strip svg { display: block; width: 18px; height: 18px; margin-bottom: 8px; stroke: currentColor; fill: none; stroke-width: 1.6; }
@@ -414,7 +418,6 @@ h1, h2, h3 { font-family: var(--font-display); }
 @media (max-width: 900px) {
   .hero2 { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 28px; }
   .hero-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
-  .hero-strip a:last-child { grid-column: 1 / -1; }
 }
 
 /* ouverture : la courbe de 34 ans se trace derrière le titre, l'année défile, les chiffres montent */
@@ -570,7 +573,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <header class="top">
   <div class="wrap topbar">
     <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
-    <nav class="nav" aria-label="Pages du projet"><a href="index.html" aria-current="page">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a><a href="python.html">Python</a></nav>
+    <nav class="nav" aria-label="Pages du projet"><a href="index.html" aria-current="page">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><button class="btn" id="share" type="button" data-i18n="share">Copier le lien</button><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
 </header>
@@ -629,7 +632,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 class="rv" data-i18n="ctxT">Un même logement, deux loyers</h2>
       <p class="intro rv" data-i18n="ctxI">Pour comprendre qui paie la hausse, il faut séparer deux prix que les moyennes mélangent : celui que paie un locataire déjà installé et celui que l'on demande à un nouveau locataire.</p>
       <div class="ctx" id="ctx"></div>
-      <div class="question rv"><b data-i18n="qT">La question : la hausse des loyers touche-t-elle tout le monde de la même façon ?</b><p data-i18n="qP">Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun vérifié en Python, en SQL et dans Excel.</p></div>
+      <div class="question rv"><b data-i18n="qT">La question : la hausse des loyers touche-t-elle tout le monde de la même façon ?</b><p data-i18n="qP">Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun recalculé indépendamment en SQL et dans Excel.</p></div>
     </div>
   </section>
 
@@ -750,8 +753,8 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
   <section class="block">
     <div class="wrap">
       <p class="kicker" data-i18n="skK">Comment j'ai répondu</p>
-      <h2 data-i18n="skT">Quatre outils, une seule chaîne de données</h2>
-      <p class="intro" data-i18n="skI">Chaque chiffre de cette page est calculé en Python, recalculé en SQL et dans Excel ; la construction du site s'arrête au moindre écart.</p>
+      <h2 data-i18n="skT">Trois outils, une seule chaîne de données</h2>
+      <p class="intro" data-i18n="skI">Chaque chiffre de cette page est recalculé indépendamment en SQL et dans Excel ; la construction du site s'arrête au moindre écart.</p>
     </div>
     <div class="wrap skills" id="skills"></div>
   </section>
@@ -783,8 +786,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="mT">Méthode</h2>
       <div class="flow">
         <div><b>Statistique Canada · SCHL</b><small data-i18n="f1">4 sources officielles, extraites et recoupées</small></div>
-        <a class="flowlink" href="python.html"><b>Python · pandas</b><small data-i18n="f2">Contrôles qualité, modèle en étoile, loyers réels</small></a>
-        <a class="flowlink" href="sql.html"><b>SQL · SQLite</b><small data-i18n="f2b">12 requêtes, vérifiées contre Python</small></a>
+        <a class="flowlink" href="sql.html"><b>SQL · SQLite</b><small data-i18n="f2b">Modèle en étoile, 12 requêtes, contrôles qualité</small></a>
         <a class="flowlink" href="excel.html"><b>Excel</b><small data-i18n="f3">Cartes, tableau de bord, scénarios, simulateur</small></a>
         <a class="flowlink" href="carte.html"><b data-i18n="f4t">Carte interactive</b><small data-i18n="f4">Provinces et 42 régions métropolitaines</small></a>
       </div>
@@ -830,13 +832,13 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
           <ul data-i18n="fia2">
             <li>Enquêtes officielles, méthodologie publiée, 34 ans de recul : la meilleure mesure publique du marché locatif canadien.</li>
             <li>Ses limites sont dites, pas cachées (liste complète sous « Méthode ») : loyers demandés et payés en <b>estimations expérimentales</b> (valeurs fragiles signalées) ; loyer payé publié pour 16 régions sur 42 ; champ SCHL limité aux immeubles privés de 3 logements et plus.</li>
-            <li>Garde-fou du projet : chaque chiffre est calculé en Python puis <b>recalculé en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>
+            <li>Garde-fou du projet : chaque chiffre est <b>recalculé indépendamment en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>
           </ul>
         </div>
         <div>
           <h3 data-i18n="fia3T">Pourquoi cette analyse est pertinente</h3>
           <ul data-i18n="fia3">
-            <li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, un pipeline contrôlé, et les mêmes chiffres dans trois outils — le métier de l'intelligence d'affaires, démontré de bout en bout.</li>
+            <li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, une chaîne contrôlée, et les mêmes chiffres recoupés entre la base SQL et le classeur Excel — le métier de l'intelligence d'affaires, démontré de bout en bout.</li>
             <li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li>
             <li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>
           </ul>
@@ -978,8 +980,8 @@ const T = {
     ctxK: "Le contexte", ctxT: "Un même logement, deux loyers",
     ctxI: "Pour comprendre qui paie la hausse, il faut séparer deux prix que les moyennes mélangent : celui que paie un locataire déjà installé et celui que l'on demande à un nouveau locataire.",
     qT: "La question : la hausse des loyers touche-t-elle tout le monde de la même façon ?",
-    qP: "Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun vérifié en Python, en SQL et dans Excel.",
-    skK: "Comment j'ai répondu", skT: "Quatre outils, une seule chaîne de données", skI: "Chaque chiffre de cette page est calculé en Python, recalculé en SQL et dans Excel ; la construction du site s'arrête au moindre écart.",
+    qP: "Pour y répondre : 34 ans de loyers de la SCHL, les loyers demandés et payés dans 42 régions, l'IPC de 10 provinces. Trois constats suivent, chacun recalculé indépendamment en SQL et dans Excel.",
+    skK: "Comment j'ai répondu", skT: "Trois outils, une seule chaîne de données", skI: "Chaque chiffre de cette page est recalculé indépendamment en SQL et dans Excel ; la construction du site s'arrête au moindre écart.",
     c1K: "Constat 1", c1T: "Depuis 2019, la hausse a changé de régime", c2K: "Constat 2", c3K: "Constat 3 · la réponse",
     heroChartT: "Loyer moyen d'un 2 chambres, en dollars de 2025", heroChartS: "Loyer d'octobre corrigé de l'inflation (IPC Montréal)",
     s1T: "Toutes les tailles de logement ont suivi la même cassure",
@@ -997,13 +999,13 @@ const T = {
     mModel: "Modèle de données", mCalc: "Calculs", mLim: "Limites", mSrc: "Sources",
     impT: "Ce que ça change, concrètement", impI: "Les mêmes chiffres ne mènent pas à la même décision selon qui les lit.",
     sqlT: "Interroge les données en SQL", sqlI: "La base du projet (modèle en étoile, 12 tables et 5 vues) se charge dans ton navigateur avec SQLite. Choisis une des requêtes qui ont servi à l'analyse, modifie-la ou écris la tienne, puis exécute-la.",
-    simX: "Voir le modèle Excel complet →", run: "Exécuter", f2b: "12 requêtes, vérifiées contre Python",
+    simX: "Voir le modèle Excel complet →", run: "Exécuter", f2b: "Modèle en étoile, 12 requêtes, contrôles qualité",
     fiaK: "Contexte, sources et fiabilité", fiaT: "D'où viennent les chiffres — et pourquoi s'y fier ?",
     fiaI: "Trois questions qu'un lecteur exigeant doit poser à n'importe quelle analyse : d'où viennent les données, que valent-elles, et à quoi sert la réponse.",
     fia1T: "D'où viennent les données", fia2T: "Est-ce fiable ?", fia3T: "Pourquoi cette analyse est pertinente",
     fia1: `<li>Quatre tableaux publics de <b>Statistique Canada</b> (34-10-0133-01, 34-10-0127-01, 18-10-0005-01, 46-10-0092-01) et le <b>Rapport sur le marché locatif 2025</b> de la SCHL — les références des prêteurs, des municipalités et des médias.</li><li>Extraites le 4 novembre 2026 sous Licence du gouvernement ouvert. Les données brutes sont conservées telles quelles dans le dépôt : toute la chaîne se rejoue depuis la source.</li><li>La série maîtresse (2 chambres, Montréal, vecteur v3824161) est identique dans trois extractions distinctes du même tableau.</li>`,
-    fia2: `<li>Enquêtes officielles, méthodologie publiée, 34 ans de recul : la meilleure mesure publique du marché locatif canadien.</li><li>Ses limites sont dites, pas cachées (liste complète sous « Méthode ») : loyers demandés et payés en <b>estimations expérimentales</b> (valeurs fragiles signalées) ; loyer payé publié pour 16 régions sur 42 ; champ SCHL limité aux immeubles privés de 3 logements et plus.</li><li>Garde-fou du projet : chaque chiffre est calculé en Python puis <b>recalculé en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>`,
-    fia3: `<li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, un pipeline contrôlé, et les mêmes chiffres dans trois outils — le métier de l'intelligence d'affaires, démontré de bout en bout.</li><li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li><li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>`,
+    fia2: `<li>Enquêtes officielles, méthodologie publiée, 34 ans de recul : la meilleure mesure publique du marché locatif canadien.</li><li>Ses limites sont dites, pas cachées (liste complète sous « Méthode ») : loyers demandés et payés en <b>estimations expérimentales</b> (valeurs fragiles signalées) ; loyer payé publié pour 16 régions sur 42 ; champ SCHL limité aux immeubles privés de 3 logements et plus.</li><li>Garde-fou du projet : chaque chiffre est <b>recalculé indépendamment en SQL et dans Excel</b> ; au moindre écart, la construction du site s'arrête. Aucun chiffre non vérifié ne peut être publié.</li>`,
+    fia3: `<li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, une chaîne contrôlée, et les mêmes chiffres recoupés entre la base SQL et le classeur Excel — le métier de l'intelligence d'affaires, démontré de bout en bout.</li><li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li><li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>`,
     scnH: "Défile pour traverser les données",
     scn1: "34 ans de loyers à Montréal : en 2019, <b>la courbe casse</b>.",
     scn2: "Et l'écart entre annonces et loyers payés se retrouve <b>partout au pays</b>.",
@@ -1017,8 +1019,8 @@ const T = {
     ctxK: "Context", ctxT: "One apartment, two rents",
     ctxI: "To see who pays for rising rents, you have to separate two prices that averages blend together: what a sitting tenant pays and what a new tenant is asked to pay.",
     qT: "The question: do rising rents hit everyone the same way?",
-    qP: "To answer it: 34 years of CMHC rents, asking and paid rents in 42 metro areas, and the CPI of 10 provinces. Three findings follow, each checked in Python, SQL and Excel.",
-    skK: "How I answered", skT: "Four tools, one data chain", skI: "Every figure on this page is computed in Python and recomputed in SQL and Excel; the site build stops on any mismatch.",
+    qP: "To answer it: 34 years of CMHC rents, asking and paid rents in 42 metro areas, and the CPI of 10 provinces. Three findings follow, each recomputed independently in SQL and Excel.",
+    skK: "How I answered", skT: "Three tools, one data chain", skI: "Every figure on this page is recomputed independently in SQL and Excel; the site build stops on any mismatch.",
     c1K: "Finding 1", c1T: "Since 2019, rent growth has shifted gear", c2K: "Finding 2", c3K: "Finding 3 · the answer",
     heroChartT: "Average two-bedroom rent, in 2025 dollars", heroChartS: "October rent adjusted for inflation (Montreal CPI)",
     s1T: "Every unit size shows the same break",
@@ -1036,13 +1038,13 @@ const T = {
     mModel: "Data model", mCalc: "Calculations", mLim: "Limitations", mSrc: "Sources",
     impT: "What it means in practice", impI: "The same figures lead to different decisions depending on who reads them.",
     sqlT: "Query the data in SQL", sqlI: "The project database (star schema, 12 tables and 5 views) loads in your browser with SQLite. Pick one of the queries used in the analysis, edit it or write your own, then run it.",
-    simX: "See the full Excel model →", run: "Run", f2b: "12 queries, checked against Python",
+    simX: "See the full Excel model →", run: "Run", f2b: "Star schema, 12 queries, quality checks",
     fiaK: "Context, sources and reliability", fiaT: "Where the figures come from — and why trust them",
     fiaI: "Three questions a demanding reader should ask of any analysis: where does the data come from, how good is it, and what is the answer for.",
     fia1T: "Where the data comes from", fia2T: "Is it reliable?", fia3T: "Why this analysis matters",
     fia1: `<li>Four public <b>Statistics Canada</b> tables (34-10-0133-01, 34-10-0127-01, 18-10-0005-01, 46-10-0092-01) and CMHC's <b>Rental Market Report 2025</b> — the references used by lenders, cities and the media.</li><li>Extracted November 4, 2026 under the Open Government Licence. The raw data sits untouched in the repository: the whole chain replays from the source.</li><li>The master series (two-bedroom, Montreal, vector v3824161) is identical across three separate extracts of the same table.</li>`,
-    fia2: `<li>Official surveys, published methodology, 34 years of depth: the best public measure of the Canadian rental market.</li><li>Its limits are stated, not hidden (full list under "Method"): asking and paid rents are <b>experimental estimates</b> (fragile values flagged); the paid rent is published for 16 of 42 metro areas; CMHC covers private buildings with 3+ units.</li><li>The project's guardrail: every figure is computed in Python, then <b>recomputed in SQL and in Excel</b>; the slightest gap stops the site build. No unverified figure can get published.</li>`,
-    fia3: `<li><b>BI, IT and data analytics</b>: a business question, a star schema, a controlled pipeline, and the same figures in three tools — the business-intelligence craft, demonstrated end to end.</li><li><b>Real estate</b>: the gap between in-place and market rent prices the income a turnover unlocks; the effort ratio bounds what demand can pay. Two direct inputs for pricing, underwriting and investment.</li><li><b>Decisions</b>: quoting 7.2% or 14.5% for "the 2025 increase" leads to opposite conclusions. Telling the two apart is exactly what an analysis is for.</li>`,
+    fia2: `<li>Official surveys, published methodology, 34 years of depth: the best public measure of the Canadian rental market.</li><li>Its limits are stated, not hidden (full list under "Method"): asking and paid rents are <b>experimental estimates</b> (fragile values flagged); the paid rent is published for 16 of 42 metro areas; CMHC covers private buildings with 3+ units.</li><li>The project's guardrail: every figure is <b>recomputed independently in SQL and in Excel</b>; the slightest gap stops the site build. No unverified figure can get published.</li>`,
+    fia3: `<li><b>BI, IT and data analytics</b>: a business question, a star schema, a controlled chain, and the same figures cross-checked between the SQL database and the Excel workbook — the business-intelligence craft, demonstrated end to end.</li><li><b>Real estate</b>: the gap between in-place and market rent prices the income a turnover unlocks; the effort ratio bounds what demand can pay. Two direct inputs for pricing, underwriting and investment.</li><li><b>Decisions</b>: quoting 7.2% or 14.5% for "the 2025 increase" leads to opposite conclusions. Telling the two apart is exactly what an analysis is for.</li>`,
     scnH: "Scroll to travel through the data",
     scn1: "34 years of Montreal rents: in 2019, <b>the curve breaks</b>.",
     scn2: "And the gap between listings and rents paid shows up <b>across the country</b>.",
@@ -1075,6 +1077,7 @@ const cityGeos = ["Montreal", "Quebec", "Ottawa-Gatineau", "Toronto", "Calgary",
 /* ------------------------------ textes calculés */
 function renderText() {
   document.documentElement.lang = state.lang;
+  document.title = state.lang === "en" ? "Montreal Rents · Who really pays?" : "Loyers à Montréal · Qui paie vraiment ?";
   document.querySelectorAll("[data-i18n]").forEach(el => { const v = t(el.dataset.i18n); if (v) { if (/^(scn|fia)/.test(el.dataset.i18n)) el.innerHTML = v; else el.textContent = v; } });
   document.getElementById("lang-fr").setAttribute("aria-pressed", state.lang === "fr");
   document.getElementById("lang-en").setAttribute("aria-pressed", state.lang === "en");
@@ -1112,8 +1115,8 @@ function renderText() {
     ? `Après inflation, le loyer moyen d'un 2 chambres a augmenté de ${real6} entre 2019 et 2025 (${fmtMoney(K.loyer_2ch_2019)} à ${fmtMoney(K.loyer_2ch_2025)} en dollars courants). De 1992 à 2019, la hausse réelle avait été de ${real27}. Un test statistique confirme que la cassure est réelle.`
     : `After inflation, the average two-bedroom rent rose ${real6} between 2019 and 2025 (${fmtMoney(K.loyer_2ch_2019)} to ${fmtMoney(K.loyer_2ch_2025)} in current dollars). From 1992 to 2019, the real increase was ${real27}. A statistical test confirms the break is real.`;
   document.getElementById("chow").innerHTML = fr
-    ? `<span class="tagp">Python · test de Chow</span><span>Rupture estimée par les données : <b>2019</b></span><span>p-value corrigée (autocorrélation, recherche de l'année) : <b>0,037</b></span><a href="python.html#chow">Voir le test →</a>`
-    : `<span class="tagp">Python · Chow test</span><span>Break year picked by the data: <b>2019</b></span><span>Corrected p-value (autocorrelation, search over years): <b>0,037</b></span><a href="python.html#chow">See the test →</a>`;
+    ? `<span class="tagp">Test de Chow (rupture)</span><span>Rupture estimée par les données : <b>2019</b></span><span>p-value corrigée (autocorrélation, recherche de l'année) : <b>0,037</b></span>`
+    : `<span class="tagp">Chow test (structural break)</span><span>Break year picked by the data: <b>2019</b></span><span>Corrected p-value (autocorrelation, search over years): <b>0,037</b></span>`;
   document.getElementById("pace-old").textContent = fmtPct(paceOld, 1, true) + (fr ? " / an" : " / yr");
   document.getElementById("pace-new").textContent = fmtPct(paceNew, 1, true) + (fr ? " / an" : " / yr");
   document.getElementById("pace-old-l").textContent = fr ? "hausse réelle moyenne, 1992–2019" : "average real increase, 1992–2019";
@@ -1199,12 +1202,10 @@ function renderText() {
   const SK = fr ? [
     ["excel.html", "Excel", "Classeur sans macro", "Deux cartes en graphiques Excel, tableau de bord, scénarios 2030, 1 239 formules."],
     ["sql.html", "SQL", "Base en étoile et 12 requêtes", "12 tables, 5 vues, fonctions de fenêtre, CTE. Exécutables dans ton navigateur."],
-    ["python.html", "Python", "Pipeline et analyses", "Un évaluateur de loyer public, le test de rupture, l'API de Statistique Canada."],
     ["carte.html", "Carte", "Carte interactive du Canada", "Loyers demandés et payés dans 42 villes, hausse des loyers par province."]
   ] : [
     ["excel.html", "Excel", "Macro-free workbook", "Two maps built as Excel charts, dashboard, 2030 scenarios, 1 239 formulas."],
     ["sql.html", "SQL", "Star schema and 12 queries", "12 tables, 5 views, window functions, CTEs. Runnable in your browser."],
-    ["python.html", "Python", "Pipeline and analyses", "A public rent evaluator, the break test, the Statistics Canada API."],
     ["carte.html", "Map", "Interactive map of Canada", "Asking and paid rents in 42 cities, rent increases by province."]
   ];
   document.getElementById("skills").innerHTML = SK.map(([h, tool, b, sm]) => `<a class="skill" href="${h}"><span class="tool">${tool}</span><b>${b}</b><small>${sm}</small><span class="go">${fr ? "Voir la page" : "See the page"} →</span></a>`).join("");
@@ -1215,11 +1216,9 @@ function renderText() {
     xl: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg>',
     py: '<svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>' };
   const FACTS = fr ? [["#contexte", "cal", "<b>34 ans</b> de loyers officiels, SCHL et Statistique Canada"], ["carte.html", "pin", "<b>42 régions</b> comparées sur une carte interactive"],
-    ["sql.html", "db", "<b>Base SQL</b> : 12 tables, modèles conceptuel et logique"], ["excel.html", "xl", "<b>Classeur Excel</b> avec cartes, sans macro"],
-    ["python.html", "py", "<b>Python</b> : un évaluateur de loyer public et un test de rupture"]]
+    ["sql.html", "db", "<b>Base SQL</b> : 12 tables, modèles conceptuel et logique"], ["excel.html", "xl", "<b>Classeur Excel</b> avec cartes, sans macro"]]
     : [["#contexte", "cal", "<b>34 years</b> of official rents, CMHC and Statistics Canada"], ["carte.html", "pin", "<b>42 areas</b> compared on an interactive map"],
-    ["sql.html", "db", "<b>SQL database</b>: 12 tables, conceptual and logical models"], ["excel.html", "xl", "<b>Excel workbook</b> with maps, no macros"],
-    ["python.html", "py", "<b>Python</b>: a public rent evaluator and a break test"]];
+    ["sql.html", "db", "<b>SQL database</b>: 12 tables, conceptual and logical models"], ["excel.html", "xl", "<b>Excel workbook</b> with maps, no macros"]];
   document.getElementById("facts").innerHTML = FACTS.map(([h, ic, t_], i) => `<a href="${h}"${heroPlayed ? "" : ` class="hero-in" style="--d:${1.05 + i * 0.07}s"`}>${IC[ic]}${t_}</a>`).join("");
   const calc = fr ? [
     "Loyer réel = loyer d'octobre × IPC 2025 / IPC de l'année (IPC Montréal, moyenne annuelle).",
@@ -1840,8 +1839,7 @@ new MutationObserver(drawCharts).observe(document.documentElement, { attributes:
     "index.html": { fr: "Analyse", en: "Analysis" },
     "carte.html": { fr: "Carte", en: "Map" },
     "excel.html": { fr: "Excel", en: "Excel" },
-    "sql.html": { fr: "SQL", en: "SQL" },
-    "python.html": { fr: "Python", en: "Python" }
+    "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
   const FOOT = {
@@ -1855,9 +1853,12 @@ new MutationObserver(drawCharts).observe(document.documentElement, { attributes:
   const saved = new Map();
   let frTitle = document.title;
 
+  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
+    const br = document.querySelector("a.brand");
+    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];

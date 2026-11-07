@@ -1,7 +1,7 @@
 """
 Assemble le site multipage dans docs/ (GitHub Pages).
 
-Pages : index.html (analyse), carte.html, excel.html, sql.html, python.html.
+Pages : index.html (analyse), carte.html, excel.html, sql.html.
 Le style vient du gabarit de l'accueil ; les données, les formules Excel et les extraits de code
 Python sont lus dans les fichiers du projet au moment de la construction :
 ce que montre le site est toujours ce que contient le dépôt.
@@ -25,8 +25,7 @@ SRC, DOCS = ROOT / "src", ROOT / "docs"
 SITE_URL = (sys.argv[1] if len(sys.argv) > 1 else "").rstrip("/")
 PREVIEW = Path(sys.argv[2]) if len(sys.argv) > 2 else None
 
-PAGES = [("index.html", "Analyse"), ("carte.html", "Carte"), ("excel.html", "Excel"), ("sql.html", "SQL"),
-         ("python.html", "Python")]
+PAGES = [("index.html", "Analyse"), ("carte.html", "Carte"), ("excel.html", "Excel"), ("sql.html", "SQL")]
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500'
@@ -225,7 +224,7 @@ def package_program():
     return demo
 
 
-DEMO_EVAL = package_program()
+DEMO_EVAL = ""  # évaluateur retiré du site (réservé à un prochain projet) ; package_program() conservé pour le réactiver
 n_formulas, xlf, n_visible, n_sheets = excel_facts()
 SQL_FILES = sorted((ROOT / "sql").glob("*.sql"))
 DDL_T = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8").strip()
@@ -249,9 +248,6 @@ code = {
     "__PY_FETCH__": py_function(SRC / "fetch_statcan.py", "download"),
     "__PY_GEO__": py_function(SRC / "geo.py", "proj"),
     "__PY_CHOW__": py_function(SRC / "rupture.py", "chow_f") + "\n\n\n" + py_between(SRC / "rupture.py", "    # Hypothèse nulle", "    return {"),
-    "__PY_EVAL__": py_function(SRC / "evalue_loyer.py", "evalue"),
-    "__EVAL_DEMO__": ("$ python3 evalue_loyer.py --fichier annonces_exemple.csv\n\n[...]\n"
-                      + DEMO_EVAL[DEMO_EVAL.index("[Rosemont-302]"):].strip()),
     "__DDL_TABLES__": DDL_T, "__DDL_VUES__": DDL_V,
 }
 SQL_VOL_FR, SQL_VOL_EN = sql_volumes()

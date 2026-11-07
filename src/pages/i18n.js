@@ -8,8 +8,7 @@
     "index.html": { fr: "Analyse", en: "Analysis" },
     "carte.html": { fr: "Carte", en: "Map" },
     "excel.html": { fr: "Excel", en: "Excel" },
-    "sql.html": { fr: "SQL", en: "SQL" },
-    "python.html": { fr: "Python", en: "Python" }
+    "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
   const FOOT = {
@@ -23,9 +22,12 @@
   const saved = new Map();
   let frTitle = document.title;
 
+  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
+    const br = document.querySelector("a.brand");
+    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];

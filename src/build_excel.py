@@ -1047,7 +1047,7 @@ x.column_dimensions["A"].width = 2
 for c_, w_ in zip("BCDEFGHIJK", [15, 13, 13, 11, 13, 15, 13, 20, 16, 2]):
     x.column_dimensions[c_].width = w_
 canvas(x, 4, 44, 1, 11)
-label(x, "B5", "Portefeuille fictif d'une agence · même liste que l'exemple du programme Python")
+label(x, "B5", "Portefeuille fictif d'une agence · huit logements, données du marché 2025")
 PORTF = [("Plateau-101", "2 chambres", 1150, 2017), ("Plateau-102", "2 chambres", 1420, 2021), ("Villeray-201", "1 chambre", 980, 2019),
          ("Villeray-202", "2 chambres", 1890, 2025), ("Rosemont-301", "Studio", 760, 2015), ("Rosemont-302", "2 chambres", 1510, 2023),
          ("HoMa-401", "1 chambre", 1245, 2024), ("HoMa-402", "3 chambres", 2150, 2024)]
@@ -1259,9 +1259,8 @@ merge(a, "B30:M30", "Méthode", F(12, True, INK))
 for i, t in enumerate([
     "Sources : Statistique Canada (34-10-0133-01, 18-10-0005-01, 46-10-0092-01) et SCHL, Rapport sur le marché locatif 2025.",
     f"Dernières données : enquête SCHL d'octobre 2025, loyers demandés et payés de {LAST_Q}, IPC annuel 2025.",
-    "Chaque chiffre est recalculé ici par formules et vérifié contre le pipeline Python et les requêtes SQL du projet.",
+    "Chaque chiffre est recalculé ici par formules et vérifié contre la base SQL du projet à chaque construction.",
     "Cases jaunes : entrées. Texte bleu : donnée source. Vert : valeur lue dans une autre feuille. Noir : calcul. Aucune macro.",
-    "Classeur généré par un script Python (openpyxl) écrit avec l'aide d'un assistant d'IA ; questions, sources et vérifications par l'auteur du projet.",
 ]):
     merge(a, f"B{31 + i}:M{31 + i}", "• " + t, F(9, color=INK2))
 
