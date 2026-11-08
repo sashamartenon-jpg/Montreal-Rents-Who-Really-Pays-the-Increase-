@@ -71,7 +71,7 @@ python src/build_site.py https://montreal-rent-gap.pages.dev
 - Statistique Canada, [18-10-0005-01](https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=1810000501) : IPC (Montréal ; loyer et ensemble par province).
 - Statistique Canada, [46-10-0092-01](https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=4610009201) : loyers demandés et payés (estimations expérimentales).
 - SCHL, [Rapport sur le marché locatif 2025](https://www.cmhc-schl.gc.ca/fr/professionals/housing-markets-data-and-research/market-reports/rental-market-reports-major-centres) : logements reloués, hausse à échantillon constant.
-- Contexte réglementaire : [Gouvernement du Québec, calcul de l'ajustement des loyers en 2026](https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053) ; [Éducaloi, section G du bail](https://educaloi.qc.ca/actualites-juridiques/loyer-paye-par-lancien-locataire-vous-avez-le-droit-de-savoir).
+- Contexte réglementaire : [Gouvernement du Québec, calcul de l'ajustement des loyers en 2026](https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053).
 
 Données sous Licence du gouvernement ouvert – Canada. Extraction : 4 novembre 2026.
 
