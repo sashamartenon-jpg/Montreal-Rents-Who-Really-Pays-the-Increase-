@@ -20,7 +20,7 @@ Réponse courte : ceux qui déménagent. Au 2ᵉ trimestre 2026, un 2 chambres a
 | Acquisition et préparation | Chaîne de construction automatisée : extraction des tableaux officiels (API WDS), contrôles qualité, tables propres | `src/fetch_statcan.py`, `src/pipeline.py` |
 | Modélisation | MCD (Merise) confronté à la base, MLD généré depuis la base | `src/modeles.py`, `docs/assets/sql/` |
 | Base de données | SQL : 12 tables (6 faits, 6 dimensions, 3ᵉ forme normale), clés primaires composées, clés étrangères, contraintes CHECK, 5 vues, dictionnaire contrôlé. Trois moteurs : SQLite (source), SQL Server et PostgreSQL (dérivés automatiquement, validés par les parseurs de chaque moteur) | `sql/schema/`, `sql/sqlserver/`, `sql/postgres/`, `data/ref/dictionnaire.csv` |
-| Requêtes analytiques | SQL : 12 requêtes classées par niveau (débutant → avancé) : contrôle qualité, LAG, ROW_NUMBER, RANK, PARTITION BY, moyennes mobiles, CTE, requêtes sur des vues. Écrites pour SQLite, traduites en T-SQL (SQL Server) et validées par deux parseurs | `sql/*.sql`, `sql/sqlserver/`, `src/build_db.py`, `src/sqlserver.py` |
+| Requêtes analytiques | SQL : 12 requêtes classées par niveau (débutant → avancé) : contrôle qualité, LAG, ROW_NUMBER, RANK, PARTITION BY, moyennes mobiles, CTE, requêtes sur des vues. Écrites pour SQLite, déclinées automatiquement pour SQL Server (T-SQL) et PostgreSQL ; les trois versions ont été exécutées sur SQL Server 2022, PostgreSQL 16 et SQLite 3 | `sql/*.sql`, `sql/sqlserver/`, `sql/postgres/`, `src/build_db.py`, `src/sqlserver.py`, `src/postgres.py` |
 | Statistique | Test de Chow avec recherche de la rupture et p-value corrigée par 20 000 simulations (résidus AR(1)) ; calculé par la chaîne de construction | `src/rupture.py` |
 | Classeur | Excel sans macro : carte du Canada et carte des villes en graphiques Excel, tableau de bord, scénarios (NPM), simulateur, feuille « Mode d'emploi » (chaque fonction, du simple SOMME.SI.ENS aux séries à NA(), et les équivalents 365). Aucune cellule vide ni erreur visible | `docs/assets/modele_loyers_montreal.xlsx`, `src/build_excel.py`, `src/geo.py` |
 | Visualisation et diffusion | Site de 4 pages (HTML, CSS, JavaScript, D3.js, sql.js) : carte animée, console SQL, animations au défilement. Accessibilité vérifiée (axe-core : 0 violation WCAG 2.1 AA sur les 4 pages, clair et sombre), navigation clavier, animations coupées avec `prefers-reduced-motion` | `src/index.template.html`, `src/pages/` → `docs/` |
@@ -40,10 +40,10 @@ La construction s'arrête dans chacun des cas suivants :
 ```
 data/raw/        extractions officielles (Statistique Canada, SCHL) et coordonnées des villes
 data/ref/        contours des provinces (Natural Earth, via sane-topojson, MIT), dictionnaire de données
-data/clean/      tables propres
+data/clean/      tables propres et statistiques calculées (stats.json : test de Chow, effet de composition)
 sql/schema/      création des tables et des vues (SQLite, source)
 sql/             12 requêtes commentées (SQLite)
-sql/sqlserver/   base et requêtes en T-SQL (SQL Server) · sql/postgres/ : base pour PostgreSQL
+sql/sqlserver/   base et requêtes en T-SQL (SQL Server) · sql/postgres/ : base et requêtes pour PostgreSQL
 src/             fetch_statcan · pipeline · build_db · sqlserver · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
 docs/            site publié ; assets/ contient les fichiers téléchargeables (classeurs Excel, scripts SQL et requêtes par moteur) et loyers.sqlite, lue par la console SQL de la page
@@ -57,7 +57,7 @@ python src/fetch_statcan.py   # vérifie data/raw contre les tableaux officiels 
 python src/pipeline.py
 python src/build_db.py
 python src/sqlserver.py       # version SQL Server (T-SQL) de la base et des 12 requêtes (validée par sqlglot et sqlfluff)
-python src/postgres.py        # version PostgreSQL du schéma, des vues et des données (validée par pglast)
+python src/postgres.py        # version PostgreSQL de la base et des 12 requêtes (validée par pglast)
 python src/modeles.py         # MCD, MLD et fichiers téléchargeables de la base
 python src/build_excel.py
 python src/render_excel.py    # captures des feuilles (LibreOffice requis)

@@ -1,15 +1,15 @@
 <title>SQL · Loyers Montréal</title>
-<meta name="description" content="Base SQLite en modèle en étoile (__N_TABLES__ tables, __N_VUES__ vues) et __N_SQL__ requêtes analytiques sur les loyers, exécutables dans le navigateur.">
+<meta name="description" content="Base SQL en modèle en étoile (__N_TABLES__ tables, __N_VUES__ vues) pour SQL Server, PostgreSQL et SQLite, et __N_SQL__ requêtes analytiques sur les loyers, exécutables dans le navigateur.">
 __HEADER__
 <main id="main">
   <div class="heroband"><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · SQL</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>__N_SQL__ requêtes</mark>, zéro chiffre non vérifié</h1>
-    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes, __N_VUES__ vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et recoupé avec le classeur Excel : au moindre écart, la construction du site s'arrête.</p>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes et __N_VUES__ vues analytiques. Chaque chiffre du site est recalculé en SQL et recoupé avec le classeur Excel : au moindre écart, la construction du site s'arrête.</p>
     <ul class="proves" data-i18n="chips">
-      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>SQL Server / PostgreSQL</li>
+      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>Clés et contraintes CHECK</li><li>Vues</li><li>CTE (WITH)</li><li>Fonctions de fenêtre (LAG, RANK)</li><li>SQL Server</li><li>PostgreSQL</li><li>SQLite</li>
     </ul>
-    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers_sqlserver.sql" download data-i18n="dl1">Base SQL Server (T-SQL) ↗</a><a class="btn" href="assets/requetes_sqlserver.sql" download data-i18n="dl2">Les __N_SQL__ requêtes (T-SQL)</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2b">Version SQLite</a></p>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers_sqlserver.sql" download data-i18n="dl1">Base SQL Server (T-SQL) ↗</a><a class="btn" href="#fichiers" data-i18n="dl2">PostgreSQL, SQLite ↓</a></p>
   </div></div>
 
   <section class="block">
@@ -23,61 +23,9 @@ __HEADER__
       </div>
       <figure class="figure models" id="m-mcd"><a href="assets/sql/mcd.svg" target="_blank" rel="noopener"><img src="assets/sql/mcd.png" alt="Modèle conceptuel de données : entités Type de logement, Grande ville, Indicateur SCHL, Année, Province, Région métropolitaine, Trimestre, Estimation, reliées par sept associations avec leurs cardinalités" loading="lazy"></a>
         <figcaption data-i18n="mCapC">Sept associations. Exemple : une région métropolitaine appartient à exactement une province (1,1), une province contient zéro ou plusieurs régions (0,n). ANNÉE et TRIMESTRE sont des entités temporelles, non traduites en tables.</figcaption></figure>
-      <figure class="figure models" id="m-mld" hidden><a href="assets/sql/mld.svg" target="_blank" rel="noopener"><img src="assets/sql/mld.png" alt="Modèle logique : 6 tables de faits et 6 dimensions, clés primaires soulignées, clés étrangères reliées à leur table de référence" loading="lazy"></a>
-        <figcaption data-i18n="mCapL">Six tables de faits (rose) et six dimensions (bleu). Chaque association porteuse de données du MCD devient une table de faits dont la clé primaire composée réunit les identifiants des entités liées.</figcaption></figure>
-      <div class="cols" style="margin-top:16px">
-        <div>
-          <h3 data-i18n="mc1T">Choix de modélisation</h3>
-          <ul>
-            <li data-i18n="mc11"><b>Troisième forme normale</b> : l'unité d'un indicateur SCHL dépend de l'indicateur seul ; elle vit dans <code>dim_indicateur</code>, pas dans la table de faits.</li>
-            <li data-i18n="mc12"><b>Dimensions de référence</b> : provinces et types d'estimation sont des tables, avec clés étrangères, plutôt que des codes libres.</li>
-            <li data-i18n="mc13"><b>Grain explicite</b> : chaque table de faits a une clé primaire composée et un commentaire qui décrit une ligne.</li>
-          </ul>
-        </div>
-        <div>
-          <h3 data-i18n="mc2T">Limite assumée</h3>
-          <ul>
-            <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
-          </ul>
-          <h3 data-i18n="fT" style="margin-top:18px">Fichiers à télécharger</h3>
-          <p class="note" data-i18n="fN">Chaque script est écrit pour un moteur précis : un script SQLite ne s'exécute pas tel quel dans SQL Server ou PostgreSQL. Prendre la section du moteur utilisé.</p>
-          <p class="dlh" data-i18n="fE2">SQL Server 2016+ · Azure Data Studio, SSMS</p>
-          <ul class="dlist">
-            <li><a href="assets/loyers_sqlserver.sql" download>loyers_sqlserver.sql</a><span data-i18n="f6">tables, vues et données en T-SQL, un lot par vue (GO) · __SZ_MSSQL__</span></li>
-            <li><a href="assets/requetes_sqlserver.sql" download>requetes_sqlserver.sql</a><span data-i18n="f7">les __N_SQL__ requêtes en T-SQL · __SZ_REQ_MSSQL__</span></li>
-          </ul>
-          <p class="dlh" data-i18n="fE1">SQLite · DB Browser for SQLite, DBeaver, console de cette page</p>
-          <ul class="dlist">
-            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script · __SZ_SQL__</span></li>
-            <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les __N_SQL__ requêtes, du niveau débutant au niveau avancé · __SZ_REQ__</span></li>
-          </ul>
-          <p class="dlh" data-i18n="fE3">PostgreSQL 12+ · psql, pgAdmin, DBeaver</p>
-          <ul class="dlist">
-            <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">tables, vues et données ; les requêtes SQLite s'y exécutent avec <code>ROUND((x)::numeric, n)</code> · __SZ_PG__</span></li>
-          </ul>
-        </div>
-      </div>
+      <figure class="figure models" id="m-mld" hidden><a href="assets/sql/mld.svg" target="_blank" rel="noopener"><img src="assets/sql/mld.png" alt="Modèle logique : 6 tables de faits et 6 dimensions, clés primaires soulignées, clés étrangères reliées à leur table de référence, cardinalités 1,1 et 0,n sur chaque lien" loading="lazy"></a>
+        <figcaption data-i18n="mCapL">Six tables de faits (rose) et six dimensions (bleu). Chaque association porteuse de données du MCD devient une table de faits dont la clé primaire composée réunit les identifiants des entités liées. Sur chaque lien : une ligne de faits référence exactement une ligne de la dimension (1,1) ; une ligne de dimension est référencée par zéro ou plusieurs lignes (0,n).</figcaption></figure>
       <p class="note" data-i18n="mVol">__SQL_VOLUMES__</p>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="wrap">
-      <h2 data-i18n="dT">Le schéma, en SQL</h2>
-      <p class="intro" data-i18n="dI">La base est reconstruite à chaque exécution à partir de ces deux scripts, puis contrôlée : <code>PRAGMA foreign_key_check</code> doit être vide et chaque contrainte CHECK rejette les valeurs impossibles avant qu'elles n'atteignent une analyse.</p>
-      <details class="more ddl"><summary data-i18n="dS1">Script de création des __N_TABLES__ tables (<code>sql/schema/01_tables.sql</code>)</summary>
-<pre class="code" data-lang="sql">__DDL_TABLES__</pre></details>
-      <details class="more ddl" open><summary data-i18n="dS2">Les __N_VUES__ vues analytiques (<code>sql/schema/02_vues.sql</code>)</summary>
-<pre class="code" data-lang="sql">__DDL_VUES__</pre></details>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="wrap">
-      <h2 data-i18n="diT">Dictionnaire de données</h2>
-      <p class="intro" data-i18n="diI">Chaque colonne de chaque table et vue, avec son type, sa clé, sa définition et sa source. Le même dictionnaire est une feuille du classeur Excel.</p>
-      <div class="controls"><label class="small" for="dico-f" data-i18n="diF">Filtrer</label><select class="sel" id="dico-f"></select></div>
-      <div class="tablewrap dico" id="dico"></div>
     </div>
   </section>
 
@@ -111,57 +59,16 @@ __HEADER__
     </div>
   </section>
 
-  <section class="block" id="moteur">
+  <section class="block" id="fichiers">
     <div class="wrap">
-      <p class="kicker" data-i18n="ixK">Avancé · moteur</p>
-      <h2 data-i18n="ixT">Lire un plan d'exécution, et porter la base sur SQL Server et PostgreSQL</h2>
-      <p class="intro" data-i18n="ixI">Deux gestes qu'on attend d'un analyste qui écrit du SQL en entreprise : savoir pourquoi une requête est rapide, et savoir déplacer une base d'un moteur à un autre sans en changer le sens.</p>
-      <div class="gallery">
-        <div class="stepc"><h3 data-i18n="ix1T">Avec et sans index : le même résultat, deux chemins</h3>
-          <p data-i18n="ix1P">La requête lit la série d'une région (Montréal, loyer demandé). La clé primaire de la table commence par le trimestre : elle ne sert à rien pour filtrer sur la région. L'index <code>ix_trim_geo_est</code> commence par la région et l'estimation, puis le trimestre : le moteur va droit aux lignes, déjà dans l'ordre demandé.</p>
-<pre class="code" data-lang="sql">__IX_QUERY__</pre>
-          <p style="margin-top:10px" data-i18n="ix1a"><b>Avec l'index</b> · <code>EXPLAIN QUERY PLAN</code></p>
-<pre class="code" data-lang="txt" style="white-space:pre-wrap">__IX_PLAN_ON__</pre>
-          <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
-<pre class="code" data-lang="txt" style="white-space:pre-wrap">__IX_PLAN_OFF__</pre>
-          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les __IX_ROWS__ lignes de la table : __IX_US_ON__ µs par exécution avec l'index, __IX_US_OFF__ µs sans (× __IX_RATIO__). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
-<pre class="code" data-lang="sql" style="white-space:pre-wrap">__IX_DDL__</pre>
-        </div>
-        <div class="stepc"><h3 data-i18n="ix2T">La même base pour SQL Server et PostgreSQL</h3>
-          <p data-i18n="ix2P">Les scripts <code>loyers_sqlserver.sql</code> et <code>loyers_postgres.sql</code> (schéma, vues, données) sont dérivés automatiquement des scripts SQLite du projet, pour que les trois versions ne divergent jamais, puis relus par les parseurs de chaque moteur (<code>sqlglot</code> et <code>sqlfluff</code> pour T-SQL, <code>pglast</code>, la grammaire de PostgreSQL elle-même) : une erreur de syntaxe arrête la construction. Les écarts de dialecte, et seulement ceux-là :</p>
-          <ul>
-            <li data-i18n="ix21"><b>SQL Server</b> · <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code> deviennent <code>NVARCHAR(100)</code>, <code>INT</code>, <code>FLOAT</code> ; <code>a || b</code> devient <code>CONCAT(a, b)</code> (<code>+</code> échoue entre un entier et un texte) ; <code>LIMIT 1</code> devient <code>TOP 1</code> ; <code>GLOB</code> devient <code>LIKE '[0-9][0-9][0-9][0-9]-[01][0-9]'</code>.</li>
-            <li data-i18n="ix22"><b>SQL Server</b> · la clause <code>WINDOW w AS (…)</code> est recopiée dans chaque <code>OVER</code> ; chaque <code>CREATE VIEW</code> occupe son propre lot (<code>GO</code>) ; un alias de CTE nommé <code>pivot</code>, mot réservé, a été renommé à la source.</li>
-            <li data-i18n="ix23"><b>PostgreSQL</b> · <code>GLOB</code> devient une expression régulière <code>periode ~ '^\d{4}-[01]\d$'</code> ; <code>REAL</code> devient <code>DOUBLE PRECISION</code> ; <code>ROUND(x, n)</code> n'accepte qu'un <code>numeric</code> : <code>ROUND((x)::numeric, n)</code> dans les vues.</li>
-            <li data-i18n="ix24"><b>Les deux</b> · <code>PRAGMA foreign_keys</code> retiré (les clés étrangères sont toujours actives) ; une sous-requête dans <code>FROM</code> doit porter un alias.</li>
-            <li data-i18n="ix25"><b>Ce qui ne change pas</b> · les CTE, <code>LAG</code>, <code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code>, les moyennes mobiles <code>ROWS BETWEEN</code> et les vues : le SQL analytique est le même sur les trois moteurs.</li>
-          </ul>
-          <p style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn" href="assets/loyers_sqlserver.sql" download data-i18n="ix2Dl">Télécharger loyers_sqlserver.sql</a><a class="btn" href="assets/requetes_sqlserver.sql" download data-i18n="ix2Dl2">Les __N_SQL__ requêtes en T-SQL</a><a class="btn" href="assets/loyers_postgres.sql" download data-i18n="ix2Dl3">Télécharger loyers_postgres.sql</a></p>
-          <p class="note" data-i18n="ix2N">Chargement : SQL Server, ouvrir le script dans Azure Data Studio ou SSMS, choisir la base, exécuter ; PostgreSQL, <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Validation : syntaxe complète de chaque moteur, lue par ses parseurs ; l'exécution sur un serveur SQL Server ou PostgreSQL ne fait pas partie de la construction automatique.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="wrap">
-      <h2 data-i18n="chT">Choix techniques</h2>
-      <div class="cols">
-        <div>
-          <h3 data-i18n="ch1T">Pourquoi SQLite</h3>
-          <ul>
-            <li data-i18n="ch11">La base tient en un fichier versionné dans le dépôt et s'ouvre dans le navigateur, sans serveur.</li>
-            <li data-i18n="ch12">Les requêtes restent en SQL standard : elles tournent aussi sur DuckDB, PostgreSQL ou SQL Server avec des ajustements mineurs (POWER, concaténation).</li>
-          </ul>
-        </div>
-        <div>
-          <h3 data-i18n="ch2T">Comment les résultats sont vérifiés</h3>
-          <ul>
-            <li data-i18n="ch21"><code>src/build_db.py</code> reconstruit la base, exécute les __N_SQL__ fichiers <code>sql/*.sql</code> et compare les résultats clés aux indicateurs publiés sur le site, ainsi que deux requêtes entre elles.</li>
-            <li data-i18n="ch22">Un écart (même de 0,05 point) interrompt la construction : aucun chiffre non vérifié ne peut être publié.</li>
-          </ul>
-        </div>
-      </div>
+      <h2 data-i18n="fT">Les scripts, par moteur</h2>
+      <p class="intro" data-i18n="fI">Chaque moteur a son dialecte : prendre la ligne du moteur utilisé. Les trois versions ont été exécutées sans erreur sur SQL Server 2022, PostgreSQL 16 et SQLite 3.</p>
+      <div class="tablewrap"><table class="data files">
+        <tr><th data-i18n="fH1">Moteur</th><th data-i18n="fH2">Base : tables, vues, données</th><th data-i18n="fH3">Les __N_SQL__ requêtes</th></tr>
+        <tr><td><b>SQL Server 2016+</b><br><span class="small">SSMS, Azure Data Studio</span></td><td><a href="assets/loyers_sqlserver.sql" download>loyers_sqlserver.sql</a> <span class="small">· __SZ_MSSQL__</span></td><td><a href="assets/requetes_sqlserver.sql" download>requetes_sqlserver.sql</a> <span class="small">· __SZ_REQ_MSSQL__</span></td></tr>
+        <tr><td><b>PostgreSQL 12+</b><br><span class="small">psql, pgAdmin, DBeaver</span></td><td><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a> <span class="small">· __SZ_PG__</span></td><td><a href="assets/requetes_postgres.sql" download>requetes_postgres.sql</a> <span class="small">· __SZ_REQ_PG__</span></td></tr>
+        <tr><td><b>SQLite 3.25+</b><br><span class="small">DB Browser for SQLite, DBeaver</span></td><td><a href="assets/loyers.sql" download>loyers.sql</a> <span class="small">· __SZ_SQL__</span></td><td><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a> <span class="small">· __SZ_REQ__</span></td></tr>
+      </table></div>
     </div>
   </section>
 
@@ -175,66 +82,25 @@ window.PAGE_EN = {
   "@title": `SQL · Montreal Rents`,
   ey: `Skill · SQL`,
   h1: `A modelled database, <mark>__N_SQL__ queries</mark>, zero unverified figures`,
-  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints, __N_VUES__ analytical views and a data dictionary. Every figure on this site is recomputed in SQL and cross-checked against the Excel workbook: the slightest gap stops the site build.`,
-  ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to SQL Server and PostgreSQL`,
-  ixI: `Two things expected from an analyst who writes SQL at work: knowing why a query is fast, and moving a database from one engine to another without changing its meaning.`,
-  ix1T: `With and without an index: same result, two paths`,
-  ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
-  ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
-  ix1N: `Measured at site build time on the table's __IX_ROWS__ rows: __IX_US_ON__ µs per run with the index, __IX_US_OFF__ µs without (× __IX_RATIO_EN__). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
-  ix2T: `The same database for SQL Server and PostgreSQL`,
-  ix2P: `The <code>loyers_sqlserver.sql</code> and <code>loyers_postgres.sql</code> scripts (schema, views, data) are derived automatically from the project's SQLite scripts, so the three versions can never drift apart, then re-read by each engine's parsers (<code>sqlglot</code> and <code>sqlfluff</code> for T-SQL, <code>pglast</code>, PostgreSQL's own grammar): a syntax error stops the build. The dialect differences, and only those:`,
-  ix21: `<b>SQL Server</b> · <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code> become <code>NVARCHAR(100)</code>, <code>INT</code>, <code>FLOAT</code>; <code>a || b</code> becomes <code>CONCAT(a, b)</code> (<code>+</code> fails between an integer and a string); <code>LIMIT 1</code> becomes <code>TOP 1</code>; <code>GLOB</code> becomes <code>LIKE '[0-9][0-9][0-9][0-9]-[01][0-9]'</code>.`,
-  ix22: `<b>SQL Server</b> · the <code>WINDOW w AS (…)</code> clause is copied into each <code>OVER</code>; each <code>CREATE VIEW</code> gets its own batch (<code>GO</code>); a CTE alias named <code>pivot</code>, a reserved word, was renamed at the source.`,
-  ix23: `<b>PostgreSQL</b> · <code>GLOB</code> becomes a regular expression <code>periode ~ '^\\d{4}-[01]\\d$'</code>; <code>REAL</code> becomes <code>DOUBLE PRECISION</code>; <code>ROUND(x, n)</code> only accepts a <code>numeric</code>: <code>ROUND((x)::numeric, n)</code> in the views.`,
-  ix24: `<b>Both</b> · <code>PRAGMA foreign_keys</code> removed (foreign keys are always enforced); a subquery in <code>FROM</code> must carry an alias.`,
-  ix25: `<b>What does not change</b> · CTEs, <code>LAG</code>, <code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code>, <code>ROWS BETWEEN</code> moving averages and the views: the analytical SQL is the same on all three engines.`,
-  ix2Dl: `Download loyers_sqlserver.sql`, ix2Dl2: `The __N_SQL__ queries in T-SQL`, ix2Dl3: `Download loyers_postgres.sql`,
-  ix2N: `Loading: SQL Server, open the script in Azure Data Studio or SSMS, pick the database, run it; PostgreSQL, <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Validation: each engine's full syntax, read by its parsers; running the scripts on a SQL Server or PostgreSQL server is not part of the automated build.`,
-  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>SQL Server / PostgreSQL</li>`,
-  dl1: `SQL Server database (T-SQL) ↗`, dl2: `The __N_SQL__ queries (T-SQL)`, dl2b: `SQLite version`,
+  lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints and __N_VUES__ analytical views. Every figure on this site is recomputed in SQL and cross-checked against the Excel workbook: the slightest gap stops the site build.`,
+  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>Keys and CHECK constraints</li><li>Views</li><li>CTE (WITH)</li><li>Window functions (LAG, RANK)</li><li>SQL Server</li><li>PostgreSQL</li><li>SQLite</li>`,
+  dl1: `SQL Server database (T-SQL) ↗`, dl2: `PostgreSQL, SQLite ↓`,
   mK: `Modelling`,
   mT: `From conceptual model to database`,
   mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
   mTabC: `Conceptual model (MCD)`, mTabL: `Logical model (MLD)`,
   mCapC: `Seven associations. Example: a metro area belongs to exactly one province (1,1); a province holds zero or more metro areas (0,n). ANNÉE (year) and TRIMESTRE (quarter) are temporal entities, not turned into tables.`,
-  mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities.`,
-  mc1T: `Modelling choices`,
-  mc11: `<b>Third normal form</b>: a CMHC indicator's unit depends on the indicator alone; it lives in <code>dim_indicateur</code>, not in the fact table.`,
-  mc12: `<b>Reference dimensions</b>: provinces and estimate types are tables, with foreign keys, rather than free-form codes.`,
-  mc13: `<b>Explicit grain</b>: every fact table has a composite primary key and a comment describing one row.`,
-  mc2T: `Acknowledged limit`,
-  mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
-  fT: `Files to download`,
-  fN: `Each script is written for one engine: a SQLite script does not run as is in SQL Server or PostgreSQL. Pick the section of the engine you use.`,
-  fE1: `SQLite · DB Browser for SQLite, DBeaver, the console on this page`, fE2: `SQL Server 2016+ · Azure Data Studio, SSMS`,
-  fE3: `PostgreSQL 12+ · psql, pgAdmin, DBeaver`,
-  f6: `tables, views and data in T-SQL, one batch per view (GO) · __SZ_MSSQL__`,
-  f7: `the __N_SQL__ queries in T-SQL · __SZ_REQ_MSSQL__`,
-  f2: `tables, views and data in a single script · __SZ_SQL__`,
-  f3: `the __N_SQL__ queries, from beginner to advanced level · __SZ_REQ__`,
-  f4: `tables, views and data; the SQLite queries run there with <code>ROUND((x)::numeric, n)</code> · __SZ_PG__`,
+  mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities. On each link: a fact row references exactly one row of the dimension (1,1); a dimension row is referenced by zero or more rows (0,n).`,
   mVol: `__SQL_VOLUMES_EN__`,
-  dT: `The schema, in SQL`,
-  dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,
-  dS1: `Creation script for the __N_TABLES__ tables (<code>sql/schema/01_tables.sql</code>)`,
-  dS2: `The __N_VUES__ analytical views (<code>sql/schema/02_vues.sql</code>)`,
-  diT: `Data dictionary`,
-  diI: `Every column of every table and view, with its type, key, definition and source. The same dictionary is a sheet of the Excel workbook. Definitions are kept in French, as shipped in the database package.`,
-  diF: `Filter`,
+  fT: `The scripts, by engine`,
+  fI: `Each engine has its own dialect: take the row of the engine you use. All three versions were run without errors on SQL Server 2022, PostgreSQL 16 and SQLite 3.`,
+  fH1: `Engine`, fH2: `Database: tables, views, data`, fH3: `The __N_SQL__ queries`,
   coT: `Console: run the queries yourself`,
   coI: `SQLite runs in your browser (sql.js). Pick a query, edit it or write your own, then run it. Shortcut: Ctrl+Enter.`,
   run: `Run`, edL: `SQL query`,
   qlT: `The queries, one by one`,
   qlI: `For each query: the question asked, the techniques used, the code and the result.`,
   qlN: `Each query carries its level: <span class="lvl D">Beginner</span> aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> CTEs, pivots, rankings · <span class="lvl A">Advanced</span> window functions (LAG, ROW_NUMBER, ROWS frames).`,
-  chT: `Technical choices`,
-  ch1T: `Why SQLite`,
-  ch11: `The database fits in one file versioned in the repository and opens in the browser, no server.`,
-  ch12: `The queries stay in standard SQL: they also run on DuckDB, PostgreSQL or SQL Server with minor adjustments (POWER, concatenation).`,
-  ch2T: `How the results are verified`,
-  ch21: `<code>src/build_db.py</code> rebuilds the database, runs the __N_SQL__ <code>sql/*.sql</code> files and compares the key results to the indicators published on the site, as well as two queries against each other.`,
-  ch22: `Any gap (even 0.05 of a point) stops the build: no unverified figure can get published.`,
   pgL: `← Excel`, pgR: `Analysis →`
 };
 const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
@@ -276,22 +142,6 @@ document.querySelectorAll(".mtabs button").forEach(b => b.onclick = () => {
   document.getElementById("m-mcd").hidden = b.dataset.m !== "mcd";
   document.getElementById("m-mld").hidden = b.dataset.m !== "mld";
 });
-const DICO = __DICO_JSON__;
-function drawDico() {
-  const f = document.getElementById("dico-f").value;
-  const rows = DICO.filter(r => !f || r.table === f);
-  const H = tr(["Table", "Colonne", "Type", "Clé", "Description", "Source"], ["Table", "Column", "Type", "Key", "Description (FR)", "Source"]);
-  document.getElementById("dico").innerHTML = `<table class="data"><tr>${H.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(r =>
-    `<tr><td><code class="${r.table.startsWith("v_") ? "vw" : "tb"}">${esc(r.table)}</code></td><td><code>${esc(r.colonne)}</code></td><td>${esc(r.type || "")}</td><td>${esc(r.cle || "")}</td><td class="desc">${esc(r.description || "")}</td><td>${esc(r.source || "")}</td></tr>`).join("")}</table>`;
-}
-function drawDicoFilter() {
-  const cur = document.getElementById("dico-f").value;
-  document.getElementById("dico-f").innerHTML = `<option value="">${tr("Toutes les tables et vues", "All tables and views")} (${DICO.length} ${tr("colonnes", "columns")})</option>` +
-    [...new Set(DICO.map(r => r.table))].map(t => `<option value="${t}"${t === cur ? " selected" : ""}>${t}</option>`).join("");
-}
-drawDicoFilter();
-document.getElementById("dico-f").onchange = drawDico;
-drawDico();
 function drawQlist() {
   document.getElementById("qlist").innerHTML = SQLRES.map(q => {
     const n = NOTES[q.file] || { q: q.title, tags: [], why: "" };
@@ -350,6 +200,6 @@ document.getElementById("sql-editor").addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSQL(); }
   if (e.key === "Tab") { e.preventDefault(); const el = e.target; el.setRangeText("  ", el.selectionStart, el.selectionEnd, "end"); }
 });
-document.addEventListener("langchange", () => { drawQlist(); drawDicoFilter(); drawDico(); drawTabs(); drawSchema(); });
+document.addEventListener("langchange", () => { drawQlist(); drawTabs(); drawSchema(); });
 loadSQL();
 </script>

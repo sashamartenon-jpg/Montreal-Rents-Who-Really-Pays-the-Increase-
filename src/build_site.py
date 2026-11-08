@@ -109,41 +109,6 @@ def sql_volumes():
     return txt, txt_en
 
 
-def index_demo():
-    """Plan d'exécution et temps mesurés avec puis sans l'index ix_trim_geo_est, sur une copie de la base."""
-    import shutil, tempfile, time
-    tmp = Path(tempfile.mkdtemp()) / "loyers.sqlite"
-    shutil.copy(ROOT / "data" / "loyers.sqlite", tmp)
-    q = "SELECT periode, loyer\nFROM fait_loyer_trimestriel\nWHERE geo_id = 7 AND estimation = 'A'\nORDER BY periode DESC;"
-    flat = q.replace("\n", " ")
-
-    def run():
-        con = sqlite3.connect(tmp)
-        plan = "\n".join(r[3] for r in con.execute("EXPLAIN QUERY PLAN " + flat))
-        best = 1e9
-        for _ in range(5):
-            t0 = time.perf_counter()
-            for _ in range(3000):
-                con.execute(flat).fetchall()
-            best = min(best, (time.perf_counter() - t0) / 3000 * 1e6)
-        n = con.execute("SELECT COUNT(*) FROM fait_loyer_trimestriel").fetchone()[0]
-        con.close()
-        return plan, best, n
-
-    plan_on, us_on, n = run()
-    con = sqlite3.connect(tmp)
-    con.execute("DROP INDEX ix_trim_geo_est")
-    con.commit()
-    con.close()
-    plan_off, us_off, _ = run()
-    shutil.rmtree(tmp.parent, ignore_errors=True)
-    assert "USING INDEX ix_trim_geo_est" in plan_on and "SCAN" in plan_off, (plan_on, plan_off)
-    return {"__IX_QUERY__": q, "__IX_PLAN_ON__": plan_on, "__IX_PLAN_OFF__": plan_off,
-            "__IX_US_ON__": f"{us_on:.0f}", "__IX_US_OFF__": f"{us_off:.0f}", "__IX_ROWS__": str(n),
-            "__IX_RATIO__": fr_num(us_off / us_on, 1), "__IX_RATIO_EN__": f"{us_off / us_on:.1f}",
-            "__IX_DDL__": "CREATE INDEX ix_trim_geo_est ON fait_loyer_trimestriel (geo_id, estimation, periode);"}
-
-
 def fr_num(x, d=2):
     return f"{x:.{d}f}".replace(".", ",").replace("-", "−")
 
@@ -231,7 +196,7 @@ import csv
 DICO = list(csv.DictReader((ROOT / "data" / "ref" / "dictionnaire.csv").open(encoding="utf-8"), delimiter=";"))
 assert all(len(r) == 6 and None not in r for r in DICO), "dictionnaire.csv mal formé"
 
-stats = json.loads((DOCS / "assets" / "python" / "stats.json").read_text(encoding="utf-8"))
+stats = json.loads((ROOT / "data" / "clean" / "stats.json").read_text(encoding="utf-8"))   # test de Chow, effet de composition
 INS = json.loads((DOCS / "data" / "data.json").read_text(encoding="utf-8"))["insights"]
 # délai de rattrapage du scénario B (locataires en place), même calcul que la fonction NPM du classeur
 import math
@@ -245,7 +210,6 @@ code = {
     "__PY_FETCH__": py_function(SRC / "fetch_statcan.py", "download"),
     "__PY_GEO__": py_function(SRC / "geo.py", "proj"),
     "__PY_CHOW__": py_function(SRC / "rupture.py", "chow_f") + "\n\n\n" + py_between(SRC / "rupture.py", "    # Hypothèse nulle", "    return {"),
-    "__DDL_TABLES__": DDL_T, "__DDL_VUES__": DDL_V,
 }
 SQL_VOL_FR, SQL_VOL_EN = sql_volumes()
 
@@ -254,7 +218,6 @@ def en_num(x, d=2):
     return f"{x:.{d}f}".replace("-", "\u2212")
 
 
-IX = index_demo()
 (DOCS / "data" / "loyers_long.csv").unlink(missing_ok=True)
 
 # Règles d'hébergement, au format lu par Cloudflare Pages (fichiers _headers / _redirects placés dans
@@ -270,10 +233,10 @@ def ko(rel):
     return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"
 SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/loyers.sql"),
          "__SZ_REQ__": ko("assets/requetes_loyers_montreal.sql"), "__SZ_PG__": ko("assets/loyers_postgres.sql"),
-         "__SZ_MSSQL__": ko("assets/loyers_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/requetes_sqlserver.sql"),
+         "__SZ_MSSQL__": ko("assets/loyers_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/requetes_sqlserver.sql"), "__SZ_REQ_PG__": ko("assets/requetes_postgres.sql"),
          "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
 common = {
-    **IX, **SIZES,
+    **SIZES,
     "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", " "),
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
     "__N_PAYE__": str(N_PAYE),
@@ -283,7 +246,6 @@ common = {
     "__CHOW_RUPT__": str(stats["chow_rupture"]), "__CHOW_F__": fr_num(stats["chow_f_2019"], 1),
     "__CHOW_P__": fr_num(stats["chow_p_simulee"], 3), "__CHOW_PN__": f"{stats['chow_p_naive']:.0e}".replace("e-", " × 10⁻").replace("10⁻10", "10⁻¹⁰").replace("10⁻0", "10⁻"),
     "__CHOW_RHO__": fr_num(stats["chow_rho"], 2), "__CHOW_SEUIL__": fr_num(stats["chow_seuil"], 1), "__CHOW_NSIM__": f"{stats['chow_n_sim']:,}".replace(",", " "),
-    "__DICO_JSON__": json.dumps(DICO, ensure_ascii=False).replace("</", "<\\/"),
     "__PY_PENTE_AVANT__": fr_num(stats["pente_avant"], 1), "__PY_PENTE_APRES__": fr_num(stats["pente_apres"], 1),
     "__PY_RATIO__": fr_num(stats["ratio_pentes"], 1), "__PY_R2_AVANT__": fr_num(stats["r2_avant"]), "__PY_R2_APRES__": fr_num(stats["r2_apres"]),
     "__PY_BRUTE__": fr_num(stats["hausse_brute_2025"], 1), "__PY_MEME__": fr_num(stats["hausse_meme_echantillon_2025"], 1),

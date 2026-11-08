@@ -536,9 +536,14 @@ details.ddl { margin-top: 12px; }
 details.ddl summary { font-weight: 600; color: var(--ink); font-size: .92rem; }
 details.ddl pre { margin-top: 8px; max-height: 560px; overflow: auto; }
 .dico { max-height: 540px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 0; }
-.dico table.data td, .dico table.data th { text-align: left; }
-.dico table.data td.desc { white-space: normal; min-width: 280px; }
-.dico table.data th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+table.data.files { font-size: .92rem; }
+table.data.files th, table.data.files td { text-align: left; padding: 10px 12px 10px 0; vertical-align: top; }
+table.data.files a { font-family: var(--font-mono); font-size: .86rem; }
+@media (max-width: 640px) {
+  table.data.files tr:first-child { display: none; }
+  table.data.files tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--grid); }
+  table.data.files td { display: block; border: 0; padding: 3px 0; white-space: normal; }
+}
 .dico code { font-size: .78rem; }
 .dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }
 select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; max-width: 100%; }

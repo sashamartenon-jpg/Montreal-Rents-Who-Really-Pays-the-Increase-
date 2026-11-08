@@ -75,8 +75,7 @@ header = """-- =================================================================
 -- Base « Loyers à Montréal » pour PostgreSQL : schéma, vues, données
 -- Générée par src/postgres.py depuis les scripts SQLite du projet et data/loyers.sqlite.
 -- Chargement :  createdb loyers && psql -d loyers -f loyers_postgres.sql
--- Les 12 requêtes de sql/requetes/ sont en SQL standard ; deux ajustements PostgreSQL :
---   ROUND(x, n) demande un numeric → ROUND((x)::numeric, n) ; POWER et || sont identiques.
+-- Requêtes : requetes_postgres.sql (les 12 requêtes analytiques, même dialecte).
 -- =====================================================================
 BEGIN;
 """
@@ -97,4 +96,22 @@ assert n_tables == len(order) and n_views == VUES.count("CREATE VIEW"), (n_table
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(script, encoding="utf-8")
 (ROOT / "docs" / "assets" / "loyers_postgres.sql").write_text(script, encoding="utf-8")
+# ---------------------------------------------------------------- les 12 requêtes, version PostgreSQL
+# Seul écart : ROUND(x, n) sur un double precision → ROUND((x)::numeric, n). Le reste est du SQL standard.
+reqs = []
+for f in sorted((ROOT / "sql").glob("[0-9][0-9]_*.sql")):
+    q = f.read_text(encoding="utf-8").strip().rstrip(";")
+    reqs.append(round_numeric(q) + ";")
+REQ = ("-- =====================================================================\n"
+       "-- Loyers à Montréal : les 12 requêtes analytiques, version PostgreSQL\n"
+       "-- Chaque requête s'exécute telle quelle sur une base chargée avec loyers_postgres.sql.\n"
+       "-- Le niveau est indiqué en tête de chacune.\n"
+       "-- =====================================================================\n\n" + "\n\n".join(reqs) + "\n")
+try:
+    assert len(parse_sql(REQ)) == len(reqs)
+except ParseError as e:
+    raise SystemExit(f"requetes_postgres.sql : syntaxe PostgreSQL invalide : {e}")
+(OUT.parent / "requetes_postgres.sql").write_text(REQ, encoding="utf-8")
+(ROOT / "docs" / "assets" / "requetes_postgres.sql").write_text(REQ, encoding="utf-8")
+
 print(f"PostgreSQL : {OUT.relative_to(ROOT)} · {n_tables} tables, {n_views} vues, {n_idx} index, {n_ins} INSERT · {len(stmts)} instructions validées par pglast")

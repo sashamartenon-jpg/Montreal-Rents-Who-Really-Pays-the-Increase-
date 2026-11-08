@@ -119,9 +119,9 @@ def mcd_svg():
 # ================================================================== MLD, lu dans la base
 LAYOUT = {  # table : (x, y)
     "dim_logement": (30, 30), "dim_geo": (30, 250), "dim_indicateur": (30, 470),
-    "fait_loyer": (330, 30), "fait_inoccupation": (330, 210), "ipc": (330, 360), "schl_roulement": (330, 510),
-    "fait_loyer_trimestriel": (650, 30), "ipc_provinces": (650, 400),
-    "dim_rmr": (970, 30), "dim_estimation": (970, 250), "dim_province": (970, 420),
+    "fait_loyer": (380, 30), "fait_inoccupation": (380, 210), "ipc": (380, 360), "schl_roulement": (380, 510),
+    "fait_loyer_trimestriel": (740, 30), "ipc_provinces": (740, 400),
+    "dim_rmr": (1100, 30), "dim_estimation": (1100, 250), "dim_province": (1100, 420),
 }
 TW, RH, HH = 250, 22, 32
 
@@ -132,17 +132,24 @@ def schema():
     info = {}
     for t in tables:
         cols = [(c[1], c[2], c[5]) for c in con.execute(f"PRAGMA table_info({t})")]
-        fks = {f[3]: (f[2], f[4]) for f in con.execute(f"PRAGMA foreign_key_list({t})")}
+        notnull = {c[1] for c in con.execute(f"PRAGMA table_info({t})") if c[3] or c[5]}
+        fks = {f[3]: (f[2], f[4], f[3] in notnull) for f in con.execute(f"PRAGMA foreign_key_list({t})")}
         info[t] = (cols, fks)
     con.close()
     return info
 
 
+def card_pill(cx, cy, txt):
+    return (f'<g><rect x="{cx - 19:.1f}" y="{cy - 10.5:.1f}" width="38" height="20" rx="10" fill="#ffffff" stroke="{BLUE_D}" stroke-width=".8"/>'
+            f'<text x="{cx:.1f}" y="{cy + 4.2:.1f}" font-size="12.5" font-weight="700" text-anchor="middle" fill="{BLUE_D}" '
+            f'font-family="{MONO}">{txt}</text></g>')
+
+
 def mld_svg(info):
     assert set(info) == set(LAYOUT), f"Tables sans position dans le MLD : {set(info) ^ set(LAYOUT)}"
-    W, H = 1330, 700
+    W, H = 1460, 700
     rowy = {}
-    boxes, arrows = [], []
+    boxes, arrows, cards, seen = [], [], [], set()
     for t, (cols, fks) in info.items():
         x, y = LAYOUT[t]
         h = HH + RH * len(cols) + 8
@@ -163,25 +170,32 @@ def mld_svg(info):
                          f'<text x="{x + TW - 10}" y="{cy}" font-size="10" fill="{PINK if "FK" in key else BLUE_D}" text-anchor="end" font-weight="700">{key.strip()}</text>')
         boxes.append('</g>')
     for t, (cols, fks) in info.items():
-        for c, (rt, rc) in fks.items():
+        for c, (rt, rc, nn) in fks.items():
             x1, x2 = LAYOUT[t][0], LAYOUT[rt][0]
             y1, y2 = rowy[(t, c)], rowy[(rt, rc)]
             if x2 + TW < x1:            # cible à gauche
-                sx, ex, k = x1, x2 + TW, -1
+                sx, ex, k, ke = x1, x2 + TW, -1, -1
             elif x1 + TW < x2:          # cible à droite
-                sx, ex, k = x1 + TW, x2, 1
+                sx, ex, k, ke = x1 + TW, x2, 1, 1
             else:                       # même colonne : boucle par la droite
-                sx, ex = x1 + TW, x2 + TW
+                sx, ex, k, ke = x1 + TW, x2 + TW, 1, -1
                 arrows.append(f'<path d="M{sx} {y1} C{sx + 70} {y1}, {ex + 70} {y2}, {ex + 6} {y2}" fill="none" stroke="{INK2}" stroke-width="1.3" marker-end="url(#a)"/>')
-                continue
-            mid = (sx + ex) / 2
-            arrows.append(f'<path d="M{sx} {y1} C{mid} {y1}, {mid} {y2}, {ex - 6 * k} {y2}" fill="none" stroke="{INK2}" stroke-width="1.3" marker-end="url(#a)"/>')
+            if x1 != x2:
+                mid = (sx + ex) / 2
+                arrows.append(f'<path d="M{sx} {y1} C{mid} {y1}, {mid} {y2}, {ex - 6 * k} {y2}" fill="none" stroke="{INK2}" stroke-width="1.3" marker-end="url(#a)"/>')
+            # cardinalités (notation Merise, comme le MCD) : côté clé étrangère, chaque ligne référence
+            # exactement une ligne (1,1 si la colonne est NOT NULL, sinon 0,1) ; côté clé référencée, une
+            # ligne peut être référencée par zéro ou plusieurs lignes (0,n). Un seul 0,n par point d'arrivée.
+            cards.append(card_pill(sx + 24 * k, y1 - 12, "1,1" if nn else "0,1"))
+            if (rt, rc, ke) not in seen:
+                seen.add((rt, rc, ke))
+                cards.append(card_pill(ex - 27 * ke, y2 - 12, "0,n"))
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="{FONT}">',
            f'<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
            f'<path d="M0 0 L10 5 L0 10 z" fill="{INK2}"/></marker></defs>',
-           f'<rect width="{W}" height="{H}" fill="#ffffff"/>', *arrows, *boxes,
-           f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Modèle logique (relationnel) généré depuis la base SQLite · '
-           f'souligné : clé primaire · # : clé étrangère, flèche vers la clé référencée · rose : faits, bleu : dimensions</text>', '</svg>']
+           f'<rect width="{W}" height="{H}" fill="#ffffff"/>', *arrows, *boxes, *cards,
+           f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Modèle logique (relationnel) généré depuis la base · '
+           f'souligné : clé primaire · # : clé étrangère, flèche vers la clé référencée · 1,1 / 0,n : cardinalités · rose : faits, bleu : dimensions</text>', '</svg>']
     return "\n".join(out)
 
 

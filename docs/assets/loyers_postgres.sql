@@ -2,8 +2,7 @@
 -- Base « Loyers à Montréal » pour PostgreSQL : schéma, vues, données
 -- Générée par src/postgres.py depuis les scripts SQLite du projet et data/loyers.sqlite.
 -- Chargement :  createdb loyers && psql -d loyers -f loyers_postgres.sql
--- Les 12 requêtes de sql/requetes/ sont en SQL standard ; deux ajustements PostgreSQL :
---   ROUND(x, n) demande un numeric → ROUND((x)::numeric, n) ; POWER et || sont identiques.
+-- Requêtes : requetes_postgres.sql (les 12 requêtes analytiques, même dialecte).
 -- =====================================================================
 BEGIN;
 -- =====================================================================
