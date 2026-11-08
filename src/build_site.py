@@ -260,6 +260,24 @@ def en_num(x, d=2):
 
 IX = index_demo()
 shutil.copy(ROOT / "tableau" / "loyers_long.csv", DOCS / "data" / "loyers_long.csv")
+
+# Règles d'hébergement, au format lu par Netlify ET par Cloudflare Pages (fichiers _headers / _redirects
+# placés dans le dossier publié). Elles forcent le téléchargement des fichiers de données et renvoient
+# les pages retirées du projet vers l'accueil.
+(DOCS / "_headers").write_text("""/assets/*.sqlite
+  Content-Type: application/vnd.sqlite3
+  Content-Disposition: attachment
+/assets/*.sql
+  Content-Type: application/sql
+  Content-Disposition: attachment
+/assets/*.csv
+  Content-Type: text/csv; charset=utf-8
+  Content-Disposition: attachment
+/data/loyers_long.csv
+  Content-Type: text/csv; charset=utf-8
+  Content-Disposition: attachment
+""", encoding="utf-8")
+(DOCS / "_redirects").write_text("/python.html  /  301\n/notebooks/*  /  301\n", encoding="utf-8")
 def ko(rel):
     """Taille d'un fichier de docs/ en Ko, pour l'afficher à côté du lien de téléchargement."""
     return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"

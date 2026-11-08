@@ -1,0 +1,12 @@
+/assets/*.sqlite
+  Content-Type: application/vnd.sqlite3
+  Content-Disposition: attachment
+/assets/*.sql
+  Content-Type: application/sql
+  Content-Disposition: attachment
+/assets/*.csv
+  Content-Type: text/csv; charset=utf-8
+  Content-Disposition: attachment
+/data/loyers_long.csv
+  Content-Type: text/csv; charset=utf-8
+  Content-Disposition: attachment
