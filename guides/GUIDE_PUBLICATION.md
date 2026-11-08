@@ -7,8 +7,7 @@ Durée totale : environ 1 h 30. Aucun terminal nécessaire : tout se fait dans l
 - [ ] Lance `python src/fetch_statcan.py` sur ton ordinateur (ou dans Colab). Il doit afficher « Aucun écart ». C'est la vérification finale des données.
 - [ ] Ouvre `docs/index.html` dans ton navigateur (double-clic) et lis toutes les pages.
 - [ ] Ouvre `docs/assets/modele_loyers_montreal.xlsx` dans Excel. Sur « Carte provinces », mets l'année à 2024 : l'Alberta doit passer en tête et les bulles changer de couleur. Choisis l'Ontario : sa bulle passe en rose. Sur « Carte villes », choisis Toronto : le point rose se déplace. Aucune cellule ne doit afficher #N/A ou #VALEUR.
-- [ ] Ouvre `docs/assets/base_loyers_montreal.zip` : la base s'ouvre dans DB Browser for SQLite, les images mcd.png et mld.png sont lisibles.
-- [ ] Dézippe `docs/assets/programme_evaluateur.zip` et lance `python3 evalue_loyer.py --fichier annonces_exemple.csv` : la synthèse des 8 logements fictifs doit s'afficher.
+- [ ] Ouvre `docs/assets/loyers.sqlite` dans DB Browser for SQLite : 12 tables, 5 vues. Vérifie que `requetes_loyers_montreal.sql` et `loyers_postgres.sql` se téléchargent depuis la page SQL.
 - [ ] Accessibilité : parcours la page d'accueil uniquement au clavier (Tab) ; le lien « Aller au contenu » doit apparaître en premier, et chaque bouton montrer un contour rose.
 - [ ] Recoupe trois chiffres avec la source : va sur le [tableau 34-10-0133-01](https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=3410013301), choisis Montréal, deux chambres, et compare 2019 (855 $), 2024 (1 176 $) et 2025 (1 346 $).
 - [ ] Prépare une réponse d'une minute à : « Pourquoi 14,5 % sur ton site et 7,2 % dans le rapport de la SCHL ? »

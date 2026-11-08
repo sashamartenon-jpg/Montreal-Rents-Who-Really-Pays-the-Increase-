@@ -14,6 +14,7 @@ import ast
 import html
 import json
 import re
+import shutil
 import sqlite3
 import sys
 from pathlib import Path
@@ -258,8 +259,16 @@ def en_num(x, d=2):
 
 
 IX = index_demo()
+shutil.copy(ROOT / "tableau" / "loyers_long.csv", DOCS / "data" / "loyers_long.csv")
+def ko(rel):
+    """Taille d'un fichier de docs/ en Ko, pour l'afficher à côté du lien de téléchargement."""
+    return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"
+SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/loyers.sql"),
+         "__SZ_REQ__": ko("assets/requetes_loyers_montreal.sql"), "__SZ_PG__": ko("assets/loyers_postgres.sql"),
+         "__SZ_DICO__": ko("assets/dictionnaire_donnees.csv"), "__SZ_CSV__": ko("data/loyers_long.csv"),
+         "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
 common = {
-    **IX,
+    **IX, **SIZES,
     "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", " "),
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
     "__N_PAYE__": str(N_PAYE),

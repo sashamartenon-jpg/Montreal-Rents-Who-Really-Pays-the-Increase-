@@ -279,6 +279,13 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
 .star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
 
+/* liste de fichiers à télécharger */
+.dlist { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+.dlist li { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; }
+.dlist a { font: 600 .9rem var(--font-mono); color: var(--link); text-decoration: none; }
+.dlist a:hover { text-decoration: underline; }
+.dlist span { font-size: .92rem; color: var(--ink-2); }
+
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }

@@ -45,7 +45,7 @@ sql/schema/      création des tables et des vues
 sql/             12 requêtes commentées
 src/             fetch_statcan · pipeline · build_db · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
-docs/            site publié par GitHub Pages, dont assets/base_loyers_montreal.zip (base, modèles, requêtes)
+docs/            site publié par GitHub Pages ; assets/ contient les fichiers téléchargeables (classeurs, base SQLite, scripts SQL, requêtes, dictionnaire) et data/loyers_long.csv
 guides/          publication, post LinkedIn
 ```
 

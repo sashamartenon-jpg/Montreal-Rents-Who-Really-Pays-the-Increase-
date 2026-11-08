@@ -6,15 +6,15 @@ Modèles de la base de données et paquet téléchargeable.
   de faits qui contient ses attributs, et chaque entité traduite en table doit exister.
 - Modèle logique (MLD) : dessiné directement à partir du schéma SQLite (tables, clés primaires,
   clés étrangères lues par PRAGMA) ; il ne peut donc pas diverger de la base.
-- Paquet docs/assets/base_loyers_montreal.zip : script SQL complet, base SQLite, schéma, requêtes,
-  dictionnaire et modèles (SVG et PNG).
+- Fichiers téléchargeables dans docs/assets : base SQLite, requêtes réunies, dictionnaire ;
+  modèles MCD/MLD (SVG et PNG) dans docs/assets/sql.
 
 Exécution : python src/modeles.py (après build_db.py)
 """
 from pathlib import Path
 import html
 import sqlite3
-import zipfile
+import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "data" / "loyers.sqlite"
@@ -224,30 +224,17 @@ if __name__ == "__main__":
     (OUT / "mld.svg").write_text(mld_svg(info), encoding="utf-8")
     for n in ("mcd", "mld"):
         png(OUT / f"{n}.svg", OUT / f"{n}.png")
-    readme = ("Base de données « Loyers à Montréal » (SQLite)\n\n"
-              "loyers.sqlite         base prête à ouvrir (DB Browser for SQLite, DBeaver, Python sqlite3)\n"
-              "loyers.sql            script complet : création des tables et des vues, puis données (INSERT)\n"
-              "schema/               création des tables (01) et des vues (02), sans données\n"
-              "requetes/            les requêtes analytiques, du niveau débutant (agrégats, jointures)\n"
-              "                      au niveau avancé (fonctions de fenêtre) ; le niveau est en tête de chaque fichier\n"
-              "dictionnaire.csv      chaque colonne de chaque table et vue (séparateur ;)\n"
-              "postgres/             la même base pour PostgreSQL : createdb loyers && psql -d loyers -f loyers_postgres.sql\n"
-              "mcd.png / mcd.svg     modèle conceptuel (Merise)\n"
-              "mld.png / mld.svg     modèle logique, généré depuis la base\n\n"
-              "Recréer la base : sqlite3 loyers.db < loyers.sql\n"
-              "Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.\n")
-    with zipfile.ZipFile(ROOT / "docs" / "assets" / "base_loyers_montreal.zip", "w", zipfile.ZIP_DEFLATED) as z:
-        z.write(ROOT / "docs" / "assets" / "loyers.sqlite", "loyers.sqlite")
-        z.write(ROOT / "docs" / "assets" / "loyers.sql", "loyers.sql")
-        for f in sorted((ROOT / "sql" / "schema").glob("*.sql")):
-            z.write(f, f"schema/{f.name}")
-        for f in sorted((ROOT / "sql").glob("*.sql")):
-            z.write(f, f"requetes/{f.name}")
-        z.write(ROOT / "data" / "ref" / "dictionnaire.csv", "dictionnaire.csv")
-        pg = ROOT / "sql" / "postgres" / "loyers_postgres.sql"
-        if pg.exists():
-            z.write(pg, "postgres/loyers_postgres.sql")
-        for n in ("mcd.svg", "mcd.png", "mld.svg", "mld.png"):
-            z.write(OUT / n, n)
-        z.writestr("LISEZMOI.txt", readme)
-    print("modèles et paquet écrits :", ", ".join(p.name for p in sorted(OUT.iterdir())), "· base_loyers_montreal.zip")
+    # Fichiers téléchargeables individuellement (pas d'archive : chaque fichier est utile seul)
+    assets = ROOT / "docs" / "assets"
+    shutil.copy(ROOT / "data" / "loyers.sqlite", assets / "loyers.sqlite")
+    shutil.copy(ROOT / "data" / "ref" / "dictionnaire.csv", assets / "dictionnaire_donnees.csv")
+    parts = ["-- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.",
+             "-- Chaque requête s'exécute telle quelle sur loyers.sqlite (SQLite 3.25+). Le niveau est indiqué en tête de chacune.",
+             "-- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.", ""]
+    for f in sorted((ROOT / "sql").glob("*.sql")):
+        parts += [f"-- ===================================================================== {f.name}", f.read_text(encoding="utf-8").strip(), "", ""]
+    (assets / "requetes_loyers_montreal.sql").write_text("\n".join(parts), encoding="utf-8")
+    old_zip = assets / "base_loyers_montreal.zip"
+    if old_zip.exists():
+        old_zip.unlink()
+    print("modèles et fichiers écrits :", ", ".join(p.name for p in sorted(OUT.iterdir())), "· loyers.sqlite, requetes_loyers_montreal.sql, dictionnaire_donnees.csv")

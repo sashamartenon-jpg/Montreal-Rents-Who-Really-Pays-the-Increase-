@@ -279,6 +279,13 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .star .d, .star .f { overflow-wrap: anywhere; min-width: 0; }
 .star .d { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 8px; }
 
+/* liste de fichiers à télécharger */
+.dlist { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+.dlist li { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; }
+.dlist a { font: 600 .9rem var(--font-mono); color: var(--link); text-decoration: none; }
+.dlist a:hover { text-decoration: underline; }
+.dlist span { font-size: .92rem; color: var(--ink-2); }
+
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
@@ -577,7 +584,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     <ul class="proves" data-i18n="chips">
       <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
     </ul>
-    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl1">Télécharger la base et les modèles ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL</a></p>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers.sqlite" download data-i18n="dl1">Télécharger la base SQLite ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL complet</a><a class="btn" href="assets/requetes_loyers_montreal.sql" download data-i18n="dl2b">Les 12 requêtes</a></p>
   </div></div>
 
   <section class="block">
@@ -607,8 +614,14 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
           <ul>
             <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
           </ul>
-          <p style="margin-top:14px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl3">Télécharger la base complète (.zip) ↗</a></p>
-          <p class="note" data-i18n="mN">Base SQLite, script SQL complet, schéma, 12 requêtes, dictionnaire, MCD et MLD (PNG et SVG).</p>
+          <h3 data-i18n="fT" style="margin-top:18px">Fichiers à télécharger</h3>
+          <ul class="dlist">
+            <li><a href="assets/loyers.sqlite" download>loyers.sqlite</a><span data-i18n="f1">la base prête à ouvrir dans DB Browser for SQLite ou DBeaver · 188 Ko</span></li>
+            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script SQLite · 69 Ko</span></li>
+            <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les 12 requêtes, du niveau débutant au niveau avancé · 10 Ko</span></li>
+            <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">la même base pour PostgreSQL · 43 Ko</span></li>
+            <li><a href="assets/dictionnaire_donnees.csv" download>dictionnaire_donnees.csv</a><span data-i18n="f5">chaque colonne de chaque table et vue · 6 Ko</span></li>
+          </ul>
         </div>
       </div>
       <p class="note" data-i18n="mVol">Volumes : 306 loyers annuels, 298 loyers trimestriels (43 régions), 198 taux d'inoccupation, 111 valeurs d'IPC, 10 indicateurs SCHL.</p>
@@ -835,7 +848,7 @@ ORDER BY periode DESC;</pre>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SEARCH fait_loyer_trimestriel USING INDEX ix_trim_geo_est (geo_id=? AND estimation=?)</pre>
           <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SCAN fait_loyer_trimestriel USING INDEX sqlite_autoindex_fait_loyer_trimestriel_1</pre>
-          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 7 µs par exécution avec l'index, 17 µs sans (× 2,5). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
+          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 4 µs par exécution avec l'index, 11 µs sans (× 2,8). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
 <pre class="code" data-lang="sql" style="white-space:pre-wrap">CREATE INDEX ix_trim_geo_est ON fait_loyer_trimestriel (geo_id, estimation, periode);</pre>
         </div>
         <div class="stepc"><h3 data-i18n="ix2T">La même base pour PostgreSQL</h3>
@@ -930,7 +943,7 @@ window.PAGE_EN = {
   ix1T: `With and without an index: same result, two paths`,
   ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
   ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
-  ix1N: `Measured at site build time on the table's 298 rows: 7 µs per run with the index, 17 µs without (× 2.5). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
+  ix1N: `Measured at site build time on the table's 298 rows: 4 µs per run with the index, 11 µs without (× 2.8). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
   ix2T: `The same database for PostgreSQL`,
   ix2P: `The <code>loyers_postgres.sql</code> script (schema, views, data) is derived automatically from the project's SQLite scripts, so the two versions can never drift apart, then validated by PostgreSQL's own grammar (<code>pglast</code>): a syntax error stops the build. Five dialect differences, and only those:`,
   ix21: `<code>PRAGMA foreign_keys</code> removed: foreign keys are always enforced in PostgreSQL.`,
@@ -941,7 +954,7 @@ window.PAGE_EN = {
   ix2Dl: `Download loyers_postgres.sql`,
   ix2N: `Loading: <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. The script also ships in the database package. Validation: full PostgreSQL syntax; execution on a PostgreSQL server has not yet been done in this project.`,
   chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
-  dl1: `Download the database and models ↗`, dl2: `SQL script`,
+  dl1: `Download the SQLite database ↗`, dl2: `Full SQL script`, dl2b: `The 12 queries`,
   mK: `Modelling`,
   mT: `From conceptual model to database`,
   mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
@@ -954,8 +967,12 @@ window.PAGE_EN = {
   mc13: `<b>Explicit grain</b>: every fact table has a composite primary key and a comment describing one row.`,
   mc2T: `Acknowledged limit`,
   mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
-  dl3: `Download the full database (.zip) ↗`,
-  mN: `SQLite database, full SQL script, schema, 12 queries, dictionary, conceptual and logical models (PNG and SVG).`,
+  fT: `Files to download`,
+  f1: `the database, ready to open in DB Browser for SQLite or DBeaver · 188 Ko`,
+  f2: `tables, views and data in a single SQLite script · 69 Ko`,
+  f3: `the 12 queries, from beginner to advanced level · 10 Ko`,
+  f4: `the same database for PostgreSQL · 43 Ko`,
+  f5: `every column of every table and view · 6 Ko`,
   mVol: `Volumes: 306 annual rents, 298 quarterly rents (43 metro areas), 198 vacancy rates, 111 CPI values, 10 CMHC indicators.`,
   dT: `The schema, in SQL`,
   dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,

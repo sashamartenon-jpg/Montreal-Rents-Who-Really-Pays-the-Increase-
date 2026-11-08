@@ -9,7 +9,7 @@ __HEADER__
     <ul class="proves" data-i18n="chips">
       <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
     </ul>
-    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl1">Télécharger la base et les modèles ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL</a></p>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers.sqlite" download data-i18n="dl1">Télécharger la base SQLite ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL complet</a><a class="btn" href="assets/requetes_loyers_montreal.sql" download data-i18n="dl2b">Les __N_SQL__ requêtes</a></p>
   </div></div>
 
   <section class="block">
@@ -39,8 +39,14 @@ __HEADER__
           <ul>
             <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
           </ul>
-          <p style="margin-top:14px"><a class="btn primary" href="assets/base_loyers_montreal.zip" download data-i18n="dl3">Télécharger la base complète (.zip) ↗</a></p>
-          <p class="note" data-i18n="mN">Base SQLite, script SQL complet, schéma, __N_SQL__ requêtes, dictionnaire, MCD et MLD (PNG et SVG).</p>
+          <h3 data-i18n="fT" style="margin-top:18px">Fichiers à télécharger</h3>
+          <ul class="dlist">
+            <li><a href="assets/loyers.sqlite" download>loyers.sqlite</a><span data-i18n="f1">la base prête à ouvrir dans DB Browser for SQLite ou DBeaver · __SZ_SQLITE__</span></li>
+            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script SQLite · __SZ_SQL__</span></li>
+            <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les __N_SQL__ requêtes, du niveau débutant au niveau avancé · __SZ_REQ__</span></li>
+            <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">la même base pour PostgreSQL · __SZ_PG__</span></li>
+            <li><a href="assets/dictionnaire_donnees.csv" download>dictionnaire_donnees.csv</a><span data-i18n="f5">chaque colonne de chaque table et vue · __SZ_DICO__</span></li>
+          </ul>
         </div>
       </div>
       <p class="note" data-i18n="mVol">__SQL_VOLUMES__</p>
@@ -178,7 +184,7 @@ window.PAGE_EN = {
   ix2Dl: `Download loyers_postgres.sql`,
   ix2N: `Loading: <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. The script also ships in the database package. Validation: full PostgreSQL syntax; execution on a PostgreSQL server has not yet been done in this project.`,
   chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
-  dl1: `Download the database and models ↗`, dl2: `SQL script`,
+  dl1: `Download the SQLite database ↗`, dl2: `Full SQL script`, dl2b: `The __N_SQL__ queries`,
   mK: `Modelling`,
   mT: `From conceptual model to database`,
   mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
@@ -191,8 +197,12 @@ window.PAGE_EN = {
   mc13: `<b>Explicit grain</b>: every fact table has a composite primary key and a comment describing one row.`,
   mc2T: `Acknowledged limit`,
   mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
-  dl3: `Download the full database (.zip) ↗`,
-  mN: `SQLite database, full SQL script, schema, __N_SQL__ queries, dictionary, conceptual and logical models (PNG and SVG).`,
+  fT: `Files to download`,
+  f1: `the database, ready to open in DB Browser for SQLite or DBeaver · __SZ_SQLITE__`,
+  f2: `tables, views and data in a single SQLite script · __SZ_SQL__`,
+  f3: `the __N_SQL__ queries, from beginner to advanced level · __SZ_REQ__`,
+  f4: `the same database for PostgreSQL · __SZ_PG__`,
+  f5: `every column of every table and view · __SZ_DICO__`,
   mVol: `__SQL_VOLUMES_EN__`,
   dT: `The schema, in SQL`,
   dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,
