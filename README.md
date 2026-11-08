@@ -19,8 +19,8 @@ Réponse courte : ceux qui déménagent. Au 2ᵉ trimestre 2026, un 2 chambres a
 |---|---|---|
 | Acquisition et préparation | Chaîne de construction automatisée : extraction des tableaux officiels (API WDS), contrôles qualité, tables propres | `src/fetch_statcan.py`, `src/pipeline.py` |
 | Modélisation | MCD (Merise) confronté à la base, MLD généré depuis la base | `src/modeles.py`, `docs/assets/sql/` |
-| Base de données | SQL : 12 tables (6 faits, 6 dimensions, 3ᵉ forme normale), clés primaires composées, clés étrangères, contraintes CHECK, 5 vues, dictionnaire contrôlé | `sql/schema/`, `data/ref/dictionnaire.csv` |
-| Requêtes analytiques | SQL (SQLite) : 12 requêtes classées par niveau (débutant → avancé) : contrôle qualité, LAG, ROW_NUMBER, RANK, PARTITION BY, moyennes mobiles, CTE, requêtes sur des vues | `sql/*.sql`, `src/build_db.py` |
+| Base de données | SQL : 12 tables (6 faits, 6 dimensions, 3ᵉ forme normale), clés primaires composées, clés étrangères, contraintes CHECK, 5 vues, dictionnaire contrôlé. Trois moteurs : SQLite (source), SQL Server et PostgreSQL (dérivés automatiquement, validés par les parseurs de chaque moteur) | `sql/schema/`, `sql/sqlserver/`, `sql/postgres/`, `data/ref/dictionnaire.csv` |
+| Requêtes analytiques | SQL : 12 requêtes classées par niveau (débutant → avancé) : contrôle qualité, LAG, ROW_NUMBER, RANK, PARTITION BY, moyennes mobiles, CTE, requêtes sur des vues. Écrites pour SQLite, traduites en T-SQL (SQL Server) et validées par deux parseurs | `sql/*.sql`, `sql/sqlserver/`, `src/build_db.py`, `src/sqlserver.py` |
 | Statistique | Test de Chow avec recherche de la rupture et p-value corrigée par 20 000 simulations (résidus AR(1)) ; calculé par la chaîne de construction | `src/rupture.py` |
 | Classeur | Excel sans macro : carte du Canada et carte des villes en graphiques Excel, tableau de bord, scénarios (NPM), simulateur, feuille « Mode d'emploi » (chaque fonction, du simple SOMME.SI.ENS aux séries à NA(), et les équivalents 365). Aucune cellule vide ni erreur visible | `docs/assets/modele_loyers_montreal.xlsx`, `src/build_excel.py`, `src/geo.py` |
 | Visualisation et diffusion | Site de 4 pages (HTML, CSS, JavaScript, D3.js, sql.js) : carte animée, console SQL, animations au défilement. Accessibilité vérifiée (axe-core : 0 violation WCAG 2.1 AA sur les 4 pages, clair et sombre), navigation clavier, animations coupées avec `prefers-reduced-motion` | `src/index.template.html`, `src/pages/` → `docs/` |
@@ -41,21 +41,22 @@ La construction s'arrête dans chacun des cas suivants :
 data/raw/        extractions officielles (Statistique Canada, SCHL) et coordonnées des villes
 data/ref/        contours des provinces (Natural Earth, via sane-topojson, MIT), dictionnaire de données
 data/clean/      tables propres
-sql/schema/      création des tables et des vues
-sql/             12 requêtes commentées
-src/             fetch_statcan · pipeline · build_db · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
+sql/schema/      création des tables et des vues (SQLite, source)
+sql/             12 requêtes commentées (SQLite)
+sql/sqlserver/   base et requêtes en T-SQL (SQL Server) · sql/postgres/ : base pour PostgreSQL
+src/             fetch_statcan · pipeline · build_db · sqlserver · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
-docs/            site publié par GitHub Pages ; assets/ contient les fichiers téléchargeables (classeurs, base SQLite, scripts SQL, requêtes, dictionnaire) et data/loyers_long.csv
-tableau/         loyers_long.csv : les séries au format long, pour Tableau, Power BI ou Excel
+docs/            site publié par GitHub Pages ; assets/ contient les fichiers téléchargeables (classeurs, base SQLite, scripts SQL par moteur, requêtes, dictionnaire)
 ```
 
 ## Reproduire
 
 ```bash
-pip install pandas numpy scipy openpyxl matplotlib playwright pglast
+pip install pandas numpy scipy openpyxl matplotlib playwright pglast sqlglot sqlfluff
 python src/fetch_statcan.py   # vérifie data/raw contre les tableaux officiels (--mettre-a-jour pour les remplacer)
 python src/pipeline.py
 python src/build_db.py
+python src/sqlserver.py       # version SQL Server (T-SQL) de la base et des 12 requêtes (validée par sqlglot et sqlfluff)
 python src/postgres.py        # version PostgreSQL du schéma, des vues et des données (validée par pglast)
 python src/modeles.py         # MCD, MLD et fichiers téléchargeables de la base
 python src/build_excel.py

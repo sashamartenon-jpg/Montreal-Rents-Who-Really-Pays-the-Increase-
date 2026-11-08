@@ -40,11 +40,24 @@ __HEADER__
             <li data-i18n="mc21">« Grande ville » (séries SCHL depuis 1992) et « Région métropolitaine » (estimations trimestrielles) viennent de deux référentiels de Statistique Canada aux identifiants différents. Une table de correspondance serait l'étape suivante.</li>
           </ul>
           <h3 data-i18n="fT" style="margin-top:18px">Fichiers à télécharger</h3>
+          <p class="note" data-i18n="fN">Chaque script est écrit pour un moteur précis : un script SQLite ne s'exécute pas tel quel dans SQL Server ou PostgreSQL. Prendre la section du moteur utilisé.</p>
+          <p class="dlh" data-i18n="fE1">SQLite · DB Browser for SQLite, DBeaver, console de cette page</p>
           <ul class="dlist">
-            <li><a href="assets/loyers.sqlite" download>loyers.sqlite</a><span data-i18n="f1">la base prête à ouvrir dans DB Browser for SQLite ou DBeaver · __SZ_SQLITE__</span></li>
-            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script SQLite · __SZ_SQL__</span></li>
+            <li><a href="assets/loyers.sqlite" download>loyers.sqlite</a><span data-i18n="f1">la base prête à ouvrir · __SZ_SQLITE__</span></li>
+            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script · __SZ_SQL__</span></li>
             <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les __N_SQL__ requêtes, du niveau débutant au niveau avancé · __SZ_REQ__</span></li>
-            <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">la même base pour PostgreSQL · __SZ_PG__</span></li>
+          </ul>
+          <p class="dlh" data-i18n="fE2">SQL Server 2016+ · Azure Data Studio, SSMS</p>
+          <ul class="dlist">
+            <li><a href="assets/loyers_sqlserver.sql" download>loyers_sqlserver.sql</a><span data-i18n="f6">tables, vues et données en T-SQL, un lot par vue (GO) · __SZ_MSSQL__</span></li>
+            <li><a href="assets/requetes_sqlserver.sql" download>requetes_sqlserver.sql</a><span data-i18n="f7">les __N_SQL__ requêtes en T-SQL · __SZ_REQ_MSSQL__</span></li>
+          </ul>
+          <p class="dlh" data-i18n="fE3">PostgreSQL 12+ · psql, pgAdmin, DBeaver</p>
+          <ul class="dlist">
+            <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">tables, vues et données ; les requêtes SQLite s'y exécutent avec <code>ROUND((x)::numeric, n)</code> · __SZ_PG__</span></li>
+          </ul>
+          <p class="dlh" data-i18n="fE4">Tous moteurs</p>
+          <ul class="dlist">
             <li><a href="assets/dictionnaire_donnees.csv" download>dictionnaire_donnees.csv</a><span data-i18n="f5">chaque colonne de chaque table et vue · __SZ_DICO__</span></li>
           </ul>
         </div>
@@ -106,7 +119,7 @@ __HEADER__
   <section class="block" id="moteur">
     <div class="wrap">
       <p class="kicker" data-i18n="ixK">Avancé · moteur</p>
-      <h2 data-i18n="ixT">Lire un plan d'exécution, et porter la base sur PostgreSQL</h2>
+      <h2 data-i18n="ixT">Lire un plan d'exécution, et porter la base sur SQL Server et PostgreSQL</h2>
       <p class="intro" data-i18n="ixI">Deux gestes qu'on attend d'un analyste qui écrit du SQL en entreprise : savoir pourquoi une requête est rapide, et savoir déplacer une base d'un moteur à un autre sans en changer le sens.</p>
       <div class="gallery">
         <div class="stepc"><h3 data-i18n="ix1T">Avec et sans index : le même résultat, deux chemins</h3>
@@ -119,17 +132,17 @@ __HEADER__
           <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les __IX_ROWS__ lignes de la table : __IX_US_ON__ µs par exécution avec l'index, __IX_US_OFF__ µs sans (× __IX_RATIO__). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
 <pre class="code" data-lang="sql" style="white-space:pre-wrap">__IX_DDL__</pre>
         </div>
-        <div class="stepc"><h3 data-i18n="ix2T">La même base pour PostgreSQL</h3>
-          <p data-i18n="ix2P">Le script <code>loyers_postgres.sql</code> (schéma, vues, données) est dérivé automatiquement des scripts SQLite du projet, pour que les deux versions ne divergent jamais, puis validé par la grammaire de PostgreSQL elle-même (<code>pglast</code>) : une erreur de syntaxe arrête la construction. Cinq écarts de dialecte, et seulement ceux-là :</p>
+        <div class="stepc"><h3 data-i18n="ix2T">La même base pour SQL Server et PostgreSQL</h3>
+          <p data-i18n="ix2P">Les scripts <code>loyers_sqlserver.sql</code> et <code>loyers_postgres.sql</code> (schéma, vues, données) sont dérivés automatiquement des scripts SQLite du projet, pour que les trois versions ne divergent jamais, puis relus par les parseurs de chaque moteur (<code>sqlglot</code> et <code>sqlfluff</code> pour T-SQL, <code>pglast</code>, la grammaire de PostgreSQL elle-même) : une erreur de syntaxe arrête la construction. Les écarts de dialecte, et seulement ceux-là :</p>
           <ul>
-            <li data-i18n="ix21"><code>PRAGMA foreign_keys</code> retiré : les clés étrangères sont toujours actives dans PostgreSQL.</li>
-            <li data-i18n="ix22"><code>GLOB</code> remplacé par une expression régulière : <code>periode ~ '^\d{4}-[01]\d$'</code>.</li>
-            <li data-i18n="ix23"><code>REAL</code> devient <code>DOUBLE PRECISION</code>.</li>
-            <li data-i18n="ix24"><code>ROUND(x, n)</code> n'accepte qu'un <code>numeric</code> : <code>ROUND((x)::numeric, n)</code> dans les vues.</li>
-            <li data-i18n="ix25">Une sous-requête dans <code>FROM</code> doit porter un alias.</li>
+            <li data-i18n="ix21"><b>SQL Server</b> · <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code> deviennent <code>NVARCHAR(100)</code>, <code>INT</code>, <code>FLOAT</code> ; <code>a || b</code> devient <code>CONCAT(a, b)</code> (<code>+</code> échoue entre un entier et un texte) ; <code>LIMIT 1</code> devient <code>TOP 1</code> ; <code>GLOB</code> devient <code>LIKE '[0-9][0-9][0-9][0-9]-[01][0-9]'</code>.</li>
+            <li data-i18n="ix22"><b>SQL Server</b> · la clause <code>WINDOW w AS (…)</code> est recopiée dans chaque <code>OVER</code> ; chaque <code>CREATE VIEW</code> occupe son propre lot (<code>GO</code>) ; un alias de CTE nommé <code>pivot</code>, mot réservé, a été renommé à la source.</li>
+            <li data-i18n="ix23"><b>PostgreSQL</b> · <code>GLOB</code> devient une expression régulière <code>periode ~ '^\d{4}-[01]\d$'</code> ; <code>REAL</code> devient <code>DOUBLE PRECISION</code> ; <code>ROUND(x, n)</code> n'accepte qu'un <code>numeric</code> : <code>ROUND((x)::numeric, n)</code> dans les vues.</li>
+            <li data-i18n="ix24"><b>Les deux</b> · <code>PRAGMA foreign_keys</code> retiré (les clés étrangères sont toujours actives) ; une sous-requête dans <code>FROM</code> doit porter un alias.</li>
+            <li data-i18n="ix25"><b>Ce qui ne change pas</b> · les CTE, <code>LAG</code>, <code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code>, les moyennes mobiles <code>ROWS BETWEEN</code> et les vues : le SQL analytique est le même sur les trois moteurs.</li>
           </ul>
-          <p style="margin-top:12px"><a class="btn" href="assets/loyers_postgres.sql" download data-i18n="ix2Dl">Télécharger loyers_postgres.sql</a></p>
-          <p class="note" data-i18n="ix2N">Chargement : <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Le script est aussi dans le paquet de la base. Validation : syntaxe PostgreSQL complète ; l'exécution sur un serveur PostgreSQL n'a pas encore été faite dans ce projet.</p>
+          <p style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn" href="assets/loyers_sqlserver.sql" download data-i18n="ix2Dl">Télécharger loyers_sqlserver.sql</a><a class="btn" href="assets/requetes_sqlserver.sql" download data-i18n="ix2Dl2">Les __N_SQL__ requêtes en T-SQL</a><a class="btn" href="assets/loyers_postgres.sql" download data-i18n="ix2Dl3">Télécharger loyers_postgres.sql</a></p>
+          <p class="note" data-i18n="ix2N">Chargement : SQL Server, ouvrir le script dans Azure Data Studio ou SSMS, choisir la base, exécuter ; PostgreSQL, <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Validation : syntaxe complète de chaque moteur, lue par ses parseurs ; l'exécution sur un serveur SQL Server ou PostgreSQL ne fait pas partie de la construction automatique.</p>
         </div>
       </div>
     </div>
@@ -168,21 +181,21 @@ window.PAGE_EN = {
   ey: `Skill · SQL`,
   h1: `A modelled database, <mark>__N_SQL__ queries</mark>, zero unverified figures`,
   lede: `I modelled, then coded, the project's database in SQL: a conceptual model, a logical model, __N_TABLES__ tables with keys and constraints, __N_VUES__ analytical views and a data dictionary. Every figure on this site is recomputed in SQL and cross-checked against the Excel workbook: the slightest gap stops the site build.`,
-  ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to PostgreSQL`,
+  ixK: `Advanced · engine`, ixT: `Reading an execution plan, and porting the database to SQL Server and PostgreSQL`,
   ixI: `Two things expected from an analyst who writes SQL at work: knowing why a query is fast, and moving a database from one engine to another without changing its meaning.`,
   ix1T: `With and without an index: same result, two paths`,
   ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
   ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
   ix1N: `Measured at site build time on the table's __IX_ROWS__ rows: __IX_US_ON__ µs per run with the index, __IX_US_OFF__ µs without (× __IX_RATIO_EN__). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
-  ix2T: `The same database for PostgreSQL`,
-  ix2P: `The <code>loyers_postgres.sql</code> script (schema, views, data) is derived automatically from the project's SQLite scripts, so the two versions can never drift apart, then validated by PostgreSQL's own grammar (<code>pglast</code>): a syntax error stops the build. Five dialect differences, and only those:`,
-  ix21: `<code>PRAGMA foreign_keys</code> removed: foreign keys are always enforced in PostgreSQL.`,
-  ix22: `<code>GLOB</code> replaced by a regular expression: <code>periode ~ '^\\d{4}-[01]\\d$'</code>.`,
-  ix23: `<code>REAL</code> becomes <code>DOUBLE PRECISION</code>.`,
-  ix24: `<code>ROUND(x, n)</code> only accepts a <code>numeric</code>: <code>ROUND((x)::numeric, n)</code> in the views.`,
-  ix25: `A subquery in <code>FROM</code> must carry an alias.`,
-  ix2Dl: `Download loyers_postgres.sql`,
-  ix2N: `Loading: <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. The script also ships in the database package. Validation: full PostgreSQL syntax; execution on a PostgreSQL server has not yet been done in this project.`,
+  ix2T: `The same database for SQL Server and PostgreSQL`,
+  ix2P: `The <code>loyers_sqlserver.sql</code> and <code>loyers_postgres.sql</code> scripts (schema, views, data) are derived automatically from the project's SQLite scripts, so the three versions can never drift apart, then re-read by each engine's parsers (<code>sqlglot</code> and <code>sqlfluff</code> for T-SQL, <code>pglast</code>, PostgreSQL's own grammar): a syntax error stops the build. The dialect differences, and only those:`,
+  ix21: `<b>SQL Server</b> · <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code> become <code>NVARCHAR(100)</code>, <code>INT</code>, <code>FLOAT</code>; <code>a || b</code> becomes <code>CONCAT(a, b)</code> (<code>+</code> fails between an integer and a string); <code>LIMIT 1</code> becomes <code>TOP 1</code>; <code>GLOB</code> becomes <code>LIKE '[0-9][0-9][0-9][0-9]-[01][0-9]'</code>.`,
+  ix22: `<b>SQL Server</b> · the <code>WINDOW w AS (…)</code> clause is copied into each <code>OVER</code>; each <code>CREATE VIEW</code> gets its own batch (<code>GO</code>); a CTE alias named <code>pivot</code>, a reserved word, was renamed at the source.`,
+  ix23: `<b>PostgreSQL</b> · <code>GLOB</code> becomes a regular expression <code>periode ~ '^\\d{4}-[01]\\d$'</code>; <code>REAL</code> becomes <code>DOUBLE PRECISION</code>; <code>ROUND(x, n)</code> only accepts a <code>numeric</code>: <code>ROUND((x)::numeric, n)</code> in the views.`,
+  ix24: `<b>Both</b> · <code>PRAGMA foreign_keys</code> removed (foreign keys are always enforced); a subquery in <code>FROM</code> must carry an alias.`,
+  ix25: `<b>What does not change</b> · CTEs, <code>LAG</code>, <code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code>, <code>ROWS BETWEEN</code> moving averages and the views: the analytical SQL is the same on all three engines.`,
+  ix2Dl: `Download loyers_sqlserver.sql`, ix2Dl2: `The __N_SQL__ queries in T-SQL`, ix2Dl3: `Download loyers_postgres.sql`,
+  ix2N: `Loading: SQL Server, open the script in Azure Data Studio or SSMS, pick the database, run it; PostgreSQL, <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Validation: each engine's full syntax, read by its parsers; running the scripts on a SQL Server or PostgreSQL server is not part of the automated build.`,
   chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
   dl1: `Download the SQLite database ↗`, dl2: `Full SQL script`, dl2b: `The __N_SQL__ queries`,
   mK: `Modelling`,
@@ -198,10 +211,15 @@ window.PAGE_EN = {
   mc2T: `Acknowledged limit`,
   mc21: `"Large city" (CMHC series since 1992) and "metro area" (quarterly estimates) come from two Statistics Canada reference frames with different identifiers. A mapping table would be the next step.`,
   fT: `Files to download`,
-  f1: `the database, ready to open in DB Browser for SQLite or DBeaver · __SZ_SQLITE__`,
-  f2: `tables, views and data in a single SQLite script · __SZ_SQL__`,
+  fN: `Each script is written for one engine: a SQLite script does not run as is in SQL Server or PostgreSQL. Pick the section of the engine you use.`,
+  fE1: `SQLite · DB Browser for SQLite, DBeaver, the console on this page`, fE2: `SQL Server 2016+ · Azure Data Studio, SSMS`,
+  fE3: `PostgreSQL 12+ · psql, pgAdmin, DBeaver`, fE4: `All engines`,
+  f1: `the database, ready to open · __SZ_SQLITE__`,
+  f6: `tables, views and data in T-SQL, one batch per view (GO) · __SZ_MSSQL__`,
+  f7: `the __N_SQL__ queries in T-SQL · __SZ_REQ_MSSQL__`,
+  f2: `tables, views and data in a single script · __SZ_SQL__`,
   f3: `the __N_SQL__ queries, from beginner to advanced level · __SZ_REQ__`,
-  f4: `the same database for PostgreSQL · __SZ_PG__`,
+  f4: `tables, views and data; the SQLite queries run there with <code>ROUND((x)::numeric, n)</code> · __SZ_PG__`,
   f5: `every column of every table and view · __SZ_DICO__`,
   mVol: `__SQL_VOLUMES_EN__`,
   dT: `The schema, in SQL`,

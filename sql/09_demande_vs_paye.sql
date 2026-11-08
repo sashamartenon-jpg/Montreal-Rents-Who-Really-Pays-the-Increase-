@@ -6,7 +6,7 @@ WITH dernier AS (
   FROM fait_loyer_trimestriel
   WHERE loyer IS NOT NULL
 ),
-pivot AS (
+par_region AS (
   SELECT geo_id,
          MAX(periode)                                      AS periode,
          MAX(CASE WHEN estimation = 'A' THEN loyer END)    AS demande,
@@ -21,7 +21,7 @@ SELECT RANK() OVER (ORDER BY demande / paye DESC)          AS rang,
        CAST(p.paye AS INTEGER)                             AS paye,
        CAST(p.demande - p.paye AS INTEGER)                 AS ecart,
        ROUND(100.0 * (p.demande / p.paye - 1), 1)          AS ecart_pct
-FROM pivot p
+FROM par_region p
 JOIN dim_rmr r ON r.geo_id = p.geo_id
 WHERE p.demande IS NOT NULL AND p.paye IS NOT NULL
 ORDER BY rang;

@@ -11,10 +11,6 @@
     "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
-  const FOOT = {
-    fr: "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.",
-    en: "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks."
-  };
   const SCROLL = {
     code: { fr: "Code, défilement horizontal", en: "Code, scrolls horizontally" },
     table: { fr: "Tableau, défilement", en: "Table, scrollable" }
@@ -34,8 +30,6 @@
     });
     const skip = document.querySelector("a.skip");
     if (skip) skip.textContent = SKIP[L];
-    const fw = document.querySelector("footer .wrap");
-    if (fw && !fw.id) fw.textContent = FOOT[L];
     // images et liens qui ont une variante anglaise (figures, captures, classeur)
     document.querySelectorAll("[data-en-src]").forEach(img => {
       if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");

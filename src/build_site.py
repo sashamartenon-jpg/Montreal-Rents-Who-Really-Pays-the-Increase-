@@ -52,9 +52,6 @@ def header(current, actions=""):
             f'    <div class="top-actions">{actions}{LANG_SEG}</div>\n  </div>\n</header>')
 
 
-FOOTER = ('<footer><div class="wrap">Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. '
-          'Extraction le 4 novembre 2026. '
-          'Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.</div></footer>')
 
 
 # ------------------------------------------------------------------ contenus lus dans le projet
@@ -258,7 +255,7 @@ def en_num(x, d=2):
 
 
 IX = index_demo()
-shutil.copy(ROOT / "tableau" / "loyers_long.csv", DOCS / "data" / "loyers_long.csv")
+(DOCS / "data" / "loyers_long.csv").unlink(missing_ok=True)
 
 # Règles d'hébergement, au format lu par Netlify ET par Cloudflare Pages (fichiers _headers / _redirects
 # placés dans le dossier publié). Elles forcent le téléchargement des fichiers de données et renvoient
@@ -272,9 +269,6 @@ shutil.copy(ROOT / "tableau" / "loyers_long.csv", DOCS / "data" / "loyers_long.c
 /assets/*.csv
   Content-Type: text/csv; charset=utf-8
   Content-Disposition: attachment
-/data/loyers_long.csv
-  Content-Type: text/csv; charset=utf-8
-  Content-Disposition: attachment
 """, encoding="utf-8")
 (DOCS / "_redirects").write_text("/python.html  /  301\n/notebooks/*  /  301\n", encoding="utf-8")
 def ko(rel):
@@ -282,7 +276,8 @@ def ko(rel):
     return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"
 SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/loyers.sql"),
          "__SZ_REQ__": ko("assets/requetes_loyers_montreal.sql"), "__SZ_PG__": ko("assets/loyers_postgres.sql"),
-         "__SZ_DICO__": ko("assets/dictionnaire_donnees.csv"), "__SZ_CSV__": ko("data/loyers_long.csv"),
+         "__SZ_MSSQL__": ko("assets/loyers_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/requetes_sqlserver.sql"),
+         "__SZ_DICO__": ko("assets/dictionnaire_donnees.csv"),
          "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
 common = {
     **IX, **SIZES,
@@ -370,7 +365,7 @@ written["index.html"] = (SKELETON + body + "\n</html>\n", body)
 for fname, _ in PAGES[1:]:
     tpl = (SRC / "pages" / fname).read_text(encoding="utf-8")
     head_part, rest = tpl.split("__HEADER__", 1)
-    rest = rest.replace("__FOOTER__", FOOTER).replace("__SQL_JSON__", sqlres)
+    rest = rest.replace("__FOOTER__", "").replace("__SQL_JSON__", sqlres)
     rest = rest.replace("__CARTE_JSON__", carte_json).replace("__GEO_JSON__", geo_json)
     page = SKELETON + head_part + FONTS + CSS + "\n" + header(fname) + rest
     page = fill(page) + f"\n<script>{MOTION_JS}</script>\n<script>{I18N_JS}</script>\n</html>\n"

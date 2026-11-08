@@ -7,6 +7,3 @@
 /assets/*.csv
   Content-Type: text/csv; charset=utf-8
   Content-Disposition: attachment
-/data/loyers_long.csv
-  Content-Type: text/csv; charset=utf-8
-  Content-Disposition: attachment

@@ -285,13 +285,14 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .dlist a { font: 600 .9rem var(--font-mono); color: var(--link); text-decoration: none; }
 .dlist a:hover { text-decoration: underline; }
 .dlist span { font-size: .92rem; color: var(--ink-2); }
+.dlh { margin: 16px 0 0; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.dlh + .dlist { margin-top: 8px; }
 
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
-footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
 
 @media (max-width: 820px) {
   .hero, .two, .sim, .cols, .cards3, .sqlbox { grid-template-columns: minmax(0, 1fr); }
@@ -482,9 +483,6 @@ h1, h2, h3 { font-family: var(--font-display); }
 .skill:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(19, 35, 58, .12); }
 .pager a { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 16px; }
 .pager a:hover { border-color: var(--mtl); }
-footer { background: #13233a; color: #c9d6e6; border-top: 0; position: relative; }
-footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
-footer a { color: #fff; }
 
 /* animations : respiration du bandeau-question, pastilles du bandeau, cartes D3 */
 .question { background-size: 150% 150%; animation: qpan 16s ease-in-out infinite alternate; }
@@ -723,7 +721,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 
   <div class="wrap pager"><a href="carte.html" data-i18n="pgL">← Carte</a><a href="sql.html" data-i18n="pgR">SQL →</a></div>
 </main>
-<footer><div class="wrap">Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.</div></footer>
+
 <script>/* Code commun aux pages de compétences : coloration syntaxique légère (SQL, Excel). */
 const KW = {
   sql: "SELECT FROM WHERE JOIN LEFT INNER CROSS ON AND OR NOT AS WITH ORDER BY GROUP HAVING LIMIT CASE WHEN THEN ELSE END IN IS NULL DESC ASC OVER PARTITION VALUES DISTINCT USING UNION ALL CAST INTEGER CREATE TABLE VIEW INDEX PRIMARY KEY FOREIGN REFERENCES CHECK UNIQUE TEXT REAL PRAGMA WINDOW ROWS BETWEEN PRECEDING CURRENT ROW GLOB DEFAULT NULLS LAST",
@@ -936,10 +934,6 @@ window.PAGE_EN = {
     "sql.html": { fr: "SQL", en: "SQL" }
   };
   const SKIP = { fr: "Aller au contenu", en: "Skip to content" };
-  const FOOT = {
-    fr: "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.",
-    en: "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks."
-  };
   const SCROLL = {
     code: { fr: "Code, défilement horizontal", en: "Code, scrolls horizontally" },
     table: { fr: "Tableau, défilement", en: "Table, scrollable" }
@@ -959,8 +953,6 @@ window.PAGE_EN = {
     });
     const skip = document.querySelector("a.skip");
     if (skip) skip.textContent = SKIP[L];
-    const fw = document.querySelector("footer .wrap");
-    if (fw && !fw.id) fw.textContent = FOOT[L];
     // images et liens qui ont une variante anglaise (figures, captures, classeur)
     document.querySelectorAll("[data-en-src]").forEach(img => {
       if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");

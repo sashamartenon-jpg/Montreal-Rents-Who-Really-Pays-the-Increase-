@@ -288,13 +288,14 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 .dlist a { font: 600 .9rem var(--font-mono); color: var(--link); text-decoration: none; }
 .dlist a:hover { text-decoration: underline; }
 .dlist span { font-size: .92rem; color: var(--ink-2); }
+.dlh { margin: 16px 0 0; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.dlh + .dlist { margin-top: 8px; }
 
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
-footer { padding-block: 24px 40px; color: var(--ink-3); font-size: .8rem; border-top: 1px solid var(--line); }
 
 @media (max-width: 820px) {
   .hero, .two, .sim, .cols, .cards3, .sqlbox { grid-template-columns: minmax(0, 1fr); }
@@ -485,9 +486,6 @@ h1, h2, h3 { font-family: var(--font-display); }
 .skill:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(19, 35, 58, .12); }
 .pager a { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 16px; }
 .pager a:hover { border-color: var(--mtl); }
-footer { background: #13233a; color: #c9d6e6; border-top: 0; position: relative; }
-footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--mtl), var(--warm), var(--coral)); }
-footer a { color: #fff; }
 
 /* animations : respiration du bandeau-question, pastilles du bandeau, cartes D3 */
 .question { background-size: 150% 150%; animation: qpan 16s ease-in-out infinite alternate; }
@@ -766,7 +764,6 @@ __HEADER__
           </div>
           <div class="controls" style="margin-top:12px">
             <a class="btn primary" id="dl-xlsx" href="assets/modele_loyers_montreal.xlsx" data-en-href="assets/modele_loyers_montreal_en.xlsx" download data-i18n="dlX">Télécharger le modèle Excel</a>
-            <a class="btn" href="data/loyers_long.csv" download data-i18n="dlD">Données (CSV)</a>
           </div>
           <p class="note" data-i18n="xlsxNote">Le classeur contient aussi une synthèse par type de logement (années modifiables), la comparaison des villes et les données sources. Formules SOMME.SI.ENS (SUMIFS) et INDEX/EQUIV.</p>
         </div>
@@ -842,9 +839,6 @@ __HEADER__
 
 </main>
 
-<footer>
-  <div class="wrap" id="footer-text"></div>
-</footer>
 
 <div class="tip" id="tip" hidden></div>
 
@@ -983,7 +977,7 @@ const T = {
     yoyT: "Variation annuelle du loyer moyen, Montréal", yoyS: "2 chambres, dollars courants, en %",
     simT: "Et ton loyer à toi ?",
     simI: "Le simulateur reprend la feuille « Simulateur » du modèle Excel, cellule pour cellule. Modifie les cases jaunes, puis clique sur un résultat pour voir sa formule. Le calcul se fait dans ton navigateur : rien n'est envoyé ni enregistré.",
-    dlX: "Télécharger le modèle Excel", dlD: "Données (CSV)",
+    dlX: "Télécharger le modèle Excel",
     xlsxNote: "Le classeur contient aussi une carte du Canada, une carte des villes, un tableau de bord piloté par 3 cellules et des scénarios jusqu'en 2030. Aucune macro. Disponible en français et en anglais.",
     mT: "Méthode", f1: "4 tableaux de Statistique Canada et le rapport de la SCHL, recoupés", f2: "Contrôles qualité, modèle en étoile, loyers réels",
     f3: "Cartes, tableau de bord, scénarios, simulateur", f4t: "Carte interactive", f4: "Provinces et 42 régions métropolitaines",
@@ -1021,7 +1015,7 @@ const T = {
     yoyT: "Annual change in average rent, Montreal", yoyS: "Two bedrooms, current dollars, %",
     simT: "What about your rent?",
     simI: "The simulator mirrors the “Simulateur” sheet of the Excel model, cell by cell. Edit the yellow cells, then click a result to see its formula. Everything runs in your browser: nothing is sent or stored.",
-    dlX: "Download the Excel model", dlD: "Data (CSV)",
+    dlX: "Download the Excel model",
     xlsxNote: "The workbook also includes a map of Canada, a city map, a dashboard driven by 3 cells and scenarios to 2030. No macros. Available in English and in French.",
     mT: "Method", f1: "4 Statistics Canada tables and the CMHC report, cross-checked", f2: "Quality checks, star schema, real rents",
     f3: "Maps, dashboard, scenarios, simulator", f4t: "Interactive map", f4: "Provinces and 42 metropolitan areas",
@@ -1093,11 +1087,11 @@ function renderText() {
   gset("g2-gap", fr ? `× ${fmtNum(K.hausse_reloues_2025 / K.hausse_non_reloues_2025, 1)}` : `× ${fmtNum(K.hausse_reloues_2025 / K.hausse_non_reloues_2025, 1)}`);
   const CTX = fr ? [
     ["01", "Le loyer payé et le loyer demandé", "Le <b>loyer payé</b> est celui des locataires déjà installés. Le <b>loyer demandé</b> est le prix affiché dans les annonces : c'est ce que paie quelqu'un qui cherche un logement. Statistique Canada publie les deux depuis 2025 (estimations expérimentales).", "Statistique Canada, tableau 46-10-0092-01"],
-    ["02", "Pourquoi ils s'écartent au Québec", "Au renouvellement d'un bail, la hausse est encadrée : le Tribunal administratif du logement publie un pourcentage de base, 3,1 % pour les baux qui commencent entre avril 2026 et avril 2027. Pour un nouveau bail, le propriétaire propose le loyer ; le locataire peut le contester dans les 10 jours s'il dépasse le loyer le plus bas des 12 derniers mois, inscrit à la section G du bail.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Gouvernement du Québec, janvier 2026</a> · <a href="https://educaloi.qc.ca/actualites-juridiques/loyer-paye-par-lancien-locataire-vous-avez-le-droit-de-savoir" target="_blank" rel="noopener">Éducaloi</a>'],
+    ["02", "Pourquoi ils s'écartent au Québec", "Au renouvellement d'un bail, la hausse est encadrée : le Tribunal administratif du logement publie un pourcentage de base, 3,1 % pour les baux qui commencent entre avril 2026 et avril 2027. Pour un nouveau bail, le propriétaire propose le loyer ; le locataire peut le contester dans les 10 jours s'il dépasse le loyer le plus bas des 12 derniers mois, inscrit à la section G du bail.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Gouvernement du Québec, janvier 2026</a>'],
     ["03", "Pourquoi c'est une question d'affaires", "Pour un prêteur ou un investisseur, l'écart entre loyers en place et loyers de marché mesure le revenu qu'un immeuble peut gagner à chaque départ. Pour une ville, il mesure le coût de la mobilité : changer d'emploi ou de quartier devient cher.", "Lecture proposée dans ce projet"]
   ] : [
     ["01", "Rent paid versus asking rent", "<b>Rent paid</b> is what sitting tenants pay. <b>Asking rent</b> is the advertised price: what someone looking for a unit pays. Statistics Canada has published both since 2025 (experimental estimates).", "Statistics Canada, table 46-10-0092-01"],
-    ["02", "Why they diverge in Quebec", "At lease renewal, increases are regulated: the Tribunal administratif du logement publishes a base rate, 3.1% for leases starting between April 2026 and April 2027. For a new lease, the landlord proposes the rent; the tenant can contest it within 10 days if it exceeds the lowest rent of the past 12 months, shown in section G of the lease.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Government of Quebec, January 2026</a> · <a href="https://educaloi.qc.ca/actualites-juridiques/loyer-paye-par-lancien-locataire-vous-avez-le-droit-de-savoir" target="_blank" rel="noopener">Éducaloi</a>'],
+    ["02", "Why they diverge in Quebec", "At lease renewal, increases are regulated: the Tribunal administratif du logement publishes a base rate, 3.1% for leases starting between April 2026 and April 2027. For a new lease, the landlord proposes the rent; the tenant can contest it within 10 days if it exceeds the lowest rent of the past 12 months, shown in section G of the lease.", '<a href="https://www.quebec.ca/nouvelles/actualites/details/le-calcul-de-lajustement-des-loyers-en-2026-68053" target="_blank" rel="noopener">Government of Quebec, January 2026</a>'],
     ["03", "Why it is a business question", "For a lender or investor, the gap between in-place and market rents measures the income a building can earn at each turnover. For a city, it measures the cost of mobility: changing jobs or neighbourhoods becomes expensive.", "Interpretation proposed in this project"]
   ];
   document.getElementById("ctx").innerHTML = CTX.map(([n, h, p, src], i) => `<article class="ctxcard rv" style="--d:${i * 0.12}s"><span class="n">${n}</span><h3>${h}</h3><p>${p}</p><p class="src">${src}</p></article>`).join("");
@@ -1248,9 +1242,6 @@ function renderText() {
     : `<li><a href="${s.url}" target="_blank" rel="noopener">${fr ? "Statistique Canada" : "Statistics Canada"}, ${s.id}</a>: ${fr ? s.title : (SRC_EN[s.id] || s.title)}</li>`);
   srcs.push(`<li><a href="https://observatoire.cmm.qc.ca/wp-content/uploads/2026/06/20260415_logement_locatif_metro_2025.pdf" target="_blank" rel="noopener">CMM, ${fr ? "capsule économique, juin 2026" : "economic brief, June 2026"}</a></li>`);
   document.getElementById("src-list").innerHTML = srcs.join("");
-  document.getElementById("footer-text").textContent = fr
-    ? "Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. Extraction le 4 novembre 2026. Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande."
-    : "Data: Statistics Canada and CMHC, Open Government Licence – Canada. Extracted November 4, 2026. Accessible site: keyboard navigation, AA contrast, animations off when your system asks.";
   renderUnitChips();
 }
 
