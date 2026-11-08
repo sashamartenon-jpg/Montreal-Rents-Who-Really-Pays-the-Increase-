@@ -52,7 +52,6 @@ def header(current, actions=""):
             f'    <div class="top-actions">{actions}{LANG_SEG}</div>\n  </div>\n</header>')
 
 
-INDEX_ACTIONS = '<button class="btn" id="share" type="button" data-i18n="share">Copier le lien</button>'
 FOOTER = ('<footer><div class="wrap">Données : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada. '
           'Extraction le 4 novembre 2026. '
           'Site accessible : navigation au clavier, contrastes AA, animations coupées si votre système le demande.</div></footer>')
@@ -356,7 +355,7 @@ def fill(text):
 
 written = {}
 # accueil
-body = index_tpl.replace("__HEADER__", header("index.html", INDEX_ACTIONS)).replace("__DATA_JSON__", data)
+body = index_tpl.replace("__HEADER__", header("index.html")).replace("__DATA_JSON__", data)
 body = body.replace("__SCENE_JSON__", scene_json())
 body = fill(body)
 if SITE_URL:
