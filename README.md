@@ -9,7 +9,7 @@ Réponse courte : ceux qui déménagent. Au 2ᵉ trimestre 2026, un 2 chambres a
 
 1. **Depuis 2019, la hausse a changé de régime.** Après inflation, le loyer moyen d'un 2 chambres a monté de 27 % de 2019 à 2025, contre 14 % de 1992 à 2019. Un test de Chow, calculé pour chaque année de 1997 à 2021, place la rupture en 2019. La p-value classique vaut 6 × 10⁻¹⁰. Corrigée par 20 000 simulations, qui tiennent compte de l'autocorrélation et de la recherche de l'année, elle vaut 0,037.
 2. **Montréal a connu la plus forte hausse des six grandes villes depuis 2019** (+57 %). Elle n'est plus la moins chère : Québec l'est depuis 2020.
-3. **Déménager coûte cher.** En 2025, la SCHL mesure une hausse de 17,2 % pour un logement reloué, contre 6,0 % pour un locataire en place. Au 2ᵉ trimestre 2026, l'écart entre le loyer affiché et le loyer payé atteint 460 $ par mois à Montréal (+34 %). C'est le 4ᵉ plus fort des 16 régions où les deux loyers sont publiés.
+3. **Déménager coûte cher.** En 2025, la SCHL mesure une hausse de 17,2 % pour un logement reloué, contre 6,0 % pour un locataire en place. Au 2ᵉ trimestre 2026, l'écart entre le loyer affiché et le loyer payé atteint 460 $ par mois à Montréal (+34 %). C'est le 4ᵉ plus fort en pourcentage des 16 régions où les deux loyers sont publiés (5ᵉ en dollars).
 4. **La moitié de la hausse brute de 2025 (14,5 %) vient de la composition du parc.** Sur les mêmes logements, la hausse est de 7,2 %.
 5. **Le Québec est la province où l'IPC du loyer a le plus monté en 2025** (+7,8 %). Sur 2019-2025, il n'est que 4ᵉ.
 
@@ -79,7 +79,7 @@ Données sous Licence du gouvernement ouvert – Canada. Extraction : 4 novembre
 
 - Champ de la SCHL : immeubles locatifs privés de 3 logements et plus. Le logement social et les condos loués sont exclus.
 - L'effet de composition est déduit, il n'est pas mesuré directement.
-- Les loyers demandés et payés sont des estimations expérimentales. Le loyer payé n'est publié que pour 16 régions sur 42.
+- Les loyers demandés et payés sont des estimations expérimentales. Le loyer payé n'est publié que pour 17 régions sur 42, et les deux loyers pour 16.
 - Le test de Chow confirme une cassure, pas sa cause. Son seuil simulé dépend du modèle AR(1).
 - « Grande ville » et « Région métropolitaine » viennent de deux référentiels aux identifiants différents. Une table de correspondance reste à faire.
 - Les scénarios servent à raisonner ; ce ne sont pas des prévisions.

@@ -54,10 +54,10 @@ __HEADER__
     <div class="wrap">
       <p class="kicker" data-i18n="s3K">Feuille « Carte villes »</p>
       <h2 data-i18n="s3T">Combien coûte un déménagement, ville par ville</h2>
-      <p class="intro" data-i18n="s3I">Les __N_PAYE__ régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
+      <p class="intro" data-i18n="s3I">Les __N_BOTH__ régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
       <figure class="figure">
         <img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy">
-        <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart sur __N_PAYE__. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
+        <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart en pourcentage sur __N_BOTH__. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
       </figure>
 <pre class="code" data-lang="xl">__XLF_VILLE_CLASS__</pre>
     </div>
@@ -176,8 +176,8 @@ window.PAGE_EN = {
   g2P: `The "QC +7,8 %" labels are series whose name comes from a cell; FIXED displays the decimal separator of the user's Excel.`,
   s3K: `"Carte villes" sheet (city map)`,
   s3T: `What moving costs, city by city`,
-  s3I: `The __N_PAYE__ metro areas where Statistics Canada publishes both the asking rent and the rent paid, on two maps (East and West). Pick a city: its dot turns pink, and its card, rank and quarterly curve update.`,
-  s3C: `Montreal: $1,820 asked against $1,360 paid, 4th widest gap of __N_PAYE__. Areas without a published paid rent are left out of the workbook: no "n/a" cells.`,
+  s3I: `The __N_BOTH__ metro areas where Statistics Canada publishes both the asking rent and the rent paid, on two maps (East and West). Pick a city: its dot turns pink, and its card, rank and quarterly curve update.`,
+  s3C: `Montreal: $1,820 asked against $1,360 paid, 4th widest gap in percentage terms of __N_BOTH__. Areas without a published paid rent are left out of the workbook: no "n/a" cells.`,
   s4K: `"Tableau de bord" sheet (dashboard)`,
   s4T: `Driven by three cells`,
   s4I: `Start year, end year and unit type: three named ranges (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) guarded by data validation. The four indicators and four charts recompute.`,

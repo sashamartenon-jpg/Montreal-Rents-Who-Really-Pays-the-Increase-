@@ -122,7 +122,11 @@ data = (DOCS / "data" / "data.json").read_text(encoding="utf-8").replace("</", "
 sqlres = (DOCS / "data" / "sql_results.json").read_text(encoding="utf-8").replace("</", "<\\/")
 carte_json = (DOCS / "data" / "carte.json").read_text(encoding="utf-8").replace("</", "<\\/")
 geo_json = (DOCS / "data" / "canada_provinces.geojson").read_text(encoding="utf-8")
-N_PAYE = sum(1 for v in json.loads(carte_json.replace("<\\/", "</"))["villes"] if v["paye"])
+_REG = [v for v in json.loads(carte_json.replace("<\\/", "</"))["villes"] if v["lat"] is not None]   # 42 RMR, sans l'agrégat national
+N_REG = len(_REG)                                              # régions sur la carte
+N_DEMANDE = sum(1 for v in _REG if v["demande"])               # loyer demandé publié au dernier trimestre
+N_PAYE = sum(1 for v in _REG if v["paye"])                     # loyer payé publié au dernier trimestre
+N_BOTH = sum(1 for v in _REG if v["demande"] and v["paye"])    # les deux : base de l'écart et du classement
 
 
 def scene_json():
@@ -235,7 +239,7 @@ common = {
     **SIZES,
     "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", " "),
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
-    "__N_PAYE__": str(N_PAYE),
+    "__N_PAYE__": str(N_PAYE), "__N_BOTH__": str(N_BOTH), "__N_DEMANDE__": str(N_DEMANDE), "__N_REG__": str(N_REG),
     "__N_SQL__": str(len(SQL_FILES)), "__N_TABLES__": str(N_TABLES), "__N_VUES__": str(N_VUES),
     "__XL_SHEETS__": str(n_sheets - 1), "__XL_VISIBLE__": str(n_visible),
     "__PERIODE__": INS["periode_derniere"],
