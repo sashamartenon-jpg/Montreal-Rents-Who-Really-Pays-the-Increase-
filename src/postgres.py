@@ -74,8 +74,9 @@ con.close()
 header = """-- =====================================================================
 -- Base « Loyers à Montréal » pour PostgreSQL : schéma, vues, données
 -- Générée par src/postgres.py depuis les scripts SQLite du projet et data/loyers.sqlite.
--- Chargement :  createdb loyers && psql -d loyers -f loyers_postgres.sql
--- Requêtes : requetes_postgres.sql (les 12 requêtes analytiques, même dialecte).
+-- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide :
+--   createdb loyers && psql -d loyers -f loyers_postgres.sql
+-- ÉTAPE 2 : psql -d loyers -f requetes_postgres.sql
 -- =====================================================================
 BEGIN;
 """
@@ -104,7 +105,7 @@ for f in sorted((ROOT / "sql").glob("[0-9][0-9]_*.sql")):
     reqs.append(round_numeric(q) + ";")
 REQ = ("-- =====================================================================\n"
        "-- Loyers à Montréal : les 12 requêtes analytiques, version PostgreSQL\n"
-       "-- Chaque requête s'exécute telle quelle sur une base chargée avec loyers_postgres.sql.\n"
+       "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_postgres.sql, sur la même base.\n"
        "-- Le niveau est indiqué en tête de chacune.\n"
        "-- =====================================================================\n\n" + "\n\n".join(reqs) + "\n")
 try:

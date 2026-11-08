@@ -147,9 +147,13 @@ con.close()
 BASE = """-- =====================================================================
 -- Base « Loyers à Montréal » pour SQL Server : schéma, vues, données
 -- Générée par src/sqlserver.py depuis les scripts SQLite du projet et data/loyers.sqlite.
--- Chargement : ouvrir ce fichier dans Azure Data Studio ou SSMS, choisir la base cible, exécuter (F5).
---              Les vues sont dans des lots séparés (GO), comme SQL Server l'exige.
--- Requêtes : requetes_sqlserver.sql (les 12 requêtes analytiques, même dialecte).
+-- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier.
+--   1. Dans SSMS ou Azure Data Studio, créer une base vide et la sélectionner (pas master) :
+--        CREATE DATABASE loyers;
+--   2. Ouvrir ce fichier sur la base « loyers » et l'exécuter (F5) : « Commands completed successfully ».
+--   3. ÉTAPE 2 : ouvrir requetes_sqlserver.sql sur la même base et l'exécuter.
+-- À exécuter une seule fois : une 2e exécution renvoie « There is already an object named … ».
+-- Les vues sont dans des lots séparés (GO), comme SQL Server l'exige.
 -- =====================================================================
 SET NOCOUNT ON;
 GO
@@ -163,8 +167,8 @@ GO
 
 REQ = """-- =====================================================================
 -- Loyers à Montréal : les 12 requêtes analytiques, version SQL Server (T-SQL)
--- Traduites des requêtes SQLite du projet par src/sqlserver.py. Chaque requête s'exécute
--- telle quelle sur une base chargée avec loyers_sqlserver.sql. Le niveau est indiqué en tête de chacune.
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_sqlserver.sql, sur la même base (sinon « Invalid object name »).
+-- Traduites des requêtes SQLite du projet par src/sqlserver.py. Le niveau est indiqué en tête de chacune.
 -- =====================================================================
 
 """ + "\n\n".join(requetes) + "\n"

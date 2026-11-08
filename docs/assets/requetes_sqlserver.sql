@@ -1,7 +1,7 @@
 ﻿-- =====================================================================
 -- Loyers à Montréal : les 12 requêtes analytiques, version SQL Server (T-SQL)
--- Traduites des requêtes SQLite du projet par src/sqlserver.py. Chaque requête s'exécute
--- telle quelle sur une base chargée avec loyers_sqlserver.sql. Le niveau est indiqué en tête de chacune.
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_sqlserver.sql, sur la même base (sinon « Invalid object name »).
+-- Traduites des requêtes SQLite du projet par src/sqlserver.py. Le niveau est indiqué en tête de chacune.
 -- =====================================================================
 
 -- Contrôle qualité : couverture, valeurs manquantes et cotes de fiabilité de chaque table de faits

@@ -243,7 +243,7 @@ if __name__ == "__main__":
     shutil.copy(ROOT / "data" / "loyers.sqlite", assets / "loyers.sqlite")   # lue par la console SQL de la page (sql.js), plus proposée au téléchargement
     (assets / "dictionnaire_donnees.csv").unlink(missing_ok=True)
     parts = ["-- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.",
-             "-- Chaque requête s'exécute telle quelle sur loyers.sqlite (SQLite 3.25+). Le niveau est indiqué en tête de chacune.",
+             "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers.sql, sur la même base (SQLite 3.25+). Le niveau est indiqué en tête de chacune.",
              "-- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.", ""]
     for f in sorted((ROOT / "sql").glob("*.sql")):
         parts += [f"-- ===================================================================== {f.name}", f.read_text(encoding="utf-8").strip(), "", ""]

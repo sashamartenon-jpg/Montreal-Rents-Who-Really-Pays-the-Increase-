@@ -142,7 +142,9 @@ if __name__ == "__main__":
     con.close()
     build(SITE_DB).close()
     with sqlite3.connect(DB) as c_:  # export complet en SQL pur : schéma + données, rejouable dans n'importe quel SQLite
-        DUMP.write_text("-- Base « Loyers à Montréal » : export complet (schéma, données, vues)\n"
+        DUMP.write_text("-- Base « Loyers à Montréal » : export complet (schéma, données, vues), SQLite 3.25+\n"
+                        "-- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide, une seule fois.\n"
+                        "-- ÉTAPE 2 : exécuter requetes_loyers_montreal.sql sur la même base.\n"
                         + "\n".join(c_.iterdump()) + "\n", encoding="utf-8")
     (ROOT / "docs" / "data" / "sql_results.json").write_text(json.dumps(res, ensure_ascii=False), encoding="utf-8")
     for x in res:

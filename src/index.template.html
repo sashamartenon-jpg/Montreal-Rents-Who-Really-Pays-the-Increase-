@@ -541,10 +541,15 @@ details.ddl pre { margin-top: 8px; max-height: 560px; overflow: auto; }
 table.data.files { font-size: .92rem; }
 table.data.files th, table.data.files td { text-align: left; padding: 10px 12px 10px 0; vertical-align: top; }
 table.data.files a { font-family: var(--font-mono); font-size: .86rem; }
+.howto { margin: 8px 0 0; padding-left: 1.1em; display: grid; gap: 8px; }
+main .howto li { text-align: left; hyphens: manual; -webkit-hyphens: manual; }
+.howto code { font-size: .84em; overflow-wrap: anywhere; hyphens: none; }
 @media (max-width: 640px) {
   table.data.files tr:first-child { display: none; }
   table.data.files tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--grid); }
   table.data.files td { display: block; border: 0; padding: 3px 0; white-space: normal; }
+  table.data.files td:nth-child(2)::before { content: "① "; }
+  table.data.files td:nth-child(3)::before { content: "② "; }
 }
 .dico code { font-size: .78rem; }
 .dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }

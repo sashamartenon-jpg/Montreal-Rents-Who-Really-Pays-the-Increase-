@@ -1,5 +1,5 @@
 -- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.
--- Chaque requête s'exécute telle quelle sur loyers.sqlite (SQLite 3.25+). Le niveau est indiqué en tête de chacune.
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers.sql, sur la même base (SQLite 3.25+). Le niveau est indiqué en tête de chacune.
 -- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.
 
 -- ===================================================================== 01_controle_qualite.sql

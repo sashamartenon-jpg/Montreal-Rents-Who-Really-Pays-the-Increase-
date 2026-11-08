@@ -62,13 +62,20 @@ __HEADER__
   <section class="block" id="fichiers">
     <div class="wrap">
       <h2 data-i18n="fT">Les scripts, par moteur</h2>
-      <p class="intro" data-i18n="fI">Chaque moteur a son dialecte : prendre la ligne du moteur utilisé. Les trois versions ont été exécutées sans erreur sur SQL Server 2022, PostgreSQL 16 et SQLite 3.</p>
+      <p class="intro" data-i18n="fI">Chaque moteur a son dialecte : prendre la ligne du moteur utilisé, puis exécuter les deux fichiers <b>dans l'ordre</b>. Le fichier ① crée les tables et les vues et charge les données ; le fichier ② ne fonctionne qu'après, sur la même base. Les trois versions ont été exécutées sans erreur sur SQL Server 2022, PostgreSQL 16 et SQLite 3.</p>
       <div class="tablewrap"><table class="data files">
-        <tr><th data-i18n="fH1">Moteur</th><th data-i18n="fH2">Base : tables, vues, données</th><th data-i18n="fH3">Les __N_SQL__ requêtes</th></tr>
+        <tr><th data-i18n="fH1">Moteur</th><th data-i18n="fH2">① D'abord : la base (tables, vues, données)</th><th data-i18n="fH3">② Ensuite : les __N_SQL__ requêtes</th></tr>
         <tr><td><b>SQL Server 2016+</b><br><span class="small">SSMS, Azure Data Studio</span></td><td><a href="assets/loyers_sqlserver.sql" download>loyers_sqlserver.sql</a> <span class="small">· __SZ_MSSQL__</span></td><td><a href="assets/requetes_sqlserver.sql" download>requetes_sqlserver.sql</a> <span class="small">· __SZ_REQ_MSSQL__</span></td></tr>
         <tr><td><b>PostgreSQL 12+</b><br><span class="small">psql, pgAdmin, DBeaver</span></td><td><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a> <span class="small">· __SZ_PG__</span></td><td><a href="assets/requetes_postgres.sql" download>requetes_postgres.sql</a> <span class="small">· __SZ_REQ_PG__</span></td></tr>
         <tr><td><b>SQLite 3.25+</b><br><span class="small">DB Browser for SQLite, DBeaver</span></td><td><a href="assets/loyers.sql" download>loyers.sql</a> <span class="small">· __SZ_SQL__</span></td><td><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a> <span class="small">· __SZ_REQ__</span></td></tr>
       </table></div>
+      <h3 data-i18n="hT" style="margin-top:22px">Mode d'emploi</h3>
+      <ul class="howto">
+        <li data-i18n="h1s"><b>SQL Server 2016+</b> · dans SSMS ou Azure Data Studio, créer une base vide (<code>CREATE DATABASE loyers;</code>) et la sélectionner à la place de <code>master</code> ; ① exécuter <code>loyers_sqlserver.sql</code> (F5) ; ② ouvrir <code>requetes_sqlserver.sql</code> sur la même base et l'exécuter.</li>
+        <li data-i18n="h2s"><b>PostgreSQL 12+</b> · <code>createdb loyers</code> ; ① <code>psql -d loyers -f loyers_postgres.sql</code> ; ② <code>psql -d loyers -f requetes_postgres.sql</code>.</li>
+        <li data-i18n="h3s"><b>SQLite 3.25+</b> · ouvrir une base vide (DB Browser for SQLite, DBeaver ou un éditeur en ligne) ; ① exécuter <code>loyers.sql</code> ; ② exécuter <code>requetes_loyers_montreal.sql</code>.</li>
+      </ul>
+      <p class="note" data-i18n="hN">Le fichier ① s'exécute une seule fois : relancé sur la même base, il s'arrête sur « la table existe déjà ». Lancer le fichier ② sans le ① donne « objet introuvable » (<i>Invalid object name</i>, <i>no such table</i>).</p>
     </div>
   </section>
 
@@ -93,8 +100,13 @@ window.PAGE_EN = {
   mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities. On each link: a fact row references exactly one row of the dimension (1,1); a dimension row is referenced by zero or more rows (0,n).`,
   mVol: `__SQL_VOLUMES_EN__`,
   fT: `The scripts, by engine`,
-  fI: `Each engine has its own dialect: take the row of the engine you use. All three versions were run without errors on SQL Server 2022, PostgreSQL 16 and SQLite 3.`,
-  fH1: `Engine`, fH2: `Database: tables, views, data`, fH3: `The __N_SQL__ queries`,
+  fI: `Each engine has its own dialect: take the row of the engine you use, then run the two files <b>in order</b>. File ① creates the tables and views and loads the data; file ② only works after it, on the same database. All three versions were run without errors on SQL Server 2022, PostgreSQL 16 and SQLite 3.`,
+  fH1: `Engine`, fH2: `① First: the database (tables, views, data)`, fH3: `② Then: the __N_SQL__ queries`,
+  hT: `How to run them`,
+  h1s: `<b>SQL Server 2016+</b> · in SSMS or Azure Data Studio, create an empty database (<code>CREATE DATABASE loyers;</code>) and select it instead of <code>master</code>; ① run <code>loyers_sqlserver.sql</code> (F5); ② open <code>requetes_sqlserver.sql</code> on the same database and run it.`,
+  h2s: `<b>PostgreSQL 12+</b> · <code>createdb loyers</code>; ① <code>psql -d loyers -f loyers_postgres.sql</code>; ② <code>psql -d loyers -f requetes_postgres.sql</code>.`,
+  h3s: `<b>SQLite 3.25+</b> · open an empty database (DB Browser for SQLite, DBeaver or an online editor); ① run <code>loyers.sql</code>; ② run <code>requetes_loyers_montreal.sql</code>.`,
+  hN: `File ① runs once: run again on the same database, it stops on "table already exists". Running file ② without file ① returns "object not found" (<i>Invalid object name</i>, <i>no such table</i>).`,
   coT: `Console: run the queries yourself`,
   coI: `SQLite runs in your browser (sql.js). Pick a query, edit it or write your own, then run it. Shortcut: Ctrl+Enter.`,
   run: `Run`, edL: `SQL query`,
