@@ -1,0 +1,42 @@
+# Déploiement Netlify : le site est déjà construit dans docs/, il n'y a rien à compiler.
+# Netlify lit ce fichier à la connexion du dépôt : aucun réglage à saisir à la main.
+
+[build]
+  publish = "docs"
+  command = ""
+
+# Les fichiers de données se téléchargent au lieu de s'afficher dans le navigateur.
+[[headers]]
+  for = "/assets/*.sqlite"
+  [headers.values]
+    Content-Type = "application/vnd.sqlite3"
+    Content-Disposition = "attachment"
+
+[[headers]]
+  for = "/assets/*.sql"
+  [headers.values]
+    Content-Type = "application/sql"
+    Content-Disposition = "attachment"
+
+[[headers]]
+  for = "/assets/*.csv"
+  [headers.values]
+    Content-Type = "text/csv; charset=utf-8"
+    Content-Disposition = "attachment"
+
+[[headers]]
+  for = "/data/loyers_long.csv"
+  [headers.values]
+    Content-Type = "text/csv; charset=utf-8"
+    Content-Disposition = "attachment"
+
+# Les pages supprimées lors du recentrage du projet renvoient vers la page d'accueil.
+[[redirects]]
+  from = "/python.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/notebooks/*"
+  to = "/"
+  status = 301

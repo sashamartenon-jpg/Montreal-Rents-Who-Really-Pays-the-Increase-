@@ -344,7 +344,8 @@ body = fill(body)
 if SITE_URL:
     body = body.replace('content="assets/og-image-v2.png"', f'content="{SITE_URL}/assets/og-image-v2.png"')
     body = body.replace('<meta property="og:type" content="website">',
-                        f'<meta property="og:type" content="website">\n<meta property="og:url" content="{SITE_URL}/">')
+                        f'<meta property="og:type" content="website">\n<meta property="og:url" content="{SITE_URL}/">'
+                        f'\n<link rel="canonical" href="{SITE_URL}/">')
 body = body + f"\n<script>{MOTION_JS}</script>\n<script>{I18N_JS}</script>"
 written["index.html"] = (SKELETON + body + "\n</html>\n", body)
 
