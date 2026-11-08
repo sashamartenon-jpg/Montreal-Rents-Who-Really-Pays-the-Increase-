@@ -1,4 +1,4 @@
-/* Code commun aux pages de compétences : coloration syntaxique légère (SQL, Python, DAX, Excel). */
+/* Code commun aux pages de compétences : coloration syntaxique légère (SQL, Excel). */
 const KW = {
   sql: "SELECT FROM WHERE JOIN LEFT INNER CROSS ON AND OR NOT AS WITH ORDER BY GROUP HAVING LIMIT CASE WHEN THEN ELSE END IN IS NULL DESC ASC OVER PARTITION VALUES DISTINCT USING UNION ALL CAST INTEGER CREATE TABLE VIEW INDEX PRIMARY KEY FOREIGN REFERENCES CHECK UNIQUE TEXT REAL PRAGMA WINDOW ROWS BETWEEN PRECEDING CURRENT ROW GLOB DEFAULT NULLS LAST",
   py: "def return if elif else for in import from as with assert not and or is None True False lambda class try except raise while",

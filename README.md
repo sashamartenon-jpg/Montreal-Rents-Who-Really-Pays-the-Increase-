@@ -46,7 +46,7 @@ sql/             12 requêtes commentées
 src/             fetch_statcan · pipeline · build_db · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
 docs/            site publié par GitHub Pages ; assets/ contient les fichiers téléchargeables (classeurs, base SQLite, scripts SQL, requêtes, dictionnaire) et data/loyers_long.csv
-guides/          publication, post LinkedIn
+tableau/         loyers_long.csv : les séries au format long, pour Tableau, Power BI ou Excel
 ```
 
 ## Reproduire
@@ -57,7 +57,7 @@ python src/fetch_statcan.py   # vérifie data/raw contre les tableaux officiels 
 python src/pipeline.py
 python src/build_db.py
 python src/postgres.py        # version PostgreSQL du schéma, des vues et des données (validée par pglast)
-python src/modeles.py         # MCD, MLD et paquet de la base
+python src/modeles.py         # MCD, MLD et fichiers téléchargeables de la base
 python src/build_excel.py
 python src/render_excel.py    # captures des feuilles (LibreOffice requis)
 python src/build_site.py https://sashamartenon-jpg.github.io/Montreal-Rents-Who-Really-Pays-the-Increase-
@@ -82,10 +82,6 @@ Données sous Licence du gouvernement ouvert – Canada. Extraction : 4 novembre
 - Le test de Chow confirme une cassure, pas sa cause. Son seuil simulé dépend du modèle AR(1).
 - « Grande ville » et « Région métropolitaine » viennent de deux référentiels aux identifiants différents. Une table de correspondance reste à faire.
 - Les scénarios servent à raisonner ; ce ne sont pas des prévisions.
-
-## Méthode de travail
-
-Le code a été écrit avec l'aide de Claude (assistant d'IA). Les choix d'analyse, la vérification des sources et l'interprétation sont les miens.
 
 ## Licence
 
