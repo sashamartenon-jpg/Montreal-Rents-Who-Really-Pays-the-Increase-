@@ -9,7 +9,6 @@ Entrées (data/raw/, extraites de Statistique Canada) :
 Sorties :
   - data/clean/*.csv        tables propres, format long (modèle en étoile)
   - docs/data/data.json     agrégats légers chargés par le site
-  - tableau/loyers_long.csv une table unique pour Tableau Public
 
 Exécution : python src/pipeline.py   (dépendance : pandas)
 """
@@ -19,8 +18,8 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW, CLEAN = ROOT / "data" / "raw", ROOT / "data" / "clean"
-SITE_DATA, TABLEAU = ROOT / "docs" / "data", ROOT / "tableau"
-for d in (CLEAN, SITE_DATA, TABLEAU):
+SITE_DATA = ROOT / "docs" / "data"
+for d in (CLEAN, SITE_DATA):
     d.mkdir(parents=True, exist_ok=True)
 
 BASE_YEAR = 2025  # les loyers réels sont exprimés en dollars de 2025
@@ -178,21 +177,6 @@ def export(t, k):
     txt = json.dumps(site, ensure_ascii=False, separators=(",", ":")).replace("NaN", "null")
     (SITE_DATA / "data.json").write_text(txt, encoding="utf-8")
 
-    # Table unique pour Tableau (format long)
-    a = r.merge(t["dim_unit"][["unit_id", "label_fr"]], on="unit_id").rename(columns={"label_fr": "type_logement"})
-    a["ville"] = "Montréal"
-    b = t["fait_loyers_2ch_rmr"].merge(t["dim_geo"], on="geo_id").rename(columns={"label_fr": "ville"})
-    b["type_logement"] = "2 chambres"
-    cpi = t["ipc_montreal"].set_index("year").ipc_2002_100
-    b["loyer_reel_2025"] = None  # l'IPC disponible est celui de Montréal seulement
-    vac = t["fait_inoccupation"].merge(t["dim_geo"], on="geo_id").rename(columns={"label_fr": "ville"})
-    long = pd.concat([
-        a[["year", "ville", "type_logement", "loyer_nominal", "loyer_reel_2025", "var_annuelle_pct"]].assign(serie="Montréal par taille"),
-        b[["year", "ville", "type_logement", "loyer_nominal", "loyer_reel_2025", "var_annuelle_pct"]].assign(serie="Comparaison RMR"),
-    ])
-    long = long.merge(vac[["year", "ville", "taux_inoccupation_pct"]], on=["year", "ville"], how="left")
-    long = long.rename(columns={"year": "annee"})
-    long.to_csv(TABLEAU / "loyers_long.csv", index=False)
 
 
 def load_turnover():

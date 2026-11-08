@@ -1286,6 +1286,10 @@ for ws_, area in ((a, "A1:N36"), (me, f"A1:K{R_CV + 5}"), (x, f"A1:L{RF + 10}"),
     ws_.print_area = area
     ws_.page_setup.fitToHeight = 1
 wb.calculation.fullCalcOnLoad = True
+# propriétés du fichier (Fichier > Informations dans Excel) : titre du classeur, pas de nom d'outil comme auteur
+wb.properties.title = "Loyers à Montréal, 1992-2026" if LANG == "fr" else "Montreal Rents, 1992-2026"
+wb.properties.creator = ""
+wb.properties.lastModifiedBy = ""
 wb.save(OUT)
 n_f = sum(1 for ws_ in wb.worksheets for row in ws_.iter_rows() for c in row if (isinstance(c.value, str) and c.value.startswith("=")) or isinstance(c.value, ArrayFormula))
 print(f"enregistré : {OUT.relative_to(ROOT)} · {len(wb.worksheets)} feuilles · {n_f} formules · {len(ids)} régions · trimestres {QS[0]} à {QS[-1]}")

@@ -14,7 +14,6 @@ import ast
 import html
 import json
 import re
-import shutil
 import sqlite3
 import sys
 from pathlib import Path
@@ -152,7 +151,6 @@ def scene_json():
 
 def package_program():
     """Paquet public de l'évaluateur : script, données, exemple, mode d'emploi."""
-    import io
     import subprocess
     import zipfile
     demo = subprocess.run([sys.executable, str(SRC / "evalue_loyer.py"), "--fichier", str(ROOT / "data" / "exemples" / "annonces_exemple.csv")],
@@ -218,16 +216,14 @@ def en_num(x, d=2):
     return f"{x:.{d}f}".replace("-", "\u2212")
 
 
-(DOCS / "data" / "loyers_long.csv").unlink(missing_ok=True)
 
-# Règles d'hébergement, au format lu par Cloudflare Pages (fichiers _headers / _redirects placés dans
-# le dossier publié). Elles forcent le téléchargement des scripts SQL (au lieu de les afficher dans
-# l'onglet) et renvoient les pages retirées du projet vers l'accueil.
+# Règle d'hébergement, au format lu par Cloudflare Pages (fichier _headers placé dans le dossier publié) :
+# les scripts SQL se téléchargent au lieu de s'afficher dans l'onglet.
 (DOCS / "_headers").write_text("""/assets/*.sql
   Content-Type: application/sql
   Content-Disposition: attachment
 """, encoding="utf-8")
-(DOCS / "_redirects").write_text("/python.html  /  301\n/notebooks/*  /  301\n", encoding="utf-8")
+(DOCS / "_redirects").unlink(missing_ok=True)
 def ko(rel):
     """Taille d'un fichier de docs/ en Ko, pour l'afficher à côté du lien de téléchargement."""
     return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"
