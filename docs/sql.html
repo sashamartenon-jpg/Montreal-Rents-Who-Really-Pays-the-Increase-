@@ -848,7 +848,7 @@ ORDER BY periode DESC;</pre>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SEARCH fait_loyer_trimestriel USING INDEX ix_trim_geo_est (geo_id=? AND estimation=?)</pre>
           <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SCAN fait_loyer_trimestriel USING INDEX sqlite_autoindex_fait_loyer_trimestriel_1</pre>
-          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 4 µs par exécution avec l'index, 12 µs sans (× 2,7). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
+          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 4 µs par exécution avec l'index, 12 µs sans (× 2,8). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
 <pre class="code" data-lang="sql" style="white-space:pre-wrap">CREATE INDEX ix_trim_geo_est ON fait_loyer_trimestriel (geo_id, estimation, periode);</pre>
         </div>
         <div class="stepc"><h3 data-i18n="ix2T">La même base pour PostgreSQL</h3>
@@ -943,7 +943,7 @@ window.PAGE_EN = {
   ix1T: `With and without an index: same result, two paths`,
   ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
   ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
-  ix1N: `Measured at site build time on the table's 298 rows: 4 µs per run with the index, 12 µs without (× 2.7). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
+  ix1N: `Measured at site build time on the table's 298 rows: 4 µs per run with the index, 12 µs without (× 2.8). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
   ix2T: `The same database for PostgreSQL`,
   ix2P: `The <code>loyers_postgres.sql</code> script (schema, views, data) is derived automatically from the project's SQLite scripts, so the two versions can never drift apart, then validated by PostgreSQL's own grammar (<code>pglast</code>): a syntax error stops the build. Five dialect differences, and only those:`,
   ix21: `<code>PRAGMA foreign_keys</code> removed: foreign keys are always enforced in PostgreSQL.`,

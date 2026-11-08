@@ -3,7 +3,7 @@
 **La question : à Montréal, qui paie vraiment la hausse des loyers ?**
 Réponse courte : ceux qui déménagent. Au 2ᵉ trimestre 2026, un 2 chambres affiché coûte 460 $ de plus par mois que le loyer payé par les locataires déjà en place.
 
-**Site :** `https://montreal-rent-gap.netlify.app` · Projet d'intelligence d'affaires
+**Site :** `https://montreal-rent-gap.pages.dev` · Projet d'intelligence d'affaires
 
 ## Constats
 
@@ -60,7 +60,7 @@ python src/postgres.py        # version PostgreSQL du schéma, des vues et des d
 python src/modeles.py         # MCD, MLD et fichiers téléchargeables de la base
 python src/build_excel.py
 python src/render_excel.py    # captures des feuilles (LibreOffice requis)
-python src/build_site.py https://montreal-rent-gap.netlify.app
+python src/build_site.py https://montreal-rent-gap.pages.dev
 ```
 
 ## Sources
