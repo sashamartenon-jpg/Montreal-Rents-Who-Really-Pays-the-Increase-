@@ -46,7 +46,7 @@ sql/             12 requêtes commentées (SQLite)
 sql/sqlserver/   base et requêtes en T-SQL (SQL Server) · sql/postgres/ : base pour PostgreSQL
 src/             fetch_statcan · pipeline · build_db · sqlserver · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
-docs/            site publié par GitHub Pages ; assets/ contient les fichiers téléchargeables (classeurs, base SQLite, scripts SQL par moteur, requêtes, dictionnaire)
+docs/            site publié ; assets/ contient les fichiers téléchargeables (classeurs Excel, scripts SQL et requêtes par moteur) et loyers.sqlite, lue par la console SQL de la page
 ```
 
 ## Reproduire

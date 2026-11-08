@@ -226,8 +226,8 @@ if __name__ == "__main__":
         png(OUT / f"{n}.svg", OUT / f"{n}.png")
     # Fichiers téléchargeables individuellement (pas d'archive : chaque fichier est utile seul)
     assets = ROOT / "docs" / "assets"
-    shutil.copy(ROOT / "data" / "loyers.sqlite", assets / "loyers.sqlite")
-    shutil.copy(ROOT / "data" / "ref" / "dictionnaire.csv", assets / "dictionnaire_donnees.csv")
+    shutil.copy(ROOT / "data" / "loyers.sqlite", assets / "loyers.sqlite")   # lue par la console SQL de la page (sql.js), plus proposée au téléchargement
+    (assets / "dictionnaire_donnees.csv").unlink(missing_ok=True)
     parts = ["-- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.",
              "-- Chaque requête s'exécute telle quelle sur loyers.sqlite (SQLite 3.25+). Le niveau est indiqué en tête de chacune.",
              "-- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.", ""]
@@ -237,4 +237,4 @@ if __name__ == "__main__":
     old_zip = assets / "base_loyers_montreal.zip"
     if old_zip.exists():
         old_zip.unlink()
-    print("modèles et fichiers écrits :", ", ".join(p.name for p in sorted(OUT.iterdir())), "· loyers.sqlite, requetes_loyers_montreal.sql, dictionnaire_donnees.csv")
+    print("modèles et fichiers écrits :", ", ".join(p.name for p in sorted(OUT.iterdir())), "· loyers.sqlite (console), loyers.sql, requetes_loyers_montreal.sql")

@@ -578,9 +578,9 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>12 requêtes</mark>, zéro chiffre non vérifié</h1>
     <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, 12 tables avec clés et contraintes, 5 vues analytiques et un dictionnaire de données. Chaque chiffre du site est recalculé en SQL et recoupé avec le classeur Excel : au moindre écart, la construction du site s'arrête.</p>
     <ul class="proves" data-i18n="chips">
-      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>PostgreSQL</li>
+      <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>CREATE TABLE / VIEW</li><li>Clés et contraintes CHECK</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot par agrégation conditionnelle</li><li>Contrôle qualité</li><li>Index et plan d'exécution</li><li>SQL Server / PostgreSQL</li>
     </ul>
-    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers.sqlite" download data-i18n="dl1">Télécharger la base SQLite ↗</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2">Script SQL complet</a><a class="btn" href="assets/requetes_loyers_montreal.sql" download data-i18n="dl2b">Les 12 requêtes</a></p>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/loyers_sqlserver.sql" download data-i18n="dl1">Base SQL Server (T-SQL) ↗</a><a class="btn" href="assets/requetes_sqlserver.sql" download data-i18n="dl2">Les 12 requêtes (T-SQL)</a><a class="btn" href="assets/loyers.sql" download data-i18n="dl2b">Version SQLite</a></p>
   </div></div>
 
   <section class="block">
@@ -612,24 +612,19 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
           </ul>
           <h3 data-i18n="fT" style="margin-top:18px">Fichiers à télécharger</h3>
           <p class="note" data-i18n="fN">Chaque script est écrit pour un moteur précis : un script SQLite ne s'exécute pas tel quel dans SQL Server ou PostgreSQL. Prendre la section du moteur utilisé.</p>
-          <p class="dlh" data-i18n="fE1">SQLite · DB Browser for SQLite, DBeaver, console de cette page</p>
-          <ul class="dlist">
-            <li><a href="assets/loyers.sqlite" download>loyers.sqlite</a><span data-i18n="f1">la base prête à ouvrir · 188 Ko</span></li>
-            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script · 69 Ko</span></li>
-            <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les 12 requêtes, du niveau débutant au niveau avancé · 10 Ko</span></li>
-          </ul>
           <p class="dlh" data-i18n="fE2">SQL Server 2016+ · Azure Data Studio, SSMS</p>
           <ul class="dlist">
             <li><a href="assets/loyers_sqlserver.sql" download>loyers_sqlserver.sql</a><span data-i18n="f6">tables, vues et données en T-SQL, un lot par vue (GO) · 45 Ko</span></li>
             <li><a href="assets/requetes_sqlserver.sql" download>requetes_sqlserver.sql</a><span data-i18n="f7">les 12 requêtes en T-SQL · 9 Ko</span></li>
           </ul>
+          <p class="dlh" data-i18n="fE1">SQLite · DB Browser for SQLite, DBeaver, console de cette page</p>
+          <ul class="dlist">
+            <li><a href="assets/loyers.sql" download>loyers.sql</a><span data-i18n="f2">tables, vues et données en un seul script · 69 Ko</span></li>
+            <li><a href="assets/requetes_loyers_montreal.sql" download>requetes_loyers_montreal.sql</a><span data-i18n="f3">les 12 requêtes, du niveau débutant au niveau avancé · 10 Ko</span></li>
+          </ul>
           <p class="dlh" data-i18n="fE3">PostgreSQL 12+ · psql, pgAdmin, DBeaver</p>
           <ul class="dlist">
             <li><a href="assets/loyers_postgres.sql" download>loyers_postgres.sql</a><span data-i18n="f4">tables, vues et données ; les requêtes SQLite s'y exécutent avec <code>ROUND((x)::numeric, n)</code> · 43 Ko</span></li>
-          </ul>
-          <p class="dlh" data-i18n="fE4">Tous moteurs</p>
-          <ul class="dlist">
-            <li><a href="assets/dictionnaire_donnees.csv" download>dictionnaire_donnees.csv</a><span data-i18n="f5">chaque colonne de chaque table et vue · 6 Ko</span></li>
           </ul>
         </div>
       </div>
@@ -857,7 +852,7 @@ ORDER BY periode DESC;</pre>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SEARCH fait_loyer_trimestriel USING INDEX ix_trim_geo_est (geo_id=? AND estimation=?)</pre>
           <p style="margin-top:10px" data-i18n="ix1b"><b>Sans l'index</b> (<code>DROP INDEX</code> sur une copie de la base)</p>
 <pre class="code" data-lang="txt" style="white-space:pre-wrap">SCAN fait_loyer_trimestriel USING INDEX sqlite_autoindex_fait_loyer_trimestriel_1</pre>
-          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 4 µs par exécution avec l'index, 12 µs sans (× 2,7). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
+          <p class="note" data-i18n="ix1N">Mesuré à la construction du site sur les 298 lignes de la table : 4 µs par exécution avec l'index, 12 µs sans (× 2,6). Sur une table de cette taille, l'écart est invisible à l'œil ; sur des millions de lignes, SEARCH contre SCAN fait la différence entre une seconde et une minute. L'index est défini dans le schéma :</p>
 <pre class="code" data-lang="sql" style="white-space:pre-wrap">CREATE INDEX ix_trim_geo_est ON fait_loyer_trimestriel (geo_id, estimation, periode);</pre>
         </div>
         <div class="stepc"><h3 data-i18n="ix2T">La même base pour SQL Server et PostgreSQL</h3>
@@ -952,7 +947,7 @@ window.PAGE_EN = {
   ix1T: `With and without an index: same result, two paths`,
   ix1P: `The query reads one area's series (Montreal, asking rent). The table's primary key starts with the quarter, so it is useless for filtering on the area. The <code>ix_trim_geo_est</code> index starts with the area and the estimate, then the quarter: the engine goes straight to the rows, already in the requested order.`,
   ix1a: `<b>With the index</b> · <code>EXPLAIN QUERY PLAN</code>`, ix1b: `<b>Without the index</b> (<code>DROP INDEX</code> on a copy of the database)`,
-  ix1N: `Measured at site build time on the table's 298 rows: 4 µs per run with the index, 12 µs without (× 2.7). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
+  ix1N: `Measured at site build time on the table's 298 rows: 4 µs per run with the index, 12 µs without (× 2.6). On a table this size the gap is invisible to the eye; on millions of rows, SEARCH versus SCAN is the difference between a second and a minute. The index is defined in the schema:`,
   ix2T: `The same database for SQL Server and PostgreSQL`,
   ix2P: `The <code>loyers_sqlserver.sql</code> and <code>loyers_postgres.sql</code> scripts (schema, views, data) are derived automatically from the project's SQLite scripts, so the three versions can never drift apart, then re-read by each engine's parsers (<code>sqlglot</code> and <code>sqlfluff</code> for T-SQL, <code>pglast</code>, PostgreSQL's own grammar): a syntax error stops the build. The dialect differences, and only those:`,
   ix21: `<b>SQL Server</b> · <code>TEXT</code>, <code>INTEGER</code>, <code>REAL</code> become <code>NVARCHAR(100)</code>, <code>INT</code>, <code>FLOAT</code>; <code>a || b</code> becomes <code>CONCAT(a, b)</code> (<code>+</code> fails between an integer and a string); <code>LIMIT 1</code> becomes <code>TOP 1</code>; <code>GLOB</code> becomes <code>LIKE '[0-9][0-9][0-9][0-9]-[01][0-9]'</code>.`,
@@ -962,8 +957,8 @@ window.PAGE_EN = {
   ix25: `<b>What does not change</b> · CTEs, <code>LAG</code>, <code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code>, <code>ROWS BETWEEN</code> moving averages and the views: the analytical SQL is the same on all three engines.`,
   ix2Dl: `Download loyers_sqlserver.sql`, ix2Dl2: `The 12 queries in T-SQL`, ix2Dl3: `Download loyers_postgres.sql`,
   ix2N: `Loading: SQL Server, open the script in Azure Data Studio or SSMS, pick the database, run it; PostgreSQL, <code>createdb loyers &amp;&amp; psql -d loyers -f loyers_postgres.sql</code>. Validation: each engine's full syntax, read by its parsers; running the scripts on a SQL Server or PostgreSQL server is not part of the automated build.`,
-  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>PostgreSQL</li>`,
-  dl1: `Download the SQLite database ↗`, dl2: `Full SQL script`, dl2b: `The 12 queries`,
+  chips: `<li>Conceptual / logical models (Merise)</li><li>Third normal form</li><li>CREATE TABLE / VIEW</li><li>Keys and CHECK constraints</li><li>LAG / ROW_NUMBER / RANK</li><li>PARTITION BY</li><li>CTE (WITH)</li><li>Pivot by conditional aggregation</li><li>Quality checks</li><li>Indexes and execution plans</li><li>SQL Server / PostgreSQL</li>`,
+  dl1: `SQL Server database (T-SQL) ↗`, dl2: `The 12 queries (T-SQL)`, dl2b: `SQLite version`,
   mK: `Modelling`,
   mT: `From conceptual model to database`,
   mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. Both diagrams keep their French labels — they are the project's working documents.`,
@@ -979,14 +974,12 @@ window.PAGE_EN = {
   fT: `Files to download`,
   fN: `Each script is written for one engine: a SQLite script does not run as is in SQL Server or PostgreSQL. Pick the section of the engine you use.`,
   fE1: `SQLite · DB Browser for SQLite, DBeaver, the console on this page`, fE2: `SQL Server 2016+ · Azure Data Studio, SSMS`,
-  fE3: `PostgreSQL 12+ · psql, pgAdmin, DBeaver`, fE4: `All engines`,
-  f1: `the database, ready to open · 188 Ko`,
+  fE3: `PostgreSQL 12+ · psql, pgAdmin, DBeaver`,
   f6: `tables, views and data in T-SQL, one batch per view (GO) · 45 Ko`,
   f7: `the 12 queries in T-SQL · 9 Ko`,
   f2: `tables, views and data in a single script · 69 Ko`,
   f3: `the 12 queries, from beginner to advanced level · 10 Ko`,
   f4: `tables, views and data; the SQLite queries run there with <code>ROUND((x)::numeric, n)</code> · 43 Ko`,
-  f5: `every column of every table and view · 6 Ko`,
   mVol: `Volumes: 306 annual rents, 298 quarterly rents (43 metro areas), 198 vacancy rates, 111 CPI values, 10 CMHC indicators.`,
   dT: `The schema, in SQL`,
   dI: `The database is rebuilt from these two scripts at every run, then checked: <code>PRAGMA foreign_key_check</code> must come back empty, and each CHECK constraint rejects impossible values before they reach any analysis.`,
