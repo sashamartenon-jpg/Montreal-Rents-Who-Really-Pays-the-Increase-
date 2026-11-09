@@ -76,7 +76,7 @@ def excel_facts():
     n = sum(1 for ws in wb.worksheets for row in ws.iter_rows() for c in row
             if (isinstance(c.value, str) and c.value.startswith("=")) or hasattr(c.value, "text"))
     x = wb["Excel 365"]
-    xl365 = lambda cell: x[cell].value.text.replace("_xlfn._xlws.", "").replace("_xlfn.", "")
+    xl365 = lambda cell: x[cell].value.text.replace("_xlfn._xlws.", "").replace("_xlfn.", "").replace("_xlpm.", "")
     assert "XLOOKUP" in xl365("G7") and "SORT" in xl365("B20"), "feuille Excel 365 déplacée"
     d, k = wb["Tableau de bord"], wb["Calculs"]
     cells = [c for row in k.iter_rows() for c in row if isinstance(c.value, str) and c.value.startswith("=")]

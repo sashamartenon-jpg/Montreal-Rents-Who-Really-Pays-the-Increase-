@@ -119,7 +119,7 @@ __XLF_CALC_SORT__</pre></div>
 <p style="margin-top:8px" data-i18n="g8P">Les logements dont l'écart au marché dépasse −5 %, classés du plus grand écart au plus petit. Le revenu annuel libéré suit la même logique :</p>
 <pre class="code" data-lang="xl">__XLF_365_GAINS__</pre></div>
       </div>
-      <p class="note" data-i18n="s7N">Les formules à résultat multiple sont figées sur huit lignes (formules matricielles) pour que le fichier s'ouvre sans réparation dans toute version ; dans Excel 365, retirer les accolades suffit pour qu'elles se propagent d'elles-mêmes. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
+      <p class="note" data-i18n="s7N">Chaque cellule des tableaux à résultat multiple lit sa ligne avec INDEX : les lignes sans résultat restent vides, et la feuille s'ouvre telle quelle dans Excel 2021 et Microsoft 365. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
     </div>
   </section>
 
@@ -210,7 +210,7 @@ window.PAGE_EN = {
   g7P: `The market rent for the type <i>and</i> the lease year, with no helper column: the lookup runs on the product of two conditions. LET names the steps.`,
   g8T: `FILTER then SORT, in one formula`,
   g8P: `Units whose gap to market is beyond −5%, ranked from the largest gap to the smallest. The yearly income freed follows the same logic:`,
-  s7N: `Multi-result formulas are fixed to eight rows (array formulas) so the file opens without repair in any version; in Excel 365, removing the braces lets them spill on their own. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
+  s7N: `Each cell of the multi-result tables reads its row with INDEX: rows without a result stay empty, and the sheet opens as is in Excel 2021 and Microsoft 365. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
   pgL: `← Map`, pgR: `SQL →`
 };
 </script>

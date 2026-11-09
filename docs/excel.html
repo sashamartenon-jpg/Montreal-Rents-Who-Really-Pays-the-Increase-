@@ -585,7 +585,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
   <div class="heroband"><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · Excel</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Un classeur qui <mark>répond à la question</mark>, avec ses propres cartes</h1>
-    <p class="hero-in" style="--d:.16s" data-i18n="lede">Sept feuilles visibles — six d'analyse et un mode d'emploi — six tableaux sources, 1 239 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">Sept feuilles visibles — six d'analyse et un mode d'emploi — six tableaux sources, 1 273 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
     <ul class="proves hero-in" style="--d:.24s" data-i18n="chips">
       <li>SOMME.SI.ENS</li><li>SI.CONDITIONS</li><li>MAX.SI.ENS</li><li>INDEX / EQUIV</li><li>CENTILE</li><li>NPM</li><li>Plages nommées</li><li>Validation des données</li><li>Graphiques cartographiques</li>
     </ul>
@@ -695,11 +695,11 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <pre class="code" data-lang="xl">=LET(debut,E7,marche_bail,XLOOKUP(1,(Loyers_Annee=debut)*(Loyers_Type=C7),Loyers_Montant),F7/marche_bail-1)</pre>
 <p style="margin-top:8px" data-i18n="g7P">Le loyer du marché pour le type <i>et</i> l'année du bail, sans colonne d'aide : la recherche porte sur un produit de deux conditions. LET nomme les étapes.</p></div>
         <div class="stepc"><h3 data-i18n="g8T">FILTRE puis TRIER, en une formule</h3>
-<pre class="code" data-lang="xl">=IFERROR(SORT(FILTER(CHOOSE({1,2,3,4},B7:B14,C7:C14,D7:D14,H7:H14),H7:H14&lt;-0.05),4,1),"")</pre>
+<pre class="code" data-lang="xl">=IFERROR(INDEX(SORT(FILTER(CHOOSE({1,2,3,4},B7:B14,C7:C14,D7:D14,H7:H14),H7:H14&lt;-0.05),4,1),1,1),"")</pre>
 <p style="margin-top:8px" data-i18n="g8P">Les logements dont l'écart au marché dépasse −5 %, classés du plus grand écart au plus petit. Le revenu annuel libéré suit la même logique :</p>
 <pre class="code" data-lang="xl">=LET(gains,FILTER(J7:J14,(C7:C14="2 chambres")*(H7:H14&lt;-0.05)),IFERROR(SUM(gains)*12,0))</pre></div>
       </div>
-      <p class="note" data-i18n="s7N">Les formules à résultat multiple sont figées sur huit lignes (formules matricielles) pour que le fichier s'ouvre sans réparation dans toute version ; dans Excel 365, retirer les accolades suffit pour qu'elles se propagent d'elles-mêmes. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
+      <p class="note" data-i18n="s7N">Chaque cellule des tableaux à résultat multiple lit sa ligne avec INDEX : les lignes sans résultat restent vides, et la feuille s'ouvre telle quelle dans Excel 2021 et Microsoft 365. Pas de capture pour cette feuille : l'outil de rendu du projet (LibreOffice) ne connaît pas encore ces fonctions, et je ne publie que des captures du vrai résultat.</p>
     </div>
   </section>
 
@@ -775,7 +775,7 @@ window.PAGE_EN = {
   "@title": `Excel · Montreal Rents`,
   ey: `Skill · Excel`,
   h1: `A workbook that <mark>answers the question</mark>, with its own maps`,
-  lede: `Seven visible sheets — six of analysis plus a how-to — six source tables, 1,239 formulas, no macros, no empty cells. Pick a year: the Canada map recolours. Pick a city: its card, rank and curve follow. Simple functions (SUMIFS, IFS) carry the essentials; the advanced ones (PERCENTILE, NPER, NA()-driven series) build the maps and scenarios. The workbook ships in French and in English — same formulas, same figures.`,
+  lede: `Seven visible sheets — six of analysis plus a how-to — six source tables, 1,273 formulas, no macros, no empty cells. Pick a year: the Canada map recolours. Pick a city: its card, rank and curve follow. Simple functions (SUMIFS, IFS) carry the essentials; the advanced ones (PERCENTILE, NPER, NA()-driven series) build the maps and scenarios. The workbook ships in French and in English — same formulas, same figures.`,
   chips: `<li>SUMIFS</li><li>IFS</li><li>MAXIFS</li><li>INDEX / MATCH</li><li>PERCENTILE</li><li>NPER</li><li>Named ranges</li><li>Data validation</li><li>Map charts</li>`,
   dl: `Classeur — français ↗`, dlEn: `Download the workbook — English ↗`,
   s1K: `"Accueil" sheet (home)`,
@@ -828,7 +828,7 @@ window.PAGE_EN = {
   g7P: `The market rent for the type <i>and</i> the lease year, with no helper column: the lookup runs on the product of two conditions. LET names the steps.`,
   g8T: `FILTER then SORT, in one formula`,
   g8P: `Units whose gap to market is beyond −5%, ranked from the largest gap to the smallest. The yearly income freed follows the same logic:`,
-  s7N: `Multi-result formulas are fixed to eight rows (array formulas) so the file opens without repair in any version; in Excel 365, removing the braces lets them spill on their own. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
+  s7N: `Each cell of the multi-result tables reads its row with INDEX: rows without a result stay empty, and the sheet opens as is in Excel 2021 and Microsoft 365. No screenshot for this sheet: the project's rendering tool (LibreOffice) does not support these functions yet, and I only publish screenshots of real output.`,
   pgL: `← Map`, pgR: `SQL →`
 };
 </script>

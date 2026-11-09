@@ -1058,12 +1058,19 @@ R0, R1 = 7, 7 + len(PORTF) - 1
 XL = lambda crit_year, typ: f"_xlfn.XLOOKUP(1,(Loyers_Annee={crit_year})*(Loyers_Type={typ}),Loyers_Montant)"
 _LETN = {"debut": "start", "marche_bail": "market_at_lease", "sous": "below", "gains": "gains"}
 def af(ref, f):
-    """Formule matricielle traduite (chaînes entre guillemets et noms LET en anglais dans la version EN)."""
+    """Formule matricielle d'une seule cellule, traduite (chaînes entre guillemets et noms LET en anglais dans la version EN).
+    Format de fichier : un nom déclaré dans LET s'écrit _xlpm.nom (comme _xlfn. pour les fonctions récentes) ;
+    sans ce préfixe, Excel juge la formule illisible et « répare » le classeur à l'ouverture."""
+    assert ":" not in ref, "une formule matricielle par cellule : pas de bloc, pas de cellule fusionnée"
     f = tr_formula(f)
     if LANG == "en":
         for a_, b_ in _LETN.items():
             f = _re.sub(r"\b" + a_ + r"\b", b_, f)
-    return ArrayFormula(ref, f)
+    parts = f.split('"')                       # les noms ne sont préfixés qu'en dehors des chaînes
+    for i in range(0, len(parts), 2):
+        for n_ in (_LETN.values() if LANG == "en" else _LETN):
+            parts[i] = _re.sub(r"(?<![\w.])" + n_ + r"\b", "_xlpm." + n_, parts[i])
+    return ArrayFormula(ref, '"'.join(parts))
 for i, (lg, typ, loyer, bail) in enumerate(PORTF):
     r = R0 + i
     for col, v, fmt in (("B", lg, "@"), ("C", typ, "@"), ("D", loyer, MONEY), ("E", bail, "0")):
@@ -1087,10 +1094,13 @@ card(x, RB + 1, 2, RB + 12, 5, "1A6B3C")
 merge(x, f"B{RB + 1}:E{RB + 1}", "Logements sous le marché, du plus grand écart au plus petit (TRIER + FILTRE)", F(10, True, INK))
 header_row(x, RB + 2, 2, ["Logement", "Type", "Loyer actuel ($)", "Écart au marché"])
 S0, S1 = RB + 3, RB + 10
-x[f"B{S0}"] = af(f"B{S0}:E{S1}",
-    f'=IFERROR(_xlfn._xlws.SORT(_xlfn._xlws.FILTER(CHOOSE({{1,2,3,4}},B{R0}:B{R1},C{R0}:C{R1},D{R0}:D{R1},H{R0}:H{R1}),H{R0}:H{R1}<-0.05),4,1),"")')
-for r in range(S0, S1 + 1):
-    for col, fmt in (("B", "@"), ("C", "@"), ("D", MONEY), ("E", PCT_S)):
+# Une formule par cellule : INDEX lit la ligne k et la colonne j du tableau filtré puis trié. Un bloc matriciel
+# unique afficherait #N/A sous la dernière ligne trouvée ; ici les lignes sans résultat restent vides.
+TRI = (f"_xlfn._xlws.SORT(_xlfn._xlws.FILTER(CHOOSE({{1,2,3,4}},B{R0}:B{R1},C{R0}:C{R1},D{R0}:D{R1},H{R0}:H{R1}),"
+       f"H{R0}:H{R1}<-0.05),4,1)")
+for k_, r in enumerate(range(S0, S1 + 1), 1):
+    for j_, (col, fmt) in enumerate((("B", "@"), ("C", "@"), ("D", MONEY), ("E", PCT_S)), 1):
+        x[f"{col}{r}"] = af(f"{col}{r}", f'=IFERROR(INDEX({TRI},{k_},{j_}),"")')
         c = x[f"{col}{r}"]
         c.font, c.number_format, c.alignment, c.border = F(10), fmt, CENTER, Border(bottom=Side(style="hair", color=LINE))
 
@@ -1105,13 +1115,12 @@ kp = [
 for i, (lab_, f_, fmt) in enumerate(kp):
     r = RB + 2 + i * 2
     merge(x, f"G{r}:I{r + 1}", lab_, F(9, color=INK2))
-    x[f"J{r}"] = af(f"J{r}", f_) if "FILTER" in f_ else f_
-    x.merge_cells(f"J{r}:J{r + 1}")
+    x[f"J{r}"] = af(f"J{r}", f_) if "FILTER" in f_ else f_      # cellule non fusionnée : Excel refuse une formule matricielle dans une fusion
     x[f"J{r}"].font, x[f"J{r}"].number_format, x[f"J{r}"].alignment = F(16, True, PINK_D if i < 2 else BLUE_D), fmt, CENTER
 U0 = RB + 8
 header_row(x, U0, 7, ["Types présents (UNIQUE)", "Logements", "Écart moyen", ""])
-x[f"G{U0 + 1}"] = af(f"G{U0 + 1}:G{U0 + 4}", f'=IFERROR(INDEX(_xlfn.UNIQUE(C{R0}:C{R1}),ROW()-{U0}),"")')
 for r in range(U0 + 1, U0 + 5):
+    x[f"G{r}"] = af(f"G{r}", f'=IFERROR(INDEX(_xlfn.UNIQUE(C{R0}:C{R1}),{r - U0}),"")')
     x[f"H{r}"] = f'=IF(G{r}="","",COUNTIF(C${R0}:C${R1},G{r}))'
     x[f"I{r}"] = f'=IF(G{r}="","",AVERAGEIFS(H${R0}:H${R1},C${R0}:C${R1},G{r}))'
     for col, fmt in (("G", "@"), ("H", "0"), ("I", PCT_S)):
@@ -1138,7 +1147,7 @@ for i, (fn, desc, ou) in enumerate(FN365):
         x[f"{col}{r}"].border = Border(bottom=Side(style="thin", color=LINE))
     x.row_dimensions[r].height = 28
 note(x, f"B{RF + 8}", "Dans une version d'Excel antérieure à 2021, seule cette feuille affiche #NOM? ; toutes les autres s'ouvrent normalement.")
-note(x, f"B{RF + 9}", "Les blocs à résultat multiple sont figés sur 8 lignes (formules matricielles {…}) pour s'ouvrir sans réparation ; dans Excel 365, retire les accolades : la formule se propage seule.")
+note(x, f"B{RF + 9}", "Chaque cellule des blocs à résultat multiple lit sa ligne avec INDEX : les lignes sans résultat restent vides. Dans Excel 365, =TRIER(FILTRE(…)) saisi seul dans la première cellule se propage de lui-même.")
 x.freeze_panes = "A7"
 
 # ================================================================== Mode d'emploi
@@ -1291,5 +1300,28 @@ wb.properties.title = "Loyers à Montréal, 1992-2026" if LANG == "fr" else "Mon
 wb.properties.creator = ""
 wb.properties.lastModifiedBy = ""
 wb.save(OUT)
+
+
+# ---------------------------------------------------------------- contrôle du fichier écrit
+# Trois défauts font « réparer » le classeur par Excel à l'ouverture ; la construction s'arrête si l'un d'eux revient.
+def controle_format(path):
+    import zipfile
+    from openpyxl.utils import range_boundaries, coordinate_to_tuple
+    with zipfile.ZipFile(path) as z:
+        for name in sorted(n for n in z.namelist() if n.startswith("xl/worksheets/sheet")):
+            xml = z.read(name).decode("utf-8")
+            fusions = [range_boundaries(m) for m in _re.findall(r'<mergeCell ref="([^"]+)"', xml)]
+            for cell, attrs, f in _re.findall(r'<c r="([A-Z]+\d+)"[^>]*><f([^>]*)>(.*?)</f>', xml):
+                for bloc in _re.findall(r"_xlfn\.LET\(([^,]+),", f):          # 1. nom LET sans préfixe _xlpm.
+                    assert bloc.startswith("_xlpm."), f"{name} {cell} : nom LET sans _xlpm. ({bloc})"
+                if 't="array"' in attrs:
+                    ref = _re.search(r'ref="([^"]+)"', attrs).group(1)
+                    assert ":" not in ref, f"{name} {cell} : formule matricielle sur plusieurs cellules ({ref})"   # 2.
+                    r_, c_ = coordinate_to_tuple(cell)
+                    assert not any(c1 <= c_ <= c2 and r1 <= r_ <= r2 for c1, r1, c2, r2 in fusions), \
+                        f"{name} {cell} : formule matricielle dans une cellule fusionnée"                          # 3.
+                for fn in _re.findall(r"(?<![\w.])(XLOOKUP|FILTER|SORT|UNIQUE|LET|IFS|MAXIFS|MINIFS)\(", f):       # fonction récente sans préfixe
+                    raise AssertionError(f"{name} {cell} : {fn} sans préfixe _xlfn.")
+controle_format(OUT)
 n_f = sum(1 for ws_ in wb.worksheets for row in ws_.iter_rows() for c in row if (isinstance(c.value, str) and c.value.startswith("=")) or isinstance(c.value, ArrayFormula))
 print(f"enregistré : {OUT.relative_to(ROOT)} · {len(wb.worksheets)} feuilles · {n_f} formules · {len(ids)} régions · trimestres {QS[0]} à {QS[-1]}")

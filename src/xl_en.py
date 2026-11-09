@@ -397,7 +397,7 @@ _X365 = {
     "Position du loyer face au marché en une formule lisible.": "Position of the rent against the market in one readable formula.",
     "Colonnes F et G": "Columns F and G", "Colonne G, indicateurs": "Column G, indicators", "Bloc de gauche": "Left block", "Bloc de droite": "Right block", "Colonne I": "Column I",
     "Dans une version d'Excel antérieure à 2021, seule cette feuille affiche #NOM? ; toutes les autres s'ouvrent normalement.": "In an Excel version older than 2021, only this sheet shows #NAME?; every other sheet opens normally.",
-    "Les blocs à résultat multiple sont figés sur 8 lignes (formules matricielles {…}) pour s'ouvrir sans réparation ; dans Excel 365, retire les accolades : la formule se propage seule.": "Multi-result blocks are fixed to 8 rows (array formulas {…}) so the file opens without repair; in Excel 365, remove the braces and the formula spills on its own.",
+    "Chaque cellule des blocs à résultat multiple lit sa ligne avec INDEX : les lignes sans résultat restent vides. Dans Excel 365, =TRIER(FILTRE(…)) saisi seul dans la première cellule se propage de lui-même.": "Each cell of the multi-result blocks reads its row with INDEX: rows without a result stay empty. In Excel 365, =SORT(FILTER(…)) typed alone in the first cell spills by itself.",
     # Mode d'emploi et Accueil
     "RECHERCHEX à deux critères": "XLOOKUP with two criteria",
     "Le loyer du marché pour un type et une année, en un seul appel.": "The market rent for a type and a year, in a single call.",
