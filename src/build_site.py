@@ -84,6 +84,7 @@ def excel_facts():
     rank = find("E", "=RANK(D")
     assert d["E9"].value.startswith("=(SUMIFS") and d["H9"].value.startswith("=IFERROR"), "cellules du tableau de bord déplacées"
     visible = [ws.title for ws in wb.worksheets if ws.sheet_state == "visible"]
+    assert len(visible) == 14 and len(wb.worksheets) == 15, "nombre de feuilles changé : revoir le texte de la page Excel (8 feuilles + 6 sources)"
     return n, {
         "__XLF_DASH_E9__": d["E9"].value, "__XLF_DASH_H9__": d["H9"].value,
         "__XLF_CALC_RANK__": rank.value, "__XLF_CALC_SORT__": k.cell(row=rank.row, column=6).value,
