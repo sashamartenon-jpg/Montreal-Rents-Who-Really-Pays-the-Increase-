@@ -162,8 +162,9 @@ function drawQlist() {
     const tags = (en && n.tags_en) || n.tags;
     const lvl = n.niv ? (en ? LVL[n.niv] : n.niv) : "";
     return `<article class="qcard"><div style="min-width:0"><p class="eyebrow" style="margin:0 0 4px">${esc(q.file)} <span class="lvl ${n.niv ? n.niv[0] : ""}">${esc(lvl)}</span></p><h3>${esc((en && n.q_en) || n.q)}</h3>
-      <div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div><pre class="code">${highlight(body, "sql")}</pre></div>
-      <div style="min-width:0"><p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tablewrap">${resultTable(q.columns, q.rows)}</div></div></article>`;
+      <p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div></div>
+      <pre class="code">${highlight(body, "sql")}</pre>
+      <div class="tablewrap">${resultTable(q.columns, q.rows)}</div></article>`;
   }).join("");
 }
 drawQlist();

@@ -34,5 +34,8 @@ document.querySelectorAll("pre.code[data-lang]").forEach(el => { el.innerHTML = 
 const fmtFR = v => v == null ? "NULL" : (typeof v === "number" ? new Intl.NumberFormat(window.LANG === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(v) : String(v));
 function resultTable(cols, rows) {
   const isYear = cols.map(c => /annee|year/i.test(c));
-  return `<table class="data"><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
+  // une colonne de texte (nom, type, période) se lit à gauche ; une colonne de nombres s'aligne à droite
+  const isText = cols.map((c, i) => rows.some(r => typeof r[i] === "string"));
+  const cl = i => (isText[i] ? ' class="t"' : "");
+  return `<table class="data"><tr>${cols.map((c, i) => `<th${cl(i)}>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td${cl(i)}>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
 }

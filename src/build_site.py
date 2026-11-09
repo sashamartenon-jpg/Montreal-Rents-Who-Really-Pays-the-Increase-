@@ -238,7 +238,7 @@ SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/l
          "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
 common = {
     **SIZES,
-    "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", " "),
+    "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", "\u202f"),
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
     "__N_PAYE__": str(N_PAYE), "__N_BOTH__": str(N_BOTH), "__N_DEMANDE__": str(N_DEMANDE), "__N_REG__": str(N_REG),
     "__N_SQL__": str(len(SQL_FILES)), "__N_TABLES__": str(N_TABLES), "__N_VUES__": str(N_VUES),

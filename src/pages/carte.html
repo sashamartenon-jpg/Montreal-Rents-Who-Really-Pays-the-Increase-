@@ -3,9 +3,15 @@
 __HEADER__
 <style>
 .mapwrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.mapcol { display: grid; gap: 16px; min-width: 0; }
+.detailcard .detail { border: 0; margin: 0; padding: 0; }
+.dgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 28px; align-items: center; }
+.dgrid dl { margin-bottom: 0; }
+@media (max-width: 700px) { .dgrid { grid-template-columns: minmax(0, 1fr); } }
 .mapcard { position: relative; }
 #map svg { display: block; width: 100%; height: auto; }
-.prov { stroke: var(--surface); stroke-width: .8; transition: opacity .15s; }
+.prov { stroke: var(--surface); stroke-width: 1; transition: opacity .15s; }
+#map .land { filter: drop-shadow(0 0 .8px var(--map-edge)); }
 .prov.na { fill: var(--map-na); }
 .prov.hover, .prov.sel { stroke: var(--warm); stroke-width: 2; }
 .city { stroke: var(--surface); stroke-width: 1.2; cursor: pointer; }
@@ -17,7 +23,7 @@ __HEADER__
 .ramp { display: flex; }
 .ramp span { width: 34px; height: 10px; }
 .ramp-l { display: flex; justify-content: space-between; width: 170px; }
-.list { max-height: 560px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.list { position: relative; max-height: 640px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
 .list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 6px; align-items: center; padding: 5px 6px; border-radius: 6px; cursor: pointer; font-size: .86rem; }
 .list li:hover, .list li.sel { background: var(--mtl-soft); }
 .list li.sel { outline: 2px solid var(--warm); outline-offset: -2px; }
@@ -82,16 +88,18 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <output id="year-out" for="year">2025</output>
     </div>
     <div class="mapwrap">
-      <div class="panel mapcard">
-        <p class="chart-title" id="map-title"></p>
-        <p class="chart-sub" id="map-sub"></p>
-        <div id="map" role="img" aria-label="Carte du Canada"></div>
-        <div class="maplegend" id="legend"></div>
+      <div class="mapcol">
+        <div class="panel mapcard">
+          <p class="chart-title" id="map-title"></p>
+          <p class="chart-sub" id="map-sub"></p>
+          <div id="map" role="img" aria-label="Carte du Canada"></div>
+          <div class="maplegend" id="legend"></div>
+        </div>
+        <div class="panel detailcard"><div class="detail" id="detail"></div></div>
       </div>
       <div class="panel">
         <p class="chart-title" id="list-title"></p>
         <ol class="list" id="list"></ol>
-        <div class="detail" id="detail"></div>
       </div>
     </div>
   </section>
@@ -238,7 +246,7 @@ function draw() {
   svg.append("rect").attr("width", W).attr("height", H).attr("fill", "transparent").on("click", () => {});
   const items = itemsFor(), col = colorScale(items), byId = new Map(items.map(d => [d.id, d]));
   const M = METRICS()[S.view].find(x => x.k === S.metric);
-  const gp = svg.append("g");
+  const gp = svg.append("g").attr("class", "land");
   gp.selectAll("path").data(GEO.features).join("path")
     .attr("d", path)
     .attr("class", f => {
@@ -246,7 +254,7 @@ function draw() {
       return "prov" + (S.view === "prov" && (!it || it.v == null) ? " na" : "") + (S.view === "prov" && S.sel === f.properties.code ? " sel" : "");
     })
     .attr("fill", f => {
-      if (S.view !== "prov") return css("--map-0");
+      if (S.view !== "prov") return css("--map-land");
       const it = byId.get(f.properties.code);
       return it && it.v != null ? col(it.v) : css("--map-na");
     })
@@ -321,7 +329,9 @@ function drawList(items, M) {
     li.onclick = () => select(id);
     li.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(id); } };
   });
-  const s = ul.querySelector("li.sel"); if (s) s.scrollIntoView({ block: "nearest" });
+  // la ligne choisie est ramenée dans la liste sans faire défiler la page (sur téléphone, la liste est sous la carte)
+  const s = ul.querySelector("li.sel");
+  if (s && (s.offsetTop < ul.scrollTop || s.offsetTop + s.offsetHeight > ul.scrollTop + ul.clientHeight)) ul.scrollTop = s.offsetTop - (ul.clientHeight - s.offsetHeight) / 2;
 }
 function spark(series, labels, keys, mark) {
   const W = 280, H = 90, m = { t: 8, r: 8, b: 18, l: 38 };
@@ -340,22 +350,22 @@ function drawDetail() {
   const d = document.getElementById("detail");
   if (S.view === "villes") {
     const v = C.villes.find(x => x.id === S.sel); if (!v) { d.innerHTML = ""; return; }
-    d.innerHTML = `<h3>${v.nom}</h3><p class="sub">${v.prov} · ${tr("appartements de 2 chambres", "two-bedroom apartments")}</p>
+    d.innerHTML = `<div class="dgrid"><div><h3>${v.nom}</h3><p class="sub">${v.prov} · ${tr("appartements de 2 chambres", "two-bedroom apartments")}</p>
       <dl><dt>${tr("Loyer demandé", "Asking rent")}, ${per(last)}</dt><dd>${v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()}</dd>
       <dt>${tr("Loyer payé", "Rent paid")}, ${per(last)}</dt><dd>${v.paye ? money(v.paye) : ND()}</dd>
       <dt>${tr("Écart", "Gap")}</dt><dd>${v.ecart != null ? money(v.ecart) + " (" + pct(v.ecart_pct) + ")" : ND()}</dd>
       <dt>${tr("Loyer demandé, sur un an", "Asking rent, year over year")}</dt><dd>${v.var_demande != null ? pct(v.var_demande) : ND()}</dd>
-      <dt>${tr("Loyer payé, sur un an", "Rent paid, year over year")}</dt><dd>${v.var_paye != null ? pct(v.var_paye) : ND()}</dd></dl>
-      <div class="legend"><span><i style="--c:var(--warm)"></i>${tr("Demandé", "Asking")}</span><span><i style="--c:var(--mtl)"></i>${tr("Payé", "Paid")}</span></div>
-      ${spark([v.serie_demande, v.serie_paye], C.periodes, ["--warm", "--mtl"])}`;
+      <dt>${tr("Loyer payé, sur un an", "Rent paid, year over year")}</dt><dd>${v.var_paye != null ? pct(v.var_paye) : ND()}</dd></dl></div>
+      <div><div class="legend"><span><i style="--c:var(--warm)"></i>${tr("Demandé", "Asking")}</span><span><i style="--c:var(--mtl)"></i>${tr("Payé", "Paid")}</span></div>
+      ${spark([v.serie_demande, v.serie_paye], C.periodes, ["--warm", "--mtl"])}</div></div>`;
   } else {
     const p = C.provinces.find(x => x.code === S.sel); if (!p) { d.innerHTML = ""; return; }
     const yrs = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
-    d.innerHTML = `<h3>${p.nom}</h3><p class="sub">${tr("Indice des prix du loyer (2002 = 100)", "Rent price index (2002 = 100)")}</p>
-      <dl><dt>${tr("Hausse en", "Increase in")} ${S.year}</dt><dd>${pct(annual(p, S.year))}</dd><dt>${tr("Hausse en 2025", "Increase in 2025")}</dt><dd>${pct(p.hausse_loyer_2025)}</dd><dt>${tr("Hausse 2019-2025", "Increase 2019-2025")}</dt><dd>${pct(p.hausse_loyer)}</dd>
-      <dt>${tr("Inflation 2019-2025", "Inflation 2019-2025")}</dt><dd>${pct(p.hausse_inflation)}</dd><dt>${tr("Hausse réelle", "Real increase")}</dt><dd>${pct(p.hausse_reelle)}</dd></dl>
-      ${spark([p.serie_loyer, C.provinces.find(x => x.code === "CA").serie_loyer], yrs, ["--warm", "--other"], S.metric === "annuelle" ? String(S.year) : null)}
-      <div class="legend"><span><i style="--c:var(--warm)"></i>${p.nom}</span><span><i style="--c:var(--other)"></i>Canada</span></div>`;
+    d.innerHTML = `<div class="dgrid"><div><h3>${p.nom}</h3><p class="sub">${tr("Indice des prix du loyer (2002 = 100)", "Rent price index (2002 = 100)")}</p>
+      <dl>${+S.year === 2025 ? "" : `<dt>${tr("Hausse en", "Increase in")} ${S.year}</dt><dd>${pct(annual(p, S.year))}</dd>`}<dt>${tr("Hausse en 2025", "Increase in 2025")}</dt><dd>${pct(p.hausse_loyer_2025)}</dd><dt>${tr("Hausse 2019-2025", "Increase 2019-2025")}</dt><dd>${pct(p.hausse_loyer)}</dd>
+      <dt>${tr("Inflation 2019-2025", "Inflation 2019-2025")}</dt><dd>${pct(p.hausse_inflation)}</dd><dt>${tr("Hausse réelle", "Real increase")}</dt><dd>${pct(p.hausse_reelle)}</dd></dl></div>
+      <div>${spark([p.serie_loyer, C.provinces.find(x => x.code === "CA").serie_loyer], yrs, ["--warm", "--other"], S.metric === "annuelle" ? String(S.year) : null)}
+      <div class="legend"><span><i style="--c:var(--warm)"></i>${p.nom}</span><span><i style="--c:var(--other)"></i>Canada</span></div></div></div>`;
   }
 }
 function select(id) { S.sel = id; draw(); }

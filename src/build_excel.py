@@ -123,6 +123,8 @@ BOX = Border(top=thin, bottom=thin, left=thin, right=thin)
 CENTER = Alignment(horizontal="center", vertical="center", wrap_text=True)
 RIGHT = Alignment(horizontal="right", vertical="center")
 LEFT = Alignment(horizontal="left", vertical="center", indent=1)
+WRAPL = Alignment(horizontal="left", vertical="center", wrap_text=True, indent=1)        # libellé sur plusieurs lignes
+JUSTIFY = Alignment(horizontal="justify", vertical="center", wrap_text=True, indent=1)   # texte courant : justifié
 INPUT_FONT = F(10, True, "0000FF")
 
 wb = Workbook()
@@ -1091,7 +1093,8 @@ note(x, f"B{R1 + 1}", f"Marché 2025 : loyer moyen SCHL par type (RECHERCHEX à 
 RB = R1 + 3   # bloc dynamique
 label(x, f"B{RB}", "Lecture dynamique du portefeuille")
 card(x, RB + 1, 2, RB + 12, 5, "1A6B3C")
-merge(x, f"B{RB + 1}:E{RB + 1}", "Logements sous le marché, du plus grand écart au plus petit (TRIER + FILTRE)", F(10, True, INK))
+merge(x, f"B{RB + 1}:E{RB + 1}", "Logements sous le marché, du plus grand écart au plus petit (TRIER + FILTRE)", F(10, True, INK), WRAPL)
+x.row_dimensions[RB + 1].height = 30
 header_row(x, RB + 2, 2, ["Logement", "Type", "Loyer actuel ($)", "Écart au marché"])
 S0, S1 = RB + 3, RB + 10
 # Une formule par cellule : INDEX lit la ligne k et la colonne j du tableau filtré puis trié. Un bloc matriciel
@@ -1105,7 +1108,7 @@ for k_, r in enumerate(range(S0, S1 + 1), 1):
         c.font, c.number_format, c.alignment, c.border = F(10), fmt, CENTER, Border(bottom=Side(style="hair", color=LINE))
 
 card(x, RB + 1, 7, RB + 12, 10, PINK)
-merge(x, f"G{RB + 1}:J{RB + 1}", "Indicateurs du portefeuille (LET + FILTRE, UNIQUE)", F(10, True, INK))
+merge(x, f"G{RB + 1}:J{RB + 1}", "Indicateurs du portefeuille (LET + FILTRE, UNIQUE)", F(10, True, INK), WRAPL)
 kp = [
     ("Logements sous le marché (écart < −5 %)", f"=_xlfn.LET(sous,_xlfn._xlws.FILTER(H{R0}:H{R1},H{R0}:H{R1}<-0.05),IFERROR(ROWS(sous),0))", "0"),
     ("Revenu annuel libéré si les 2 chambres sous le marché étaient reloués au prix des annonces",
@@ -1114,9 +1117,11 @@ kp = [
 ]
 for i, (lab_, f_, fmt) in enumerate(kp):
     r = RB + 2 + i * 2
-    merge(x, f"G{r}:I{r + 1}", lab_, F(9, color=INK2))
+    merge(x, f"G{r}:I{r + 1}", lab_, F(9, color=INK2), WRAPL)
     x[f"J{r}"] = af(f"J{r}", f_) if "FILTER" in f_ else f_      # cellule non fusionnée : Excel refuse une formule matricielle dans une fusion
     x[f"J{r}"].font, x[f"J{r}"].number_format, x[f"J{r}"].alignment = F(16, True, PINK_D if i < 2 else BLUE_D), fmt, CENTER
+for r in range(RB + 2, RB + 13):
+    x.row_dimensions[r].height = 21          # hauteur fixe : les deux blocs restent alignés ligne à ligne
 U0 = RB + 8
 header_row(x, U0, 7, ["Types présents (UNIQUE)", "Logements", "Écart moyen", ""])
 for r in range(U0 + 1, U0 + 5):
@@ -1139,15 +1144,19 @@ FN365 = [
 ]
 for i, (fn, desc, ou) in enumerate(FN365):
     r = RF + 2 + i
-    x[f"B{r}"], x[f"B{r}"].font = fn, F(10, True)
-    merge(x, f"C{r}:H{r}", desc, F(10, color=INK2))
-    x[f"I{r}"], x[f"I{r}"].font = ou, F(9, color=INK3)
+    x[f"B{r}"], x[f"B{r}"].font, x[f"B{r}"].alignment = fn, F(9, True), Alignment(horizontal="left", vertical="center", wrap_text=True)
+    merge(x, f"C{r}:H{r}", desc, F(10, color=INK2), JUSTIFY)
+    x[f"I{r}"], x[f"I{r}"].font, x[f"I{r}"].alignment = ou, F(9, color=INK3), WRAPL
     for col in "BCDEFGHI":
         x[f"{col}{r}"].fill = fill(WHITE)
         x[f"{col}{r}"].border = Border(bottom=Side(style="thin", color=LINE))
-    x.row_dimensions[r].height = 28
+    x.row_dimensions[r].height = 32
 note(x, f"B{RF + 8}", "Dans une version d'Excel antérieure à 2021, seule cette feuille affiche #NOM? ; toutes les autres s'ouvrent normalement.")
 note(x, f"B{RF + 9}", "Chaque cellule des blocs à résultat multiple lit sa ligne avec INDEX : les lignes sans résultat restent vides. Dans Excel 365, =TRIER(FILTRE(…)) saisi seul dans la première cellule se propage de lui-même.")
+for r in (RF + 8, RF + 9):                   # notes sur toute la largeur de la feuille, justifiées
+    x.merge_cells(f"B{r}:J{r}")
+    x[f"B{r}"].alignment = JUSTIFY
+x.row_dimensions[RF + 9].height = 28
 x.freeze_panes = "A7"
 
 # ================================================================== Mode d'emploi
@@ -1155,7 +1164,7 @@ me = sheet("Mode d'emploi", VIOLET)
 banner(me, "Mode d'emploi : les fonctions du classeur, de la plus simple à la plus avancée",
        "Chaque formule est visible : clique sur une cellule pour la lire. Aucune macro, aucun code caché.", 10)
 me.column_dimensions["A"].width = 2
-for c_, w_ in zip("BCDEFGHIJ", [24, 16, 60, 34, 2, 2, 2, 2, 2]):
+for c_, w_ in zip("BCDEFGHIJ", [16, 24, 62, 32, 2, 2, 2, 2, 2]):
     me.column_dimensions[c_].width = w_
 canvas(me, 4, 46, 1, 10)
 label(me, "B5", "Les fonctions, par niveau")
@@ -1183,12 +1192,13 @@ for i, (niv, fn, desc, ou) in enumerate(FN):
     me[f"C{r}"] = fn
     me[f"C{r}"].font = F(10, True)
     me[f"D{r}"] = desc
+    me[f"D{r}"].font = F(10, color=INK2)
     me[f"E{r}"] = ou
     me[f"E{r}"].font = F(9, color=INK3)
     for col in "BCDE":
         me[f"{col}{r}"].fill = fill(WHITE)
         me[f"{col}{r}"].border = Border(bottom=Side(style="thin", color=LINE))
-        me[f"{col}{r}"].alignment = Alignment(vertical="center", wrap_text=True, indent=1)
+        me[f"{col}{r}"].alignment = JUSTIFY if col == "D" else WRAPL
     me.row_dimensions[r].height = 30
 R_ME = 7 + len(FN) + 1
 label(me, f"B{R_ME}", "Et les fonctions d'Excel 365 ?")

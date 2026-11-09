@@ -140,6 +140,7 @@ section.block { padding-block: 36px; border-top: 1px solid var(--line); }
 table.data { border-collapse: collapse; font-size: .82rem; width: 100%; font-variant-numeric: tabular-nums; }
 table.data th, table.data td { padding: 5px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
 table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th.t, table.data td.t { text-align: left; }
 table.data th { font-weight: 600; color: var(--ink-2); }
 details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); margin-top: 10px; }
 
@@ -180,14 +181,14 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
   .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
 }
 /* bandeau compétences (accueil) */
-.skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
+.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
 .skill { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--ink); transition: border-color .15s; }
 .skill:hover { border-color: var(--mtl); }
 .skill .tool { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); }
 .skill b { font: 600 1.05rem var(--font-display); }
 .skill small { color: var(--ink-3); font-size: .82rem; line-height: 1.4; }
 .skill .go { margin-top: auto; padding-top: 6px; font-size: .82rem; color: var(--link); }
-@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr); } }
 /* pages compétences */
 .phero { padding-block: 40px 24px; max-width: 760px; }
 .phero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
@@ -196,6 +197,8 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .proves li { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
 .figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 0; }
 .figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+.figure a.zoom { display: block; cursor: zoom-in; border-radius: 4px; }
+.figure a.zoom:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
 .figure figcaption { font-size: .82rem; color: var(--ink-3); margin-top: 8px; }
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stepc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
@@ -209,10 +212,12 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .code .n { color: var(--code-num); }
 .code .f { color: var(--code-fn); }
 .code[data-lang="xl"] { white-space: pre-wrap; overflow-wrap: anywhere; }
-.qcard.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
-.qcard { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.qcard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
 .qcard h3 { font: 600 1.1rem var(--font-display); margin: 0 0 4px; }
-.qcard .why { color: var(--ink-2); font-size: .9rem; margin: 6px 0 10px; }
+.qcard .why { color: var(--ink-2); font-size: .92rem; margin: 4px 0 10px; max-width: 78ch; }
+.qcard .tablewrap { margin-top: 0; }
+.qcard table.data { width: auto; min-width: min(100%, 26rem); }
+.qcard table.data th, .qcard table.data td { padding-right: 22px; }
 .tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 10px; }
 .tags span { font: 500 .72rem var(--font-mono); background: var(--mtl-soft); color: var(--link); border-radius: 4px; padding: 2px 7px; }
 .status-banner { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-left: 4px solid var(--warm); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 8px; }
@@ -229,7 +234,7 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .erd .t li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
 .gallery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
 @media (max-width: 820px) {
-  .steps, .qcard, .qcard.wide, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
+  .steps, .qcard, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* hero note */
@@ -290,7 +295,8 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
-.cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
+main .note, main figcaption, main .kpi small, main .skill small, main .flow small, main .why { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.cta, .chart-sub, .chart-title, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
 
@@ -308,7 +314,7 @@ main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-ali
   --ink: #13233a; --ink-2: #44546a; --ink-3: #5b6b82; --line: #dbe4ef; --grid: #e8eef6;
   --mtl: #2f86d6; --mtl-soft: #e8f2fc; --link: #1f6fc0; --warm: #e0457b; --warm-ink: #b8285e; --warm-soft: #fdeaf1;
   --coral: #f2876b; --other: #a9b6c6; --u-1ch: #2f86d6; --u-2ch: #e0457b; --u-3ch: #7b6cd9;
-  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0;
+  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0; --map-land: #d5e3f3; --map-edge: #a9c0dc;
   --cell-sel: #2f86d6; --warm-btn: #c9336b;
   --font-display: "Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -324,14 +330,14 @@ main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-ali
   --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
   --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
   --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
-  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638; --map-land: #203a5c; --map-edge: #3a5a86;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4); } }
 :root[data-theme="dark"] {
   --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
   --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
   --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
   --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
-  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638; --map-land: #203a5c; --map-edge: #3a5a86;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 .skip { position: absolute; left: 12px; top: -48px; z-index: 60; background: #fff; color: #13233a; font: 600 .9rem var(--font-body); padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none; transition: top .2s; }
@@ -539,7 +545,8 @@ table.data.files { font-size: .92rem; }
 table.data.files th, table.data.files td { text-align: left; padding: 10px 12px 10px 0; vertical-align: top; }
 table.data.files a { font-family: var(--font-mono); font-size: .86rem; }
 .howto { margin: 8px 0 0; padding-left: 1.1em; display: grid; gap: 8px; }
-main .howto li { text-align: left; hyphens: manual; -webkit-hyphens: manual; }
+main .howto li { text-align: justify; hyphens: manual; -webkit-hyphens: manual; }
+@media (max-width: 640px) { main .howto li { text-align: left; } }   /* lignes courtes + noms de fichiers insécables : la justification y creuse des blancs */
 .howto code { font-size: .84em; overflow-wrap: anywhere; hyphens: none; }
 @media (max-width: 640px) {
   table.data.files tr:first-child { display: none; }
@@ -557,7 +564,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 .scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
 .scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
 #sc-map { opacity: 0; }
-#sc-map .ring { fill: var(--mtl-soft); stroke: var(--surface); stroke-width: 1; }
+#sc-map .ring { fill: var(--map-land); stroke: var(--surface); stroke-width: 1; }
 #sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
 #sc-map circle.on { opacity: 1; transform: scale(1); }
 #sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
@@ -585,7 +592,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
   <div class="heroband"><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · Excel</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Un classeur qui <mark>répond à la question</mark>, avec ses propres cartes</h1>
-    <p class="hero-in" style="--d:.16s" data-i18n="lede">Huit feuilles — six d'analyse, une feuille « Excel 365 » et un mode d'emploi — plus six tableaux sources, 1 273 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
+    <p class="hero-in" style="--d:.16s" data-i18n="lede">Huit feuilles — six d'analyse, une feuille « Excel 365 » et un mode d'emploi — plus six tableaux sources, 1 273 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
     <ul class="proves hero-in" style="--d:.24s" data-i18n="chips">
       <li>SOMME.SI.ENS</li><li>SI.CONDITIONS</li><li>MAX.SI.ENS</li><li>INDEX / EQUIV</li><li>CENTILE</li><li>NPM</li><li>Plages nommées</li><li>Validation des données</li><li>Graphiques cartographiques</li>
     </ul>
@@ -598,7 +605,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s1T">La question et la réponse, dès l'ouverture</h2>
       <p class="intro" data-i18n="s1I">Le classeur s'ouvre sur la question du projet et quatre chiffres qui y répondent, tous recalculés par formules à partir des tableaux sources. Un bouton par feuille sert de menu. Les captures suivent la langue choisie : classeur français ici, classeur anglais en version anglaise de la page.</p>
       <figure class="figure">
-        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy" width="1329" height="961" decoding="async">
+        <a class="zoom" href="assets/excel/accueil.png" data-en-href="assets/excel/en/accueil.png" target="_blank" rel="noopener"><img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy" width="1329" height="961" decoding="async"></a>
         <figcaption data-i18n="s1C">460 $ d'écart entre annonce et loyer payé à Montréal ; +17,2 % pour un logement reloué contre +6,0 % pour un locataire en place. Capture du classeur réel.</figcaption>
       </figure>
     </div>
@@ -610,7 +617,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s2T">La carte du Canada, en graphique Excel</h2>
       <p class="intro" data-i18n="s2I">Une carte faite avec un graphique Excel standard : les contours des provinces forment une série de lignes, chaque province est une bulle dont la couleur et la taille suivent sa valeur. Elle s'ouvre dans toutes les versions d'Excel, sans connexion et sans complément.</p>
       <figure class="figure">
-        <img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy" width="1356" height="970" decoding="async">
+        <a class="zoom" href="assets/excel/carte-provinces.png" data-en-href="assets/excel/en/carte-provinces.png" target="_blank" rel="noopener"><img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy" width="1356" height="970" decoding="async"></a>
         <figcaption data-i18n="s2C">Hausse de l'IPC du loyer en 2025 : le Québec, sélectionné, est en rose et premier des 10 provinces. Change l'année à 2024 : l'Alberta prend la tête.</figcaption>
       </figure>
       <div class="steps" style="margin-top:14px">
@@ -636,7 +643,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s3T">Combien coûte un déménagement, ville par ville</h2>
       <p class="intro" data-i18n="s3I">Les 16 régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
       <figure class="figure">
-        <img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy" width="961" height="958" decoding="async">
+        <a class="zoom" href="assets/excel/carte-villes.png" data-en-href="assets/excel/en/carte-villes.png" target="_blank" rel="noopener"><img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy" width="961" height="958" decoding="async"></a>
         <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart en pourcentage sur 16. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
       </figure>
 <pre class="code" data-lang="xl">=IF(AND(L112=1,A112&lt;&gt;VilleSelID),D112,NA())</pre>
@@ -649,7 +656,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s4T">Piloté par trois cellules</h2>
       <p class="intro" data-i18n="s4I">Année de début, année de fin et type de logement : trois plages nommées (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) protégées par une validation des données. Les quatre indicateurs et les quatre graphiques se recalculent.</p>
       <figure class="figure">
-        <img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy" width="1065" height="968" decoding="async">
+        <a class="zoom" href="assets/excel/tableau-de-bord.png" data-en-href="assets/excel/en/tableau-de-bord.png" target="_blank" rel="noopener"><img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy" width="1065" height="968" decoding="async"></a>
         <figcaption data-i18n="s4C">Période 2019 à 2025, 2 chambres : +27,2 % après inflation, soit 4,1 % par an.</figcaption>
       </figure>
       <div class="gallery" style="margin-top:14px">
@@ -669,7 +676,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <h2 data-i18n="s5T">Quand le loyer moyen rattrapera-t-il les annonces ?</h2>
       <p class="intro" data-i18n="s5I">Trois hypothèses de croissance tirées des données (tendance 1992-2019, hausse 2025 des locataires en place, rythme 2019-2025), ajustables. La fonction NPM calcule le nombre d'années pour que le loyer moyen (1 346 $) atteigne le loyer affiché aujourd'hui (1 820 $).</p>
       <figure class="figure">
-        <img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy" width="1685" height="688" decoding="async">
+        <a class="zoom" href="assets/excel/scenarios.png" data-en-href="assets/excel/en/scenarios.png" target="_blank" rel="noopener"><img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy" width="1685" height="688" decoding="async"></a>
         <figcaption data-i18n="s5C">Au rythme des locataires en place, le loyer moyen n'atteindrait le niveau actuel des annonces qu'en 2031, soit dans 6 ans. Des scénarios pour raisonner ; aucun n'est une prévision.</figcaption>
       </figure>
 <pre class="code" data-lang="xl">=IF(G11&lt;=0,"jamais",ROUNDUP(NPER(G11,0,-$E$6,$E$7),0)&amp;" ans ("&amp;(2025+ROUNDUP(NPER(G11,0,-$E$6,$E$7),0))&amp;")")</pre>
@@ -680,7 +687,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     <div class="wrap">
       <p class="kicker" data-i18n="s6K">Feuille « Simulateur »</p>
       <h2 data-i18n="s6T">Ton loyer face au marché</h2>
-      <figure class="figure"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy" width="1689" height="627" decoding="async">
+      <figure class="figure"><a class="zoom" href="assets/excel/simulateur.png" data-en-href="assets/excel/en/simulateur.png" target="_blank" rel="noopener"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy" width="1689" height="627" decoding="async"></a>
         <figcaption data-i18n="s6C">Le site en reprend la logique, cellule pour cellule, <a href="index.html#simulateur">sur la page Analyse</a>.</figcaption></figure>
     </div>
   </section>
@@ -767,7 +774,10 @@ document.querySelectorAll("pre.code[data-lang]").forEach(el => { el.innerHTML = 
 const fmtFR = v => v == null ? "NULL" : (typeof v === "number" ? new Intl.NumberFormat(window.LANG === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(v) : String(v));
 function resultTable(cols, rows) {
   const isYear = cols.map(c => /annee|year/i.test(c));
-  return `<table class="data"><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
+  // une colonne de texte (nom, type, période) se lit à gauche ; une colonne de nombres s'aligne à droite
+  const isText = cols.map((c, i) => rows.some(r => typeof r[i] === "string"));
+  const cl = i => (isText[i] ? ' class="t"' : "");
+  return `<table class="data"><tr>${cols.map((c, i) => `<th${cl(i)}>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td${cl(i)}>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
 }
 </script>
 <script>

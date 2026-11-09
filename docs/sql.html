@@ -140,6 +140,7 @@ section.block { padding-block: 36px; border-top: 1px solid var(--line); }
 table.data { border-collapse: collapse; font-size: .82rem; width: 100%; font-variant-numeric: tabular-nums; }
 table.data th, table.data td { padding: 5px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
 table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th.t, table.data td.t { text-align: left; }
 table.data th { font-weight: 600; color: var(--ink-2); }
 details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); margin-top: 10px; }
 
@@ -180,14 +181,14 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
   .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
 }
 /* bandeau compétences (accueil) */
-.skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
+.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
 .skill { display: flex; flex-direction: column; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--ink); transition: border-color .15s; }
 .skill:hover { border-color: var(--mtl); }
 .skill .tool { font: 500 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); }
 .skill b { font: 600 1.05rem var(--font-display); }
 .skill small { color: var(--ink-3); font-size: .82rem; line-height: 1.4; }
 .skill .go { margin-top: auto; padding-top: 6px; font-size: .82rem; color: var(--link); }
-@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 820px) { .skills { grid-template-columns: minmax(0, 1fr); } }
 /* pages compétences */
 .phero { padding-block: 40px 24px; max-width: 760px; }
 .phero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
@@ -196,6 +197,8 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .proves li { font: 500 .78rem var(--font-mono); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; color: var(--ink-2); }
 .figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 0; }
 .figure img { display: block; width: 100%; height: auto; border-radius: 4px; }
+.figure a.zoom { display: block; cursor: zoom-in; border-radius: 4px; }
+.figure a.zoom:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
 .figure figcaption { font-size: .82rem; color: var(--ink-3); margin-top: 8px; }
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stepc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
@@ -209,10 +212,12 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .code .n { color: var(--code-num); }
 .code .f { color: var(--code-fn); }
 .code[data-lang="xl"] { white-space: pre-wrap; overflow-wrap: anywhere; }
-.qcard.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
-.qcard { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.qcard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
 .qcard h3 { font: 600 1.1rem var(--font-display); margin: 0 0 4px; }
-.qcard .why { color: var(--ink-2); font-size: .9rem; margin: 6px 0 10px; }
+.qcard .why { color: var(--ink-2); font-size: .92rem; margin: 4px 0 10px; max-width: 78ch; }
+.qcard .tablewrap { margin-top: 0; }
+.qcard table.data { width: auto; min-width: min(100%, 26rem); }
+.qcard table.data th, .qcard table.data td { padding-right: 22px; }
 .tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 10px; }
 .tags span { font: 500 .72rem var(--font-mono); background: var(--mtl-soft); color: var(--link); border-radius: 4px; padding: 2px 7px; }
 .status-banner { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-left: 4px solid var(--warm); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 16px; margin-bottom: 8px; }
@@ -229,7 +234,7 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 .erd .t li span { color: var(--ink-3); font-size: .72rem; margin-left: 6px; }
 .gallery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
 @media (max-width: 820px) {
-  .steps, .qcard, .qcard.wide, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
+  .steps, .qcard, .erd, .gallery { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* hero note */
@@ -290,7 +295,8 @@ textarea.sql { width: 100%; min-height: 220px; resize: vertical; font: 13px/1.5 
 
 /* texte justifié (lecture longue) */
 main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
-.cta, .chart-sub, .chart-title, .note, figcaption, .kpi small, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
+main .note, main figcaption, main .kpi small, main .skill small, main .flow small, main .why { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.cta, .chart-sub, .chart-title, .hero-strip a, .scene-cap, .pager a, .chow { text-align: initial; hyphens: manual; }
 
 /* pied de page */
 
@@ -308,7 +314,7 @@ main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-ali
   --ink: #13233a; --ink-2: #44546a; --ink-3: #5b6b82; --line: #dbe4ef; --grid: #e8eef6;
   --mtl: #2f86d6; --mtl-soft: #e8f2fc; --link: #1f6fc0; --warm: #e0457b; --warm-ink: #b8285e; --warm-soft: #fdeaf1;
   --coral: #f2876b; --other: #a9b6c6; --u-1ch: #2f86d6; --u-2ch: #e0457b; --u-3ch: #7b6cd9;
-  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0;
+  --map-0: #eef5fc; --map-1: #cfe6fa; --map-2: #9ccbf2; --map-3: #5fa8e6; --map-4: #2f86d6; --map-5: #1f5fa8; --map-na: #e4e9f0; --map-land: #d5e3f3; --map-edge: #a9c0dc;
   --cell-sel: #2f86d6; --warm-btn: #c9336b;
   --font-display: "Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -324,14 +330,14 @@ main p, main li, .ctxcard p, .card p, .qcard p, .stepc p, .question p { text-ali
   --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
   --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
   --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
-  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638; --map-land: #203a5c; --map-edge: #3a5a86;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4); } }
 :root[data-theme="dark"] {
   --bg: #0b1424; --surface: #111d31; --glass: rgba(17, 29, 49, .72); --glass-line: rgba(255, 255, 255, .12);
   --ink: #e8eef8; --ink-2: #b2c0d4; --ink-3: #8a9ab2; --line: #213149; --grid: #1a2840;
   --mtl: #4b9de4; --mtl-soft: #13304f; --link: #7cbcf2; --warm: #ec5f91; --warm-ink: #f58db3; --warm-soft: #3a1528;
   --u-1ch: #4b9de4; --u-2ch: #ec5f91; --u-3ch: #9b8ff0; --other: #4f6178;
-  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638;
+  --map-0: #13253d; --map-1: #17375c; --map-2: #1f5590; --map-3: #2f78c4; --map-4: #5fa8e6; --map-5: #a8d2f5; --map-na: #1a2638; --map-land: #203a5c; --map-edge: #3a5a86;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 .skip { position: absolute; left: 12px; top: -48px; z-index: 60; background: #fff; color: #13233a; font: 600 .9rem var(--font-body); padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none; transition: top .2s; }
@@ -539,7 +545,8 @@ table.data.files { font-size: .92rem; }
 table.data.files th, table.data.files td { text-align: left; padding: 10px 12px 10px 0; vertical-align: top; }
 table.data.files a { font-family: var(--font-mono); font-size: .86rem; }
 .howto { margin: 8px 0 0; padding-left: 1.1em; display: grid; gap: 8px; }
-main .howto li { text-align: left; hyphens: manual; -webkit-hyphens: manual; }
+main .howto li { text-align: justify; hyphens: manual; -webkit-hyphens: manual; }
+@media (max-width: 640px) { main .howto li { text-align: left; } }   /* lignes courtes + noms de fichiers insécables : la justification y creuse des blancs */
 .howto code { font-size: .84em; overflow-wrap: anywhere; hyphens: none; }
 @media (max-width: 640px) {
   table.data.files tr:first-child { display: none; }
@@ -557,7 +564,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 .scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
 .scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
 #sc-map { opacity: 0; }
-#sc-map .ring { fill: var(--mtl-soft); stroke: var(--surface); stroke-width: 1; }
+#sc-map .ring { fill: var(--map-land); stroke: var(--surface); stroke-width: 1; }
 #sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
 #sc-map circle.on { opacity: 1; transform: scale(1); }
 #sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
@@ -699,7 +706,10 @@ document.querySelectorAll("pre.code[data-lang]").forEach(el => { el.innerHTML = 
 const fmtFR = v => v == null ? "NULL" : (typeof v === "number" ? new Intl.NumberFormat(window.LANG === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: Number.isInteger(v) ? 0 : 2 }).format(v) : String(v));
 function resultTable(cols, rows) {
   const isYear = cols.map(c => /annee|year/i.test(c));
-  return `<table class="data"><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
+  // une colonne de texte (nom, type, période) se lit à gauche ; une colonne de nombres s'aligne à droite
+  const isText = cols.map((c, i) => rows.some(r => typeof r[i] === "string"));
+  const cl = i => (isText[i] ? ' class="t"' : "");
+  return `<table class="data"><tr>${cols.map((c, i) => `<th${cl(i)}>${esc(c)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((v, i) => `<td${cl(i)}>${esc(isYear[i] ? String(v) : fmtFR(v))}</td>`).join("")}</tr>`).join("")}</table>`;
 }
 </script>
 <script>
@@ -780,8 +790,9 @@ function drawQlist() {
     const tags = (en && n.tags_en) || n.tags;
     const lvl = n.niv ? (en ? LVL[n.niv] : n.niv) : "";
     return `<article class="qcard"><div style="min-width:0"><p class="eyebrow" style="margin:0 0 4px">${esc(q.file)} <span class="lvl ${n.niv ? n.niv[0] : ""}">${esc(lvl)}</span></p><h3>${esc((en && n.q_en) || n.q)}</h3>
-      <div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div><pre class="code">${highlight(body, "sql")}</pre></div>
-      <div style="min-width:0"><p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tablewrap">${resultTable(q.columns, q.rows)}</div></div></article>`;
+      <p class="why">${esc((en && n.why_en) || n.why)}</p><div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div></div>
+      <pre class="code">${highlight(body, "sql")}</pre>
+      <div class="tablewrap">${resultTable(q.columns, q.rows)}</div></article>`;
   }).join("");
 }
 drawQlist();

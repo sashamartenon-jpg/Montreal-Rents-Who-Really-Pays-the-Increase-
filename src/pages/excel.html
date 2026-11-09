@@ -18,7 +18,7 @@ __HEADER__
       <h2 data-i18n="s1T">La question et la réponse, dès l'ouverture</h2>
       <p class="intro" data-i18n="s1I">Le classeur s'ouvre sur la question du projet et quatre chiffres qui y répondent, tous recalculés par formules à partir des tableaux sources. Un bouton par feuille sert de menu. Les captures suivent la langue choisie : classeur français ici, classeur anglais en version anglaise de la page.</p>
       <figure class="figure">
-        <img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy">
+        <a class="zoom" href="assets/excel/accueil.png" data-en-href="assets/excel/en/accueil.png" target="_blank" rel="noopener"><img src="assets/excel/accueil.png" data-en-src="assets/excel/en/accueil.png" alt="Feuille Accueil : la question, quatre indicateurs recalculés et des boutons de navigation" loading="lazy"></a>
         <figcaption data-i18n="s1C">460 $ d'écart entre annonce et loyer payé à Montréal ; +17,2 % pour un logement reloué contre +6,0 % pour un locataire en place. Capture du classeur réel.</figcaption>
       </figure>
     </div>
@@ -30,7 +30,7 @@ __HEADER__
       <h2 data-i18n="s2T">La carte du Canada, en graphique Excel</h2>
       <p class="intro" data-i18n="s2I">Une carte faite avec un graphique Excel standard : les contours des provinces forment une série de lignes, chaque province est une bulle dont la couleur et la taille suivent sa valeur. Elle s'ouvre dans toutes les versions d'Excel, sans connexion et sans complément.</p>
       <figure class="figure">
-        <img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy">
+        <a class="zoom" href="assets/excel/carte-provinces.png" data-en-href="assets/excel/en/carte-provinces.png" target="_blank" rel="noopener"><img src="assets/excel/carte-provinces.png" data-en-src="assets/excel/en/carte-provinces.png" alt="Feuille Carte provinces : carte du Canada avec une bulle colorée par province, le Québec en rose, classement et fiche de la province" loading="lazy"></a>
         <figcaption data-i18n="s2C">Hausse de l'IPC du loyer en 2025 : le Québec, sélectionné, est en rose et premier des 10 provinces. Change l'année à 2024 : l'Alberta prend la tête.</figcaption>
       </figure>
       <div class="steps" style="margin-top:14px">
@@ -56,7 +56,7 @@ __HEADER__
       <h2 data-i18n="s3T">Combien coûte un déménagement, ville par ville</h2>
       <p class="intro" data-i18n="s3I">Les __N_BOTH__ régions où Statistique Canada publie à la fois le loyer demandé et le loyer payé, sur deux cartes (Est et Ouest). Choisis une ville : son point passe en rose, sa fiche, son rang et sa courbe trimestrielle se mettent à jour.</p>
       <figure class="figure">
-        <img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy">
+        <a class="zoom" href="assets/excel/carte-villes.png" data-en-href="assets/excel/en/carte-villes.png" target="_blank" rel="noopener"><img src="assets/excel/carte-villes.png" data-en-src="assets/excel/en/carte-villes.png" alt="Feuille Carte villes : régions colorées selon l'écart entre loyer demandé et loyer payé, Montréal en rose, fiche, classement et courbe" loading="lazy"></a>
         <figcaption data-i18n="s3C">Montréal : 1 820 $ demandé contre 1 360 $ payé, 4e écart en pourcentage sur __N_BOTH__. Les régions sans loyer payé publié ne sont pas dans le classeur : aucune case « n.d. ».</figcaption>
       </figure>
 <pre class="code" data-lang="xl">__XLF_VILLE_CLASS__</pre>
@@ -69,7 +69,7 @@ __HEADER__
       <h2 data-i18n="s4T">Piloté par trois cellules</h2>
       <p class="intro" data-i18n="s4I">Année de début, année de fin et type de logement : trois plages nommées (<code>Debut</code>, <code>Fin</code>, <code>TypeLog</code>) protégées par une validation des données. Les quatre indicateurs et les quatre graphiques se recalculent.</p>
       <figure class="figure">
-        <img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy">
+        <a class="zoom" href="assets/excel/tableau-de-bord.png" data-en-href="assets/excel/en/tableau-de-bord.png" target="_blank" rel="noopener"><img src="assets/excel/tableau-de-bord.png" data-en-src="assets/excel/en/tableau-de-bord.png" alt="Feuille Tableau de bord : sélecteurs, quatre indicateurs et quatre graphiques" loading="lazy"></a>
         <figcaption data-i18n="s4C">Période 2019 à 2025, 2 chambres : +27,2 % après inflation, soit 4,1 % par an.</figcaption>
       </figure>
       <div class="gallery" style="margin-top:14px">
@@ -89,7 +89,7 @@ __XLF_CALC_SORT__</pre></div>
       <h2 data-i18n="s5T">Quand le loyer moyen rattrapera-t-il les annonces ?</h2>
       <p class="intro" data-i18n="s5I">Trois hypothèses de croissance tirées des données (tendance 1992-2019, hausse 2025 des locataires en place, rythme 2019-2025), ajustables. La fonction NPM calcule le nombre d'années pour que le loyer moyen (__K_LOYER_2025__) atteigne le loyer affiché aujourd'hui (__K_DEMANDE__).</p>
       <figure class="figure">
-        <img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy">
+        <a class="zoom" href="assets/excel/scenarios.png" data-en-href="assets/excel/en/scenarios.png" target="_blank" rel="noopener"><img src="assets/excel/scenarios.png" data-en-src="assets/excel/en/scenarios.png" alt="Feuille Scénarios : hypothèses, délai de rattrapage, historique, projections et graphique jusqu'en 2030" loading="lazy"></a>
         <figcaption data-i18n="s5C">Au rythme des locataires en place, le loyer moyen n'atteindrait le niveau actuel des annonces qu'en __K_RATTRAPAGE__. Des scénarios pour raisonner ; aucun n'est une prévision.</figcaption>
       </figure>
 <pre class="code" data-lang="xl">__XLF_SC_NPER__</pre>
@@ -100,7 +100,7 @@ __XLF_CALC_SORT__</pre></div>
     <div class="wrap">
       <p class="kicker" data-i18n="s6K">Feuille « Simulateur »</p>
       <h2 data-i18n="s6T">Ton loyer face au marché</h2>
-      <figure class="figure"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy">
+      <figure class="figure"><a class="zoom" href="assets/excel/simulateur.png" data-en-href="assets/excel/en/simulateur.png" target="_blank" rel="noopener"><img src="assets/excel/simulateur.png" data-en-src="assets/excel/en/simulateur.png" alt="Feuille Simulateur : entrées en jaune, résultats et graphique comparant un loyer au marché" loading="lazy"></a>
         <figcaption data-i18n="s6C">Le site en reprend la logique, cellule pour cellule, <a href="index.html#simulateur">sur la page Analyse</a>.</figcaption></figure>
     </div>
   </section>
