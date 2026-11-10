@@ -1,5 +1,6 @@
 -- Variation annuelle du loyer à Montréal, pour chaque type de logement (LAG avec PARTITION BY)
 -- Niveau : Intermédiaire
+-- EN: Year-over-year rent change in Montreal, for each unit type (LAG with PARTITION BY) · Level: Intermediate
 WITH v AS (
   SELECT f.annee, l.libelle_fr AS logement, l.chambres, f.loyer,
          ROUND(100.0 * (f.loyer - LAG(f.loyer) OVER (PARTITION BY f.unit_id ORDER BY f.annee))

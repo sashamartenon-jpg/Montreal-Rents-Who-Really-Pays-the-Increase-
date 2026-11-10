@@ -145,6 +145,14 @@ if __name__ == "__main__":
         DUMP.write_text("-- Base « Loyers à Montréal » : export complet (schéma, données, vues), SQLite 3.25+\n"
                         "-- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide, une seule fois.\n"
                         "-- ÉTAPE 2 : exécuter rents_queries_sqlite.sql sur la même base.\n"
+                        "--\n"
+                        "-- \"Montreal Rents\" database: full export (schema, data, views), SQLite 3.25+\n"
+                        "-- STEP 1 OF 2: run this file first, in an empty database, once only.\n"
+                        "-- STEP 2: run rents_queries_sqlite.sql on the same database.\n"
+                        """-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
+"""
                         + "\n".join(c_.iterdump()) + "\n", encoding="utf-8")
     (ROOT / "docs" / "data" / "sql_results.json").write_text(json.dumps(res, ensure_ascii=False), encoding="utf-8")
     for x in res:

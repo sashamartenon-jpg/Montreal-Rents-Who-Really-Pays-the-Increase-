@@ -17,7 +17,7 @@ SHEETS = {
     "IPC provinces": "CPI provinces",
     "Loyers trimestriels": "Quarterly rents",
     "SCHL": "CMHC",
-    # "Calculs" reste "Calculs" : feuille masquée, 33 références de formules.
+    "Calculs": "Calculations",      # feuille masquée : références de formules, plages nommées et graphiques suivent
 }
 
 FORMATS = {
@@ -199,7 +199,6 @@ STRINGS = {
         "Average two-bedroom rent in Montreal · three assumptions drawn from the data · scenarios to reason with, not a forecast",
     "POINT DE DÉPART": "STARTING POINT",
     "Loyer moyen 2025, tous les locataires": "2025 average rent, all tenants",
-    "Loyer demandé dans les annonces, 2026 T2": "Asking rent in listings, Q2 2026",
     "HYPOTHÈSES DE CROISSANCE ANNUELLE": "ANNUAL GROWTH ASSUMPTIONS",
     "Scénario": "Scenario",
     "Taux tiré des données": "Rate drawn from the data",
@@ -306,10 +305,10 @@ STRINGS = {
     "Cartes, Tableau de bord": "Maps, Dashboard",
     "Carte villes, repères du marché": "City map, market benchmarks",
     "Carte provinces, Carte villes": "Province map, City map",
-    "Calculs, légendes des cartes": "Calculs sheet, map legends",
-    "Calculs (alimente les graphiques)": "Calculs sheet (feeds the charts)",
+    "Calculs, légendes des cartes": "Calculations sheet, map legends",
+    "Calculs (alimente les graphiques)": "Calculations sheet (feeds the charts)",
     "Accueil, bandeaux": "Home, banners",
-    "Calculs (feuille masquée)": "Calculs (hidden sheet)",
+    "Calculs (feuille masquée)": "Calculations (hidden sheet)",
     "ET LES FONCTIONS D'EXCEL 365 ?": "WHAT ABOUT EXCEL 365 FUNCTIONS?",
     "Avec Excel 365 : RECHERCHEX remplacerait les paires INDEX + EQUIV, LET nommerait les étapes des longues formules des scénarios,":
         "With Excel 365: XLOOKUP would replace the INDEX + MATCH pairs, LET would name the steps of the long scenario formulas,",
@@ -330,7 +329,7 @@ STRINGS = {
     "Chaque bandeau de feuille cite sa source. Les données brutes sont dans les cinq derniers onglets, en tableaux Excel nommés.":
         "Each sheet banner cites its source. The raw data sits in the last five tabs, as named Excel tables.",
     "La feuille « Calculs » (masquée : clic droit sur un onglet → Afficher) contient les séries des graphiques ; ses NA() sont volontaires.":
-        "The “Calculs” sheet (hidden: right-click a tab → Unhide) holds the chart series; its NA() values are intentional.",
+        "The “Calculations” sheet (hidden: right-click a tab → Unhide) holds the chart series; its NA() values are intentional.",
 
     # ---------- feuilles de données (en-têtes et bandeaux)
     "Loyers Montréal": "Rents Montreal",
@@ -421,3 +420,27 @@ _X365 = {
     "Un portefeuille de logements lu avec RECHERCHEX, LET, FILTRE, TRIER et UNIQUE (Excel 2021 ou 365).": "A housing portfolio read with XLOOKUP, LET, FILTER, SORT and UNIQUE (Excel 2021 or 365).",
 }
 STRINGS.update(_X365)
+
+# ---------- feuille masquée Calculs : en-têtes de colonnes, dont ceux qui deviennent des légendes et
+# des infobulles de graphiques (« Tous les locataires », « Province choisie », « Loyer demandé »…)
+_CALCULS = {
+    "Calculs": "Calculations", "Contours": "Outline", "Classe": "Class",
+    "Loyer (type choisi)": "Rent (selected type)", "IPC": "CPI", "Loyer réel": "Real rent", "Période choisie": "Selected period",
+    "Contours Canada": "Canada outline", "Contours Est": "East outline", "Contours Ouest": "West outline",
+    "Loyer début": "Starting rent", "Loyer fin": "Ending rent", "Hausse": "Increase",
+    "Ville (triée)": "City (sorted)", "Hausse (triée)": "Increase (sorted)",
+    "Tous les locataires": "All tenants", "Logements reloués (SCHL)": "Re-let units (CMHC)",
+    "Écart entre loyer demandé et loyer payé ($)": "Gap between asking rent and rent paid ($)", "Loyer demandé ($)": "Asking rent ($)",
+    "Loyer (année)": "Rent (year)", "Loyer (année - 1)": "Rent (year - 1)", "Loyer 2019": "Rent 2019",
+    "Ensemble (année)": "All units (year)", "Ensemble 2019": "All units 2019", "Sur un an": "One year", "Depuis 2019": "Since 2019",
+    "Réelle": "Real", "Tri": "Sort key", "Étiquette": "Label", "x étiquette": "x label", "y étiquette": "y label",
+    **{f"y classe {i}": f"y class {i}" for i in range(1, 6)}, "y choisie": "y selected",
+    "Rang trié": "Sorted rank", "Province triée": "Sorted province", "Valeur triée": "Sorted value",
+    "Hausse 2025": "Increase 2025", "Rang 2025": "Rank 2025", "Seuils (quintiles)": "Thresholds (quintiles)",
+    "Code choisi": "Selected code", "Province choisie": "Selected province",
+    "x est": "x east", "y est": "y east", "x ouest": "x west", "y ouest": "y west", "Écart $": "Gap $", "Écart %": "Gap %",
+    **{f"y est c{i}": f"y east c{i}" for i in range(1, 6)}, **{f"y ouest c{i}": f"y west c{i}" for i in range(1, 6)},
+    "Ville choisie": "Selected city", "Valeur (texte)": "Value (text)", "Loyer demandé": "Asking rent", "Loyer payé": "Rent paid",
+}
+for _k, _v in _CALCULS.items():
+    STRINGS.setdefault(_k, _v)

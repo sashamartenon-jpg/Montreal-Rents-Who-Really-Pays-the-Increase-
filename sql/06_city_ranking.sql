@@ -1,5 +1,6 @@
 -- Classement des six grandes villes selon la hausse du 2 chambres, 2019 -> 2025
 -- Niveau : Intermédiaire
+-- EN: Ranking of six large cities by two-bedroom rent increase, 2019 -> 2025 · Level: Intermediate
 WITH h AS (
   SELECT g.libelle_fr AS ville,
          MAX(CASE WHEN f.annee = 2019 THEN f.loyer END) AS loyer_2019,

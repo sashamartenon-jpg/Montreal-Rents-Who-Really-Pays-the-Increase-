@@ -1,5 +1,6 @@
 -- Tendance lissée : moyenne mobile sur 3 ans de la hausse annuelle (2 chambres, Montréal)
 -- Niveau : Avancé
+-- EN: Smoothed trend: 3-year moving average of the annual increase (two-bedroom, Montreal) · Level: Advanced
 WITH v AS (
   SELECT annee, loyer,
          100.0 * loyer / LAG(loyer) OVER (ORDER BY annee) - 100 AS variation_pct

@@ -1,5 +1,6 @@
 -- Montréal reste-t-elle la moins chère ? Rang et niveau relatif chaque année (RANK et MAX ... PARTITION BY)
 -- Niveau : Avancé
+-- EN: Is Montreal still the cheapest? Rank and relative level each year (RANK and MAX ... PARTITION BY) · Level: Advanced
 WITH r AS (
   SELECT annee, geo_id, loyer,
          RANK() OVER (PARTITION BY annee ORDER BY loyer)                 AS rang_moins_cher,

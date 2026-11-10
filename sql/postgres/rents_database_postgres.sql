@@ -4,6 +4,14 @@
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide :
 --   createdb loyers && psql -d loyers -f rents_database_postgres.sql
 -- ÉTAPE 2 : psql -d loyers -f rents_queries_postgres.sql
+--
+-- "Montreal Rents" database for PostgreSQL: schema, views, data.
+-- STEP 1 OF 2: run this file first, in an empty database:
+--   createdb loyers && psql -d loyers -f rents_database_postgres.sql
+-- STEP 2: psql -d loyers -f rents_queries_postgres.sql
+-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
 -- =====================================================================
 BEGIN;
 -- =====================================================================

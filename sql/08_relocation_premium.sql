@@ -1,5 +1,6 @@
 -- Écart entre le loyer d'un 2 chambres reloué (SCHL) et le loyer moyen de tous les locataires
 -- Niveau : Débutant
+-- EN: Gap between the rent of a re-let two-bedroom (CMHC) and the average rent of all tenants · Level: Beginner
 SELECT r.annee,
        f.loyer                                         AS loyer_moyen_tous,
        CAST(r.valeur AS INTEGER)                       AS loyer_moyen_reloues,

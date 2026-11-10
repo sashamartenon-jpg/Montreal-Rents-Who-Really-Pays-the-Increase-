@@ -1,5 +1,6 @@
 -- Provinces : hausse des loyers (IPC du loyer) en 2025 et depuis 2019, comparée à l'inflation
 -- Niveau : Intermédiaire
+-- EN: Provinces: rent increase (rent CPI) in 2025 and since 2019, compared with inflation · Level: Intermediate
 WITH b AS (
   SELECT i.code, p.nom AS province,
          MAX(CASE WHEN i.annee = 2019 THEN i.ipc_loyer END)    AS loyer_2019,

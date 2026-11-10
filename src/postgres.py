@@ -77,6 +77,14 @@ header = """-- =================================================================
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide :
 --   createdb loyers && psql -d loyers -f rents_database_postgres.sql
 -- ÉTAPE 2 : psql -d loyers -f rents_queries_postgres.sql
+--
+-- "Montreal Rents" database for PostgreSQL: schema, views, data.
+-- STEP 1 OF 2: run this file first, in an empty database:
+--   createdb loyers && psql -d loyers -f rents_database_postgres.sql
+-- STEP 2: psql -d loyers -f rents_queries_postgres.sql
+-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
 -- =====================================================================
 BEGIN;
 """
@@ -107,6 +115,14 @@ REQ = ("-- =====================================================================
        "-- Loyers à Montréal : les 12 requêtes analytiques, version PostgreSQL\n"
        "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_postgres.sql, sur la même base.\n"
        "-- Le niveau est indiqué en tête de chacune.\n"
+       "--\n"
+       "-- Montreal Rents: the 12 analytical queries, PostgreSQL version.\n"
+       "-- STEP 2 OF 2: run AFTER rents_database_postgres.sql, on the same database.\n"
+       "-- Each query starts with its title in French and in English (EN:) and its level.\n"
+       + """-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
+"""
        "-- =====================================================================\n\n" + "\n\n".join(reqs) + "\n")
 try:
     assert len(parse_sql(REQ)) == len(reqs)

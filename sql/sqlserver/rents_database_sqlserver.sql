@@ -8,6 +8,17 @@
 --   3. ÉTAPE 2 : ouvrir rents_queries_sqlserver.sql sur la même base et l'exécuter.
 -- À exécuter une seule fois : une 2e exécution renvoie « There is already an object named … ».
 -- Les vues sont dans des lots séparés (GO), comme SQL Server l'exige.
+--
+-- "Montreal Rents" database for SQL Server: schema, views, data.
+-- STEP 1 OF 2: run this file first.
+--   1. In SSMS or Azure Data Studio, create an empty database and select it (not master):
+--        CREATE DATABASE loyers;
+--   2. Open this file on the "loyers" database and run it (F5): "Commands completed successfully".
+--   3. STEP 2: open rents_queries_sqlserver.sql on the same database and run it.
+-- Run it once only: a second run returns "There is already an object named …".
+-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
 -- =====================================================================
 SET NOCOUNT ON;
 GO

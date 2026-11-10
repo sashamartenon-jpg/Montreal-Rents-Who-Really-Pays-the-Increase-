@@ -596,7 +596,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <header class="top">
   <div class="wrap topbar">
     <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
-    <nav class="nav" aria-label="Pages du projet"><a href="index.html" aria-current="page">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
+    <nav class="nav" aria-label="Pages du projet" data-en-aria="Project pages"><a href="index.html" aria-current="page">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
 </header>
@@ -619,7 +619,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
           <a class="ghost" href="sql.html" data-i18n="ctaDb">Voir le SQL ↗</a>
         </div>
       </div>
-      <aside class="glass-stack hero-in" style="--d:.85s" aria-label="Chiffres clés">
+      <aside class="glass-stack hero-in" style="--d:.85s" aria-label="Chiffres clés" data-en-aria="Key figures">
         <div class="handle"></div>
         <p class="where"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="g-where"></span></p>
         <div class="gcard">
@@ -635,7 +635,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       </aside>
     </div>
     </div>
-    <nav class="wrap hero-strip" id="facts" aria-label="Le projet en bref"></nav>
+    <nav class="wrap hero-strip" id="facts" aria-label="Le projet en bref" data-en-aria="The project at a glance"></nav>
   </div>
 
   <section class="scene" id="voyage" aria-hidden="true">
@@ -688,7 +688,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <p class="intro" id="s1-intro"></p>
       <div class="panel">
         <div class="controls">
-          <div class="seg" role="group" aria-label="Unité">
+          <div class="seg" role="group" aria-label="Unité" data-en-aria="Unit">
             <button type="button" id="m-nom" aria-pressed="false" data-i18n="nominal">Dollars courants</button>
             <button type="button" id="m-real" aria-pressed="true" data-i18n="real">Dollars de 2025</button>
           </div>
@@ -711,7 +711,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
       <div class="two">
         <div class="panel">
           <div class="controls">
-            <div class="seg" role="group" aria-label="Échelle">
+            <div class="seg" role="group" aria-label="Échelle" data-en-aria="Scale">
               <button type="button" id="c-abs" aria-pressed="false" data-i18n="dollars">Dollars</button>
               <button type="button" id="c-idx" aria-pressed="true" data-i18n="index">Indice 2019 = 100</button>
             </div>
@@ -807,7 +807,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     <div class="wrap">
       <h2 data-i18n="mT">Méthode</h2>
       <div class="flow">
-        <div><b>Statistique Canada · SCHL</b><small data-i18n="f1">4 sources officielles, extraites et recoupées</small></div>
+        <div><b data-en="Statistics Canada · CMHC">Statistique Canada · SCHL</b><small data-i18n="f1">4 sources officielles, extraites et recoupées</small></div>
         <a class="flowlink" href="sql.html"><b>SQL</b><small data-i18n="f2b">Modèle en étoile, 12 requêtes, SQL Server · PostgreSQL · SQLite</small></a>
         <a class="flowlink" href="excel.html"><b>Excel</b><small data-i18n="f3">Cartes, tableau de bord, scénarios, simulateur</small></a>
         <a class="flowlink" href="carte.html"><b data-i18n="f4t">Carte interactive</b><small data-i18n="f4">Provinces et 42 régions métropolitaines</small></a>
@@ -819,8 +819,8 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
             <div class="d">dim_logement<br><small>unit_id, chambres</small></div>
             <div class="f">fait_loyer<br><small>annee<br>geo_id · unit_id<br>loyer</small></div>
             <div class="d">dim_geo<br><small>6 RMR</small></div>
-            <div class="d">fait_inoccupation · ipc<br><small>par année</small></div>
-            <div class="d">schl_roulement<br><small>loyers reloués</small></div>
+            <div class="d">fait_inoccupation · ipc<br><small data-en="per year">par année</small></div>
+            <div class="d">schl_roulement<br><small data-en="re-let rents">loyers reloués</small></div>
           </div>
           <h3 style="margin-top:18px" data-i18n="mCalc">Calculs</h3>
           <ul id="calc-list"></ul>
@@ -1071,6 +1071,11 @@ const T = {
 };
 const t = k => T[state.lang][k];
 const loc = () => state.lang === "fr" ? "fr-CA" : "en-CA";
+// montant sans décimale : « 1 400 $ » en français, « $1,400 » en anglais (axes, étiquettes, tableaux)
+const money = v => state.lang === "en" ? "$" + fmtNum(v) : fmtNum(v) + "\u00a0$";
+// trimestre : « 2026 T2 » en français, « Q2 2026 » en anglais
+const qLabel = p => state.lang === "en" ? `Q${String(p).slice(-1)} ${String(p).slice(0, 4)}` : p;
+const pctAxis = (v, d = 1) => fmtNum(v, d) + (state.lang === "en" ? "%" : "\u00a0%");
 const fmtMoney = v => new Intl.NumberFormat(loc(), { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(v);
 const fmtPct = (v, d = 1, sign = false) => (sign && v > 0 ? "+" : "") + new Intl.NumberFormat(loc(), { style: "percent", maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
 const fmtNum = (v, d = 0) => new Intl.NumberFormat(loc(), { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
@@ -1098,6 +1103,15 @@ function renderText() {
   document.getElementById("lang-fr").setAttribute("aria-pressed", state.lang === "fr");
   document.getElementById("lang-en").setAttribute("aria-pressed", state.lang === "en");
   const fr = state.lang === "fr";
+  // textes fixes sans clé dans T (data-en) et attributs (aria-label) : le français est gardé au premier passage
+  document.querySelectorAll("[data-en]").forEach(el => {
+    if (el.dataset.fr == null) el.dataset.fr = el.textContent;
+    el.textContent = fr ? el.dataset.fr : el.dataset.en;
+  });
+  document.querySelectorAll("[data-en-aria]").forEach(el => {
+    if (el.dataset.frAria == null) el.dataset.frAria = el.getAttribute("aria-label") || "";
+    el.setAttribute("aria-label", fr ? el.dataset.frAria : el.dataset.enAria);
+  });
   const real6 = fmtPct(K.hausse_reelle_2019_2025 / 100, 0, true);
   const real27 = fmtPct(K.hausse_reelle_1992_2019 / 100, 0, true);
   document.getElementById("h1").innerHTML = fr
@@ -1106,8 +1120,8 @@ function renderText() {
   if (!heroPlayed) wrapWords(document.getElementById("h1"));
   document.getElementById("lede").innerHTML = fr
     ? `Réponse courte : <b>ceux qui déménagent</b>. Au ${K.periode_derniere.slice(-1)}<sup>e</sup> trimestre de ${K.periode_derniere.slice(0, 4)}, un 2 chambres affiché à Montréal coûte <b>${fmtMoney(K.mtl_ecart_dernier)} de plus par mois</b> que le loyer payé par les locataires déjà en place. Voici comment je l'ai établi, avec 34 ans de données officielles.`
-    : `Short answer: <b>people who move</b>. In ${K.periode_derniere}, an advertised two-bedroom in Montreal costs <b>${fmtMoney(K.mtl_ecart_dernier)} more per month</b> than the rent paid by sitting tenants. Here is how I established it, with 34 years of official data.`;
-  document.getElementById("g-where").textContent = fr ? `Montréal · appartement de 2 chambres · ${K.periode_derniere}` : `Montreal · two-bedroom apartment · ${K.periode_derniere}`;
+    : `Short answer: <b>people who move</b>. In ${qLabel(K.periode_derniere)}, an advertised two-bedroom in Montreal costs <b>${fmtMoney(K.mtl_ecart_dernier)} more per month</b> than the rent paid by sitting tenants. Here is how I established it, with 34 years of official data.`;
+  document.getElementById("g-where").textContent = fr ? `Montréal · appartement de 2 chambres · ${K.periode_derniere}` : `Montreal · two-bedroom apartment · ${qLabel(K.periode_derniere)}`;
   const gset = (id, v) => { document.getElementById(id).textContent = v; };
   gset("g1-t", fr ? "Ce que coûte un déménagement" : "What moving costs"); gset("g1-s", "StatCan 46-10-0092");
   gset("g1-al", fr ? "Loyer affiché" : "Asking rent"); gset("g1-a", fmtMoney(K.mtl_demande_dernier));
@@ -1189,7 +1203,7 @@ function renderText() {
   document.getElementById("reloc-cs").textContent = fr ? "Dollars courants par mois, octobre" : "Current dollars per month, October";
   document.getElementById("reloc-map").innerHTML = fr
     ? `Données plus récentes (${K.periode_derniere}, Statistique Canada) : à Montréal, un 2 chambres affiché coûte ${fmtMoney(K.mtl_demande_dernier)}, soit ${fmtMoney(K.mtl_ecart_dernier)} de plus que le loyer payé (${fmtMoney(K.mtl_paye_dernier)}). Sur un an, le loyer demandé a baissé de ${fmtNum(-K.mtl_var_demande, 1)} % et le loyer payé a monté de ${fmtNum(K.mtl_var_paye, 1)} % : l'écart se resserre. <a href="carte.html">Comparer avec 42 villes sur la carte →</a>`
-    : `More recent data (${K.periode_derniere}, Statistics Canada): in Montreal, an advertised two-bedroom costs ${fmtMoney(K.mtl_demande_dernier)}, ${fmtMoney(K.mtl_ecart_dernier)} more than the rent paid (${fmtMoney(K.mtl_paye_dernier)}). Over one year, asking rent fell ${fmtNum(-K.mtl_var_demande, 1)}% while paid rent rose ${fmtNum(K.mtl_var_paye, 1)}%: the gap is narrowing. <a href="carte.html">Compare 42 cities on the map →</a>`;
+    : `More recent data (${qLabel(K.periode_derniere)}, Statistics Canada): in Montreal, an advertised two-bedroom costs ${fmtMoney(K.mtl_demande_dernier)}, ${fmtMoney(K.mtl_ecart_dernier)} more than the rent paid (${fmtMoney(K.mtl_paye_dernier)}). Over one year, asking rent fell ${fmtNum(-K.mtl_var_demande, 1)}% while paid rent rose ${fmtNum(K.mtl_var_paye, 1)}%: the gap is narrowing. <a href="carte.html">Compare 42 cities on the map →</a>`;
   document.getElementById("reloc-legend").innerHTML = `<span><i style="--c:var(--warm)"></i>${fr ? "Logements reloués (SCHL)" : "Re-let units (CMHC)"}</span><span><i style="--c:var(--mtl)"></i>${fr ? "Tous les locataires (StatCan)" : "All tenants (StatCan)"}</span>`;
 
   const ann = n => fmtMoney(n);
@@ -1362,7 +1376,7 @@ function drawHero() {
   const el = document.getElementById("c-hero");
   const fr = state.lang === "fr";
   lineChart(el, [{ key: "2ch", label: t("units")["2ch"], color: css("--mtl"), width: 2.5, values: twoReal }], {
-    h: isSmall(el) ? 240 : 280, yFmt: v => fmtNum(v) + " $", ml: 54,
+    h: isSmall(el) ? 240 : 280, yFmt: v => money(v), ml: 54,
     tipFmt: (v, d) => fmtMoney(v),
     aria: fr ? "Loyer réel d'un 2 chambres à Montréal, 1992 à 2025" : "Real two-bedroom rent in Montreal, 1992 to 2025",
     bands: (g, x, y, f) => {
@@ -1397,15 +1411,15 @@ function drawUnits() {
   document.getElementById("m-real").setAttribute("aria-pressed", state.mode === "real");
   const series = state.units.map(u => ({ key: u, label: t("units")[u], color: css(UCOL[u]), values: rentsBy.get(u).map(d => ({ year: d.year, v: d[key], yoy: d.yoy })) }));
   lineChart(el, series, {
-    endLabels: true, endValue: v => fmtNum(v) + " $", yFmt: v => fmtNum(v) + " $", ml: 54, zero: state.mode === "nom",
+    endLabels: true, endValue: v => money(v), yFmt: v => money(v), ml: 54, zero: state.mode === "nom",
     tipFmt: v => fmtMoney(v),
     bands: (g, x, y, f) => g.append("rect").attr("x", x(2019)).attr("y", 0).attr("width", x(2025) - x(2019)).attr("height", f.ih).attr("fill", css("--warm-soft")),
-    aria: "Loyers moyens à Montréal par type de logement"
+    aria: state.lang === "en" ? "Average rents in Montreal by unit type" : "Loyers moyens à Montréal par type de logement"
   });
   // tableau
   const yrs = DATA.rents.filter(d => d.unit_id === "2ch").map(d => d.year).reverse();
   const head = `<tr><th>${state.lang === "fr" ? "Année" : "Year"}</th>${UNITS.map(u => `<th>${t("units")[u]}</th>`).join("")}</tr>`;
-  const body = yrs.map(y => `<tr><td>${y}</td>${UNITS.map(u => `<td>${fmtNum(rentsBy.get(u).find(d => d.year === y)[key])} $</td>`).join("")}</tr>`).join("");
+  const body = yrs.map(y => `<tr><td>${y}</td>${UNITS.map(u => `<td>${money(rentsBy.get(u).find(d => d.year === y)[key])}</td>`).join("")}</tr>`).join("");
   document.getElementById("t-units").innerHTML = `<table class="data">${head}${body}</table>`;
 }
 
@@ -1422,9 +1436,9 @@ function drawCities() {
       values: rows.map(d => ({ year: d.year, v: idx ? d.nom / base * 100 : d.nom, nom: d.nom })) };
   });
   lineChart(el, series, {
-    endLabels: true, yFmt: v => idx ? fmtNum(v) : fmtNum(v) + " $", ml: 50, zero: !idx, refLine: idx ? 100 : null,
-    tipFmt: (v, d) => idx ? `${fmtNum(v)} · ${fmtNum(d.nom)} $` : fmtMoney(v),
-    aria: "Loyer d'un 2 chambres dans six villes"
+    endLabels: true, yFmt: v => idx ? fmtNum(v) : money(v), ml: 50, zero: !idx, refLine: idx ? 100 : null,
+    tipFmt: (v, d) => idx ? `${fmtNum(v)} · ${money(d.nom)}` : fmtMoney(v),
+    aria: state.lang === "en" ? "Two-bedroom rent in six cities" : "Loyer d'un 2 chambres dans six villes"
   });
 }
 
@@ -1445,7 +1459,7 @@ function drawBars() {
     f.g.append("text").attr("class", "lbl" + (mtl ? " strong" : "")).attr("x", -8).attr("y", y(d.g) + y.bandwidth() / 2).attr("dy", "0.32em").attr("text-anchor", "end").text(t("geo")[d.g]);
     f.g.append("text").attr("class", "lbl" + (mtl ? " strong" : "")).attr("x", bw + 6).attr("y", y(d.g) + y.bandwidth() / 2).attr("dy", "0.32em").text(fmtPct(d.v, 0, true));
   });
-  f.svg.attr("aria-label", "Hausse du loyer 2019-2025 par ville");
+  f.svg.attr("aria-label", state.lang === "en" ? "Rent increase 2019-2025 by city" : "Hausse du loyer 2019-2025 par ville");
 }
 
 function barYears(el, data, o) {
@@ -1454,7 +1468,7 @@ function barYears(el, data, o) {
   const f = frame(el, small ? 220 : 250, m);
   const x = d3.scaleBand().domain(data.map(d => d.year)).range([0, f.iw]).padding(0.25);
   const y = d3.scaleLinear().domain([Math.min(0, d3.min(data, d => d.v)), d3.max(data, d => d.v) * 1.12]).nice().range([f.ih, 0]);
-  yAxis(f.g, y, f.iw, v => fmtNum(v, 0) + " %", 4);
+  yAxis(f.g, y, f.iw, v => pctAxis(v, 0), 4);
   const ax = f.g.append("g").attr("class", "axis").attr("transform", `translate(0,${f.ih})`);
   data.filter(d => d.year % (small ? 10 : 5) === 0).forEach(d => ax.append("text").attr("x", x(d.year) + x.bandwidth() / 2).attr("y", 16).attr("text-anchor", "middle").text(d.year));
   f.g.append("line").attr("x1", 0).attr("x2", f.iw).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", css("--ink-3"));
@@ -1469,7 +1483,7 @@ function barYears(el, data, o) {
     f.g.append("rect").attr("x", x(d.year) - 1).attr("width", x.bandwidth() + 2).attr("y", 0).attr("height", f.ih).attr("fill", "transparent")
       .on("pointermove", ev => { const [mx, my] = d3.pointer(ev, f.svg.node()); const sx = el.clientWidth / f.W; showTip(el, `<div class="t">${d.year}</div><div class="r"><span>${o.name}</span><b>${fmtNum(d.v, 1)} %</b></div>`, mx * sx, my * sx); })
       .on("pointerleave", hideTip);
-    if (hi) f.g.append("text").attr("class", "lbl strong").attr("x", x(d.year) + x.bandwidth()).attr("y", y(d.v) - 6).attr("text-anchor", "end").text(fmtNum(d.v, 1) + " %");
+    if (hi) f.g.append("text").attr("class", "lbl strong").attr("x", x(d.year) + x.bandwidth()).attr("y", y(d.v) - 6).attr("text-anchor", "end").text(pctAxis(d.v, 1));
   });
   f.svg.attr("aria-label", o.name);
 }
@@ -1588,7 +1602,7 @@ function drawReloc() {
   const x0 = d3.scaleBand().domain(years).range([0, f.iw]).padding(0.28);
   const x1 = d3.scaleBand().domain(["all", "tv"]).range([0, x0.bandwidth()]).padding(0.08);
   const y = d3.scaleLinear().domain([0, d3.max(tv, d => d.v) * 1.1]).nice().range([f.ih, 0]);
-  yAxis(f.g, y, f.iw, v => fmtNum(v) + " $", 4);
+  yAxis(f.g, y, f.iw, v => money(v), 4);
   const ax = f.g.append("g").attr("class", "axis").attr("transform", `translate(0,${f.ih})`);
   years.forEach(yr => ax.append("text").attr("x", x0(yr) + x0.bandwidth() / 2).attr("y", 16).attr("text-anchor", "middle").text(yr));
   const bar = (xx, w, v) => { const h = f.ih - y(v), r = Math.min(4, w / 2, h); return `M${xx},${f.ih} v${-(h - r)} a${r},${r} 0 0 1 ${r},${-r} h${w - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${h - r} Z`; };
@@ -1872,6 +1886,15 @@ new MutationObserver(drawCharts).observe(document.documentElement, { attributes:
     document.querySelectorAll("[data-en-src]").forEach(img => {
       if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");
       img.setAttribute("src", en ? img.dataset.enSrc : img.dataset.frSrc);
+    });
+    // textes non affichés : description des images et libellés lus par les lecteurs d'écran
+    document.querySelectorAll("[data-en-alt],[data-en-aria]").forEach(el => {
+      for (const [attr, k] of [["alt", "enAlt"], ["aria-label", "enAria"]]) {
+        if (el.dataset[k] == null) continue;
+        const f = "fr" + k.slice(2);
+        if (el.dataset[f] == null) el.dataset[f] = el.getAttribute(attr) || "";
+        el.setAttribute(attr, en ? el.dataset[k] : el.dataset[f]);
+      }
     });
     document.querySelectorAll("[data-en-href]").forEach(a => {
       if (!a.dataset.frHref) a.dataset.frHref = a.getAttribute("href");

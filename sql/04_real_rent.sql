@@ -1,5 +1,6 @@
 -- Loyer réel (dollars de 2025) : jointure avec l'IPC de Montréal
 -- Niveau : Débutant
+-- EN: Real rent (2025 dollars): join with the Montreal CPI · Level: Beginner
 WITH base AS (SELECT ipc AS ipc_2025 FROM ipc WHERE annee = 2025 AND geo_id = 'Montreal')
 SELECT f.annee,
        l.libelle_fr                                AS logement,

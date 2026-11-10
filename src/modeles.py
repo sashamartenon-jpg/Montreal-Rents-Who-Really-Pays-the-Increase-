@@ -244,7 +244,15 @@ if __name__ == "__main__":
     (assets / "dictionnaire_donnees.csv").unlink(missing_ok=True)
     parts = ["-- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.",
              "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_sqlite.sql, sur la même base (SQLite 3.25+). Le niveau est indiqué en tête de chacune.",
-             "-- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.", ""]
+             "-- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.",
+             "--",
+             "-- The analytical queries of the \"Montreal Rents\" project, from beginner to advanced level.",
+             "-- STEP 2 OF 2: run AFTER rents_database_sqlite.sql, on the same database (SQLite 3.25+).",
+             "-- Each query starts with its title in French and in English (EN:) and its level.",
+             "-- Sources: Statistics Canada and CMHC, Open Government Licence – Canada.",
+             "-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,",
+             "--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,",
+             "--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.", ""]
     for f in sorted((ROOT / "sql").glob("*.sql")):
         parts += [f"-- ===================================================================== {f.name}", f.read_text(encoding="utf-8").strip(), "", ""]
     (assets / "rents_queries_sqlite.sql").write_text("\n".join(parts), encoding="utf-8")

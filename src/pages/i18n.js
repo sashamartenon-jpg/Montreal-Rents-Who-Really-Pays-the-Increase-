@@ -35,6 +35,15 @@
       if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");
       img.setAttribute("src", en ? img.dataset.enSrc : img.dataset.frSrc);
     });
+    // textes non affichés : description des images et libellés lus par les lecteurs d'écran
+    document.querySelectorAll("[data-en-alt],[data-en-aria]").forEach(el => {
+      for (const [attr, k] of [["alt", "enAlt"], ["aria-label", "enAria"]]) {
+        if (el.dataset[k] == null) continue;
+        const f = "fr" + k.slice(2);
+        if (el.dataset[f] == null) el.dataset[f] = el.getAttribute(attr) || "";
+        el.setAttribute(attr, en ? el.dataset[k] : el.dataset[f]);
+      }
+    });
     document.querySelectorAll("[data-en-href]").forEach(a => {
       if (!a.dataset.frHref) a.dataset.frHref = a.getAttribute("href");
       a.setAttribute("href", en ? a.dataset.enHref : a.dataset.frHref);

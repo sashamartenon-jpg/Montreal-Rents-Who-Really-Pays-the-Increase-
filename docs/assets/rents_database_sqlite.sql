@@ -1,6 +1,13 @@
 -- Base « Loyers à Montréal » : export complet (schéma, données, vues), SQLite 3.25+
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide, une seule fois.
 -- ÉTAPE 2 : exécuter rents_queries_sqlite.sql sur la même base.
+--
+-- "Montreal Rents" database: full export (schema, data, views), SQLite 3.25+
+-- STEP 1 OF 2: run this file first, in an empty database, once only.
+-- STEP 2: run rents_queries_sqlite.sql on the same database.
+-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
 BEGIN TRANSACTION;
 CREATE TABLE dim_estimation (                            -- type d'estimation du tableau 46-10-0092
   code        TEXT PRIMARY KEY CHECK (code IN ('A', 'P')),

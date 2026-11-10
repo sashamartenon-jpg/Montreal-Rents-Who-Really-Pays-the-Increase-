@@ -1,5 +1,6 @@
 -- Requête sur les vues : régions du Québec, écart demandé / payé et hausse provinciale des loyers en 2025
 -- Niveau : Intermédiaire
+-- EN: Query on the views: Quebec metro areas, asking / paid gap and provincial rent increase in 2025 · Level: Intermediate
 SELECT e.nom,
        CAST(e.demande AS INTEGER)                  AS demande,
        CAST(e.paye AS INTEGER)                     AS paye,

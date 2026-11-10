@@ -273,9 +273,14 @@ def value_labels(sr, fmt=None, series_name=False, pos=None, size=None, bold=Fals
         sr.dLbls.txPr = RichText(p=[Paragraph(pPr=ParagraphProperties(defRPr=cp), endParaRPr=cp)])
 
 
+def money_text(ref):
+    """Montant en texte : « 1 234 $ » en français, « $1,234 » en anglais."""
+    return f'"$"&FIXED({ref},0)' if LANG == "en" else f'FIXED({ref},0)&" $"'
+
+
 def pct_text(ref):
     """Pourcentage signé en texte ; FIXED suit le séparateur décimal de l'Excel de l'utilisateur."""
-    return f'IF(({ref})>=0,"+","")&FIXED(({ref})*100,1)&" %"'
+    return f'IF(({ref})>=0,"+","")&FIXED(({ref})*100,1)&"{'%' if LANG == 'en' else ' %'}"'
 
 
 def as_table(ws, ref, tname):
@@ -300,7 +305,7 @@ TYPES = ["Studio", "1 chambre", "2 chambres", "3 chambres"]
 YEARS = list(range(1992, 2026))
 CITY_LABELS = list(geos.label_fr)
 QNUM = {"01": 1, "04": 2, "07": 3, "10": 4}
-QLAB = lambda p: f"{p[:4]} T{QNUM[p[5:]]}"
+QLAB = lambda p: f"{p[:4]} {'Q' if LANG == 'en' else 'T'}{QNUM[p[5:]]}"
 PERIODS = sorted(trim.periode.unique())
 LAST_Q = QLAB(PERIODS[-1])
 
@@ -316,6 +321,7 @@ if LANG == "en":
     _ST.update({
         LAST_Q: LAST_Q,
         f"Annonce moins loyer payé, {LAST_Q}": f"Asking minus rent paid, {Q_EN}",
+        f"Loyer demandé dans les annonces, {LAST_Q}": f"Asking rent in listings, {Q_EN}",
         f"ANNONCE MOINS LOYER PAYÉ, {LAST_Q}": f"ASKING MINUS RENT PAID, {Q_EN}",
         f"Appartements de 2 chambres, {LAST_Q} · loyer demandé dans les annonces contre loyer payé par les locataires en place · {len(ids)} régions":
             f"Two-bedroom apartments, {Q_EN} · asking rent in listings vs rent paid by sitting tenants · {len(ids)} metro areas",
@@ -605,7 +611,7 @@ SV = VL + 3
 kset(f"A{SV}", "Seuils (quintiles)")
 for i, p in enumerate([0, 0.2, 0.4, 0.6, 0.8]):
     kset(f"B{SV + i}", f"=PERCENTILE(V_Valeurs,{p})")
-    kset(f"C{SV + i}", f'=IF(VillePct,{pct_text(f"B{SV + i}")},FIXED(B{SV + i},0)&" $")')
+    kset(f"C{SV + i}", f'=IF(VillePct,{pct_text(f"B{SV + i}")},{money_text(f"B{SV + i}")})')
 name("Seuils_Ville", f"Calculs!$B${SV}:$B${SV + 4}")
 kset(f"E{SV}", "Ville choisie"); kset(f"F{SV}", "=MATCH(VilleSel,V_Noms,0)")
 kset(f"E{SV + 1}", "ID"); kset(f"F{SV + 1}", f"=INDEX($A${V0}:$A${VL},F{SV})")
@@ -623,7 +629,7 @@ for i in range(10):
     kset(f"A{r}", i + 1)
     kset(f"B{r}", f"=INDEX(V_Noms,MATCH({i + 1},V_Rangs,0))")
     kset(f"C{r}", f"=INDEX(V_Valeurs,MATCH({i + 1},V_Rangs,0))")
-    kset(f"D{r}", f'=IF(VillePct,{pct_text(f"C{r}")},FIXED(C{r},0)&" $")')
+    kset(f"D{r}", f'=IF(VillePct,{pct_text(f"C{r}")},{money_text(f"C{r}")})')
 Q0 = T0 + 12
 header_row(k, Q0, 1, ["Trimestre", "Loyer demandé", "Loyer payé"])
 for i, q in enumerate(QS):
@@ -663,14 +669,14 @@ def map_chart(title, bbox, w, outline_col, x_ref, class_cols, sel, extra=()):
     ch.width, ch.height = w, w * 0.96 * ratio / 0.86
     ch.plot_area.layout = Layout(manualLayout=ManualLayout(layoutTarget="inner", xMode="edge", yMode="edge", x=0.02, y=0.11, w=0.96, h=0.86))
     o = Series(Reference(k, min_col=outline_col + 1, min_row=5, max_row=outline_last[outline_col]),
-               Reference(k, min_col=outline_col, min_row=5, max_row=outline_last[outline_col]), title="Contours")
+               Reference(k, min_col=outline_col, min_row=5, max_row=outline_last[outline_col]), title=tr("Contours"))
     o.marker.symbol = "none"
     o.graphicalProperties.line.solidFill = "9FB2C8"
     o.graphicalProperties.line.width = 9525
     ch.series.append(o)
     for c_, (ycol, size) in enumerate(class_cols):
         s_ = Series(Reference(k, min_col=ycol, min_row=x_ref[1], max_row=x_ref[2]),
-                    Reference(k, min_col=x_ref[0], min_row=x_ref[1], max_row=x_ref[2]), title=f"Classe {c_ + 1}")
+                    Reference(k, min_col=x_ref[0], min_row=x_ref[1], max_row=x_ref[2]), title=f"{tr('Classe')} {c_ + 1}")
         s_.marker.symbol, s_.marker.size = "circle", size
         s_.marker.graphicalProperties = GraphicalProperties(solidFill=CLASS_COLORS[c_])
         s_.marker.graphicalProperties.line.solidFill = "FFFFFF"
@@ -680,7 +686,7 @@ def map_chart(title, bbox, w, outline_col, x_ref, class_cols, sel, extra=()):
     s_ = Series(Reference(k, min_col=ycol[0], min_row=ycol[1], max_row=ycol[2]),
                 Reference(k, min_col=xcell[0], min_row=xcell[1], max_row=xcell[2]))
     if name_ref:
-        s_.tx = SeriesLabel(strRef=StrRef(name_ref))
+        s_.tx = SeriesLabel(strRef=StrRef(tr_sheets(name_ref)))
         value_labels(s_, series_name=True, pos="r", size=1000, bold=True, color=PINK_D)
     s_.marker.symbol, s_.marker.size = "circle", size
     s_.marker.graphicalProperties = GraphicalProperties(solidFill=PINK)
@@ -808,7 +814,7 @@ labels = []
 for i, (code, _) in enumerate(PROV):
     r = P0 + i
     s_ = Series(Reference(k, min_col=19, min_row=r, max_row=r), Reference(k, min_col=18, min_row=r, max_row=r))
-    s_.tx = SeriesLabel(strRef=StrRef(f"Calculs!$Q${r}"))
+    s_.tx = SeriesLabel(strRef=StrRef(tr_sheets(f"Calculs!$Q${r}")))
     s_.marker.symbol = "none"
     s_.graphicalProperties.line.noFill = True
     value_labels(s_, series_name=True, pos="ctr", size=900, bold=True, color=INK)
@@ -922,7 +928,8 @@ for i in range(10):
     for j in range(4):
         c = cv.cell(row=r_, column=12 + j)
         c.fill, c.border, c.font = fill(WHITE), BOX, F(10)
-        c.alignment = LEFT if j == 0 else Alignment(horizontal="center", vertical="center")
+        # noms longs (« Gatineau (Ottawa-Gatineau, partie québécoise) ») : réduits pour tenir dans la colonne
+        c.alignment = Alignment(horizontal="left", vertical="center", indent=1, shrink_to_fit=True) if j == 0 else Alignment(horizontal="center", vertical="center")
 cv.conditional_formatting.add("N26:N35", DataBarRule(start_type="min", end_type="max", color="9CCBF2", showValue=False))
 cv.conditional_formatting.add("L26:O35", FormulaRule(formula=["$L26=VilleSel"], fill=fill(PINK_L), font=F(10, True, PINK_D)))
 label(cv, "L51", "Repères du marché (calculés sur le tableau source)")

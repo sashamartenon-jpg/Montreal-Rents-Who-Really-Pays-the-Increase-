@@ -2,10 +2,18 @@
 -- Loyers à Montréal : les 12 requêtes analytiques, version SQL Server (T-SQL)
 -- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_sqlserver.sql, sur la même base (sinon « Invalid object name »).
 -- Traduites des requêtes SQLite du projet par src/sqlserver.py. Le niveau est indiqué en tête de chacune.
+--
+-- Montreal Rents: the 12 analytical queries, SQL Server (T-SQL) version.
+-- STEP 2 OF 2: run AFTER rents_database_sqlserver.sql, on the same database (otherwise "Invalid object name").
+-- Each query starts with its title in French and in English (EN:) and its level.
+-- Names are in French: annee = year, loyer = rent, logement = unit type, chambres = bedrooms, taux = rate,
+--   periode = quarter, estimation A/P = asking/paid, cote = reliability grade, ipc = CPI, fait = fact, rmr = metro area,
+--   inoccupation = vacancy, reloue = re-let, ecart = gap, demande = asking, paye = paid, variation = change.
 -- =====================================================================
 
 -- Contrôle qualité : couverture, valeurs manquantes et cotes de fiabilité de chaque table de faits
 -- Niveau : Débutant
+-- EN: Quality check: coverage, missing values and reliability grades of each fact table · Level: Beginner
 SELECT
   'fait_loyer' AS source,
   COUNT(*) AS lignes,
@@ -27,7 +35,7 @@ UNION ALL
 SELECT
   'fait_loyer_trimestriel',
   COUNT(*),
-  CONCAT(MIN(periode), ' à ', MAX(periode)),
+  CONCAT(MIN(periode), ' / ', MAX(periode)),
   COUNT(DISTINCT CONCAT(geo_id, estimation)),
   SUM(CASE WHEN loyer IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN cote = 'E' THEN 1 ELSE 0 END)
@@ -44,6 +52,7 @@ FROM ipc_provinces;
 
 -- Variation annuelle du loyer à Montréal, pour chaque type de logement (LAG avec PARTITION BY)
 -- Niveau : Intermédiaire
+-- EN: Year-over-year rent change in Montreal, for each unit type (LAG with PARTITION BY) · Level: Intermediate
 WITH v AS (
   SELECT
     f.annee,
@@ -76,6 +85,7 @@ ORDER BY
 
 -- Tendance lissée : moyenne mobile sur 3 ans de la hausse annuelle (2 chambres, Montréal)
 -- Niveau : Avancé
+-- EN: Smoothed trend: 3-year moving average of the annual increase (two-bedroom, Montreal) · Level: Advanced
 WITH v AS (
   SELECT
     annee,
@@ -105,6 +115,7 @@ ORDER BY
 
 -- Loyer réel (dollars de 2025) : jointure avec l'IPC de Montréal
 -- Niveau : Débutant
+-- EN: Real rent (2025 dollars): join with the Montreal CPI · Level: Beginner
 WITH base AS (
   SELECT
     ipc AS ipc_2025
@@ -131,6 +142,7 @@ ORDER BY
 
 -- Hausse réelle et taux de croissance annuel composé, 1992-2019 vs 2019-2025 (2 chambres)
 -- Niveau : Intermédiaire
+-- EN: Real increase and compound annual growth rate, 1992-2019 vs 2019-2025 (two-bedroom) · Level: Intermediate
 WITH reel AS (
   SELECT
     f.annee,
@@ -172,6 +184,7 @@ JOIN reel AS b
 
 -- Classement des six grandes villes selon la hausse du 2 chambres, 2019 -> 2025
 -- Niveau : Intermédiaire
+-- EN: Ranking of six large cities by two-bedroom rent increase, 2019 -> 2025 · Level: Intermediate
 WITH h AS (
   SELECT
     g.libelle_fr AS ville,
@@ -199,6 +212,7 @@ ORDER BY
 
 -- Montréal reste-t-elle la moins chère ? Rang et niveau relatif chaque année (RANK et MAX ... PARTITION BY)
 -- Niveau : Avancé
+-- EN: Is Montreal still the cheapest? Rank and relative level each year (RANK and MAX ... PARTITION BY) · Level: Advanced
 WITH r AS (
   SELECT
     annee,
@@ -223,6 +237,7 @@ ORDER BY
 
 -- Écart entre le loyer d'un 2 chambres reloué (SCHL) et le loyer moyen de tous les locataires
 -- Niveau : Débutant
+-- EN: Gap between the rent of a re-let two-bedroom (CMHC) and the average rent of all tenants · Level: Beginner
 SELECT
   r.annee,
   f.loyer AS loyer_moyen_tous,
@@ -244,6 +259,7 @@ ORDER BY
 
 -- Loyer demandé vs loyer payé : dernier trimestre disponible de chaque région (ROW_NUMBER par groupe)
 -- Niveau : Avancé
+-- EN: Asking rent vs rent paid: latest available quarter for each metro area (ROW_NUMBER per group) · Level: Advanced
 WITH dernier AS (
   SELECT
     geo_id,
@@ -287,6 +303,7 @@ ORDER BY
 
 -- Provinces : hausse des loyers (IPC du loyer) en 2025 et depuis 2019, comparée à l'inflation
 -- Niveau : Intermédiaire
+-- EN: Provinces: rent increase (rent CPI) in 2025 and since 2019, compared with inflation · Level: Intermediate
 WITH b AS (
   SELECT
     i.code,
@@ -330,6 +347,7 @@ ORDER BY
 
 -- Années où l'inoccupation a augmenté ET le loyer a monté de plus de 5 % (Montréal, 2 chambres)
 -- Niveau : Avancé
+-- EN: Years when vacancy rose AND rent went up by more than 5% (Montreal, two-bedroom) · Level: Advanced
 WITH s AS (
   SELECT
     f.annee,
@@ -357,6 +375,7 @@ ORDER BY
 
 -- Requête sur les vues : régions du Québec, écart demandé / payé et hausse provinciale des loyers en 2025
 -- Niveau : Intermédiaire
+-- EN: Query on the views: Quebec metro areas, asking / paid gap and provincial rent increase in 2025 · Level: Intermediate
 SELECT
   e.nom,
   CAST(e.demande AS INTEGER) AS demande,

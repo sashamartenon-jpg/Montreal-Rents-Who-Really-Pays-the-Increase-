@@ -47,7 +47,7 @@ def header(current, actions=""):
     return (LANG_BOOT + '<a class="skip" href="#main">Aller au contenu</a>\n'
             f'<header class="top">\n  <div class="wrap topbar">\n'
             f'    <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>\n'
-            f'    <nav class="nav" aria-label="Pages du projet">{links}</nav>\n'
+            f'    <nav class="nav" aria-label="Pages du projet" data-en-aria="Project pages">{links}</nav>\n'
             f'    <div class="top-actions">{actions}{LANG_SEG}</div>\n  </div>\n</header>')
 
 

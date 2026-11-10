@@ -1,5 +1,6 @@
 -- Loyer demandé vs loyer payé : dernier trimestre disponible de chaque région (ROW_NUMBER par groupe)
 -- Niveau : Avancé
+-- EN: Asking rent vs rent paid: latest available quarter for each metro area (ROW_NUMBER per group) · Level: Advanced
 WITH dernier AS (
   SELECT geo_id, estimation, periode, loyer,
          ROW_NUMBER() OVER (PARTITION BY geo_id, estimation ORDER BY periode DESC) AS rn

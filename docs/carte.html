@@ -584,7 +584,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <header class="top">
   <div class="wrap topbar">
     <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
-    <nav class="nav" aria-label="Pages du projet"><a href="index.html">Analyse</a><a href="carte.html" aria-current="page">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
+    <nav class="nav" aria-label="Pages du projet" data-en-aria="Project pages"><a href="index.html">Analyse</a><a href="carte.html" aria-current="page">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
 </header>
@@ -656,7 +656,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 
   <section class="wrap" style="padding-bottom:36px">
     <div class="ctrlrow">
-      <div class="seg" role="group" aria-label="Vue">
+      <div class="seg" role="group" aria-label="Vue" data-en-aria="View">
         <button type="button" id="v-villes" aria-pressed="true" data-i18n="vV">Villes</button>
         <button type="button" id="v-prov" aria-pressed="false" data-i18n="vP">Provinces</button>
       </div>
@@ -670,7 +670,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
     </div>
     <div class="yearbar" id="yearbar" hidden>
       <button type="button" class="btn primary" id="play">▶ Lecture</button>
-      <div class="yearcol"><input type="range" id="year" min="2020" max="2025" step="1" value="2025" aria-label="Année">
+      <div class="yearcol"><input type="range" id="year" min="2020" max="2025" step="1" value="2025" aria-label="Année" data-en-aria="Year">
         <div class="yearticks" aria-hidden="true"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div></div>
       <output id="year-out" for="year">2025</output>
     </div>
@@ -679,7 +679,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
         <div class="panel mapcard">
           <p class="chart-title" id="map-title"></p>
           <p class="chart-sub" id="map-sub"></p>
-          <div id="map" role="img" aria-label="Carte du Canada"></div>
+          <div id="map" role="img" aria-label="Carte du Canada" data-en-aria="Map of Canada"></div>
           <div class="maplegend" id="legend"></div>
         </div>
         <div class="panel detailcard"><div class="detail" id="detail"></div></div>
@@ -969,7 +969,7 @@ function spark(series, labels, keys, mark) {
   const y = d3.scaleLinear().domain(d3.extent(all)).nice().range([H - m.b, m.t]);
   const line = d3.line().defined(v => v != null).x((v, i) => x(labels[i])).y(v => y(v));
   const ticks = y.ticks(3).map(t => `<text x="${m.l - 5}" y="${y(t)}" dy="0.32em" text-anchor="end" style="fill:var(--ink-3);font:10px var(--font-mono)">${nf(t)}</text><line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" style="stroke:var(--grid)"/>`).join("");
-  const xl = [labels[0], labels[labels.length - 1]].map((l, i) => `<text x="${x(l)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}" style="fill:var(--ink-3);font:10px var(--font-mono)">${l}</text>`).join("");
+  const xl = [labels[0], labels[labels.length - 1]].map((l, i) => `<text x="${x(l)}" y="${H - 4}" text-anchor="${i ? "end" : "start"}" style="fill:var(--ink-3);font:10px var(--font-mono)">${per(l)}</text>`).join("");
   const paths = series.map((s, i) => `<path d="${line(s)}" fill="none" stroke="${css(keys[i])}" stroke-width="2.2" stroke-linecap="round"/>`).join("");
   const mk = mark && x(mark) != null ? `<line x1="${x(mark)}" x2="${x(mark)}" y1="${m.t}" y2="${H - m.b}" style="stroke:var(--warm);stroke-dasharray:3 3"/><text x="${x(mark)}" y="${m.t + 2}" dx="-4" text-anchor="end" style="fill:var(--warm-ink);font:600 10px var(--font-mono)">${mark}</text>` : "";
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${ticks}${mk}${xl}${paths}</svg>`;
@@ -1164,6 +1164,15 @@ document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect()
     document.querySelectorAll("[data-en-src]").forEach(img => {
       if (!img.dataset.frSrc) img.dataset.frSrc = img.getAttribute("src");
       img.setAttribute("src", en ? img.dataset.enSrc : img.dataset.frSrc);
+    });
+    // textes non affichés : description des images et libellés lus par les lecteurs d'écran
+    document.querySelectorAll("[data-en-alt],[data-en-aria]").forEach(el => {
+      for (const [attr, k] of [["alt", "enAlt"], ["aria-label", "enAria"]]) {
+        if (el.dataset[k] == null) continue;
+        const f = "fr" + k.slice(2);
+        if (el.dataset[f] == null) el.dataset[f] = el.getAttribute(attr) || "";
+        el.setAttribute(attr, en ? el.dataset[k] : el.dataset[f]);
+      }
     });
     document.querySelectorAll("[data-en-href]").forEach(a => {
       if (!a.dataset.frHref) a.dataset.frHref = a.getAttribute("href");

@@ -1,5 +1,6 @@
 -- Hausse réelle et taux de croissance annuel composé, 1992-2019 vs 2019-2025 (2 chambres)
 -- Niveau : Intermédiaire
+-- EN: Real increase and compound annual growth rate, 1992-2019 vs 2019-2025 (two-bedroom) · Level: Intermediate
 WITH reel AS (
   SELECT f.annee, f.loyer * (SELECT ipc FROM ipc WHERE annee = 2025 AND geo_id = 'Montreal') / i.ipc AS loyer_reel
   FROM fait_loyer f JOIN ipc i ON i.annee = f.annee AND i.geo_id = f.geo_id
