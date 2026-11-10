@@ -5,7 +5,7 @@
 --   1. Dans SSMS ou Azure Data Studio, créer une base vide et la sélectionner (pas master) :
 --        CREATE DATABASE loyers;
 --   2. Ouvrir ce fichier sur la base « loyers » et l'exécuter (F5) : « Commands completed successfully ».
---   3. ÉTAPE 2 : ouvrir requetes_sqlserver.sql sur la même base et l'exécuter.
+--   3. ÉTAPE 2 : ouvrir rents_queries_sqlserver.sql sur la même base et l'exécuter.
 -- À exécuter une seule fois : une 2e exécution renvoie « There is already an object named … ».
 -- Les vues sont dans des lots séparés (GO), comme SQL Server l'exige.
 -- =====================================================================

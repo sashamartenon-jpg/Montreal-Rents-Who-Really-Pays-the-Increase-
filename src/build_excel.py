@@ -10,7 +10,7 @@ Feuilles visibles
   Carte villes      16 régions métropolitaines : loyer demandé contre loyer payé, ville au choix
   Scénarios         trois hypothèses jusqu'en 2030 et délai de rattrapage (NPM)
   Simulateur        un loyer comparé au marché
-  Données           6 tableaux sources (onglets gris)
+  Données           5 tableaux sources (onglets gris)
 Feuille masquée : Calculs (séries des graphiques ; les NA() n'y servent qu'à masquer des points de graphique).
 
 Règles : aucune macro, aucune valeur collée dans les feuilles d'analyse, aucune cellule vide ni erreur visible.
@@ -18,6 +18,7 @@ Les cartes sont des graphiques Excel (nuages de points) : contours projetés en 
 Exécution : python src/build_excel.py
 """
 from pathlib import Path
+import math
 import sys
 
 import numpy as np
@@ -340,23 +341,45 @@ QS = [QLAB(p) for p in KEEP_P]
 PROV = ipcp[ipcp.code != "CA"][["code", "province"]].drop_duplicates().sort_values("province").values.tolist()
 
 
-def data_sheet(title, tname, df, headers, fmts, names, source, widths):
+def data_sheet(title, tname, df, headers, fmts, names, source, widths, grain, autres=()):
+    """Tableau source : bandeau aussi large que sa source, ligne de lecture (grain, plages nommées), tableau Excel nommé.
+    Les formules des autres feuilles ne lisent ces tableaux que par leurs plages nommées."""
     ws = sheet(title, GREY)
-    banner(ws, title, source, len(headers) + 1)
+    # en-têtes : assez de place pour le libellé ET le bouton de filtre du tableau
+    widths = [max(w_, min(len(tr(h)), 22) + 6) for w_, h in zip(widths, headers)]
+    # bandeau : colonnes d'appoint à droite du tableau tant que la source n'y tient pas (Arial 9 ≈ 0,85 unité par caractère)
+    need = max(len(tr(source)) * 0.85 + 14, 96)
+    pad = [12] * max(0, math.ceil((need - sum(widths)) / 12))
+    last_col = 1 + len(headers) + len(pad)
+    banner(ws, title, source, last_col)
+    total = sum(widths) + sum(pad)
+    DEUX_POINTS = ": " if LANG == "en" else " : "
+    # deux lignes : ce que contient une ligne et les plages nommées lues par les formules, puis la convention de couleur
+    plages = sorted([n for n in names if n] + list(autres))
+    lignes = [f"{tr('Une ligne')} = {tr(grain)}   ·   {tr('Plages nommées')}{DEUX_POINTS}{', '.join(plages)}",
+              tr("Texte bleu : donnée saisie depuis la source, sans formule")]
+    merge(ws, f"B4:{CL(last_col)}4", "\n".join(lignes), F(9, color=INK2), JUSTIFY)
+    ws.row_dimensions[4].height = 8 + 13 * sum(math.ceil(len(l) * 0.85 / total) for l in lignes)
     header_row(ws, 5, 2, headers)
+    for j in range(len(headers)):
+        ws.cell(row=5, column=2 + j).alignment = WRAPL
+    # années, codes et libellés courts au centre ; texte à gauche ; montants et indices à droite
+    NUM = Alignment(horizontal="right", vertical="center", indent=1)
+    aligns = [CENTER if (f_ == "0" or h in ("Code", "Trimestre", "Estimation", "Unité")) else LEFT if f_ == "@" else NUM
+              for f_, h in zip(fmts, headers)]
     for i, row in enumerate(df.itertuples(index=False)):
         for j, v in enumerate(row):
             assert not (v is None or (isinstance(v, float) and np.isnan(v))), f"cellule vide dans {title}"
             c = ws.cell(row=6 + i, column=2 + j, value=v.item() if hasattr(v, "item") else v)
-            c.font, c.number_format = F(10, color="0000FF"), fmts[j]
+            c.font, c.number_format, c.alignment = F(10, color="0000FF"), fmts[j], aligns[j]
     last = 5 + len(df)
     as_table(ws, f"B5:{CL(1 + len(headers))}{last}", tname)
     for j, nm in enumerate(names):
         if nm:
             name(nm, f"'{title}'!${CL(2 + j)}$6:${CL(2 + j)}${last}")
-    ws.row_dimensions[5].height = 30
+    ws.row_dimensions[5].height = 32
     ws.column_dimensions["A"].width = 2
-    for j, w_ in enumerate(widths):
+    for j, w_ in enumerate(widths + pad):
         ws.column_dimensions[CL(2 + j)].width = w_
     ws.freeze_panes = "B6"
     return ws, last
@@ -367,26 +390,42 @@ order = {u: i for i, u in enumerate(["studio", "1ch", "2ch", "3ch"])}
 rd = rents.assign(o=rents.unit_id.map(order)).sort_values(["o", "year"])
 data_sheet("Loyers Montréal", "tbl_loyers", rd[["year", "label_fr", "loyer_nominal"]].astype({"loyer_nominal": int}),
            ["Année", "Type de logement", "Loyer moyen ($/mois)"], ["0", "@", MONEY], ["Loyers_Annee", "Loyers_Type", "Loyers_Montant"],
-           "Statistique Canada 34-10-0133-01 · loyers moyens SCHL, immeubles de 3 logements et plus, octobre", [9, 16, 20])
-pv = cities.pivot(index="year", columns="label_fr", values="loyer_nominal")[CITY_LABELS].reset_index()
-vws, lastv = data_sheet("Grandes villes", "tbl_villes", pv.astype(int), ["Année"] + CITY_LABELS, ["0"] + [MONEY] * 6,
-                        ["Villes_Annees"], "Statistique Canada 34-10-0133-01 · loyer moyen d'un 2 chambres, octobre",
-                        [9] + [15] * 6)
-name("Villes_Loyers", f"'Grandes villes'!$C$6:$H${lastv}")
-name("Villes_Noms", "'Grandes villes'!$C$5:$H$5")
-data_sheet("IPC Montréal", "tbl_ipc", cpi[["year", "ipc_2002_100"]], ["Année", "IPC d'ensemble (2002 = 100)"], ["0", "0.0"],
-           ["IPC_Annee", "IPC_Valeur"], "Statistique Canada 18-10-0005-01 · moyenne annuelle", [9, 24])
+           "Statistique Canada 34-10-0133-01 · loyers moyens SCHL, immeubles de 3 logements et plus, octobre", [11, 22, 24],
+           "une année et un type de logement")
+# Loyers des six villes et IPC de Montréal : même grain (une ligne par année), donc un seul tableau.
+pv = cities.pivot(index="year", columns="label_fr", values="loyer_nominal")[CITY_LABELS].astype(int).reset_index()
+an = pv.merge(cpi[["year", "ipc_2002_100"]], on="year", validate="one_to_one")
+assert len(an) == len(pv) == len(cpi) == len(YEARS), "les séries annuelles ne couvrent pas les mêmes années"
+vws, lastv = data_sheet("Séries annuelles", "tbl_annuel", an, ["Année"] + CITY_LABELS + ["IPC Montréal (2002 = 100)"],
+                        ["0"] + [MONEY] * 6 + ["0.0"], ["Villes_Annees"] + [None] * 6 + ["IPC_Valeur"],
+                        "Statistique Canada · 34-10-0133-01 : loyer moyen d'un 2 chambres, octobre · 18-10-0005-01 : IPC d'ensemble de Montréal, moyenne annuelle",
+                        [11] + [17] * 6 + [20], "une année (loyer d'un 2 chambres dans six villes, IPC de Montréal)",
+                        autres=["Villes_Loyers", "Villes_Noms", "IPC_Annee"])
+name("Villes_Loyers", f"'Séries annuelles'!$C$6:$H${lastv}")
+name("Villes_Noms", "'Séries annuelles'!$C$5:$H$5")
+name("IPC_Annee", f"'Séries annuelles'!$B$6:$B${lastv}")
 data_sheet("IPC provinces", "tbl_ipc_provinces", ipcp[["annee", "code", "province", "ipc_loyer", "ipc_ensemble"]],
            ["Année", "Code", "Province", "IPC du loyer", "IPC d'ensemble"], ["0", "@", "@", "0.0", "0.0"],
            ["IPCP_Annee", "IPCP_Code", None, "IPCP_Loyer", "IPCP_Ens"],
-           "Statistique Canada 18-10-0005-01 · 2002 = 100 · le loyer suit les mêmes logements d'une année à l'autre", [8, 7, 26, 13, 14])
+           "Statistique Canada 18-10-0005-01 · 2002 = 100 · le loyer suit les mêmes logements d'une année à l'autre", [11, 10, 28, 18, 20],
+           "une année et une province (ou le Canada)")
 data_sheet("Loyers trimestriels", "tbl_trimestriel", tq[["trimestre", "geo_id", "nom", "est", "loyer", "fiab"]],
            ["Trimestre", "ID", "Région métropolitaine", "Estimation", "Loyer ($)", "Fiabilité"], ["@", "0", "@", "@", MONEY, "@"],
            ["T_Periode", "T_ID", None, "T_Est", "T_Loyer", None],
-           f"Statistique Canada 46-10-0092-01 · 2 chambres · les {len(ids)} régions où loyer demandé et payé sont publiés", [10, 6, 40, 11, 11, 22])
-data_sheet("SCHL", "tbl_schl", schl[["year", "indicateur", "valeur", "unite"]], ["Année", "Indicateur", "Valeur", "Unité"],
-           ["0", "@", "0.0", "@"], ["SCHL_Annee", "SCHL_Indic", "SCHL_Valeur", None],
-           "SCHL, Rapport sur le marché locatif 2025 · logements reloués, hausses à échantillon constant", [8, 36, 10, 10])
+           f"Statistique Canada 46-10-0092-01 · 2 chambres · les {len(ids)} régions où loyer demandé et payé sont publiés", [15, 9, 42, 17, 15, 26],
+           "un trimestre, une région et une estimation (loyer demandé ou payé)")
+# Le code reste : c'est la clé lue par SOMME.SI.ENS. Le libellé le rend lisible sans ouvrir le dictionnaire.
+SCHL_LIB = {"loyer_moyen_reloues_2ch": "Loyer moyen d'un 2 chambres reloué à un nouveau locataire",
+            "hausse_loyer_reloues_2ch": "Hausse du loyer des 2 chambres reloués",
+            "hausse_loyer_non_reloues_2ch": "Hausse du loyer des 2 chambres non reloués (locataires en place)",
+            "hausse_loyer_meme_echantillon_2ch": "Hausse du loyer des 2 chambres à échantillon constant",
+            "taux_inoccupation_3plus": "Taux d'inoccupation, immeubles de 3 logements et plus"}
+sc = schl.assign(lib=schl.indicateur.map(SCHL_LIB), u=schl.unite.map({"dollars": "$", "pct": "%"}))
+assert sc.lib.notna().all() and sc.u.notna().all(), "indicateur ou unité SCHL sans libellé"
+data_sheet("SCHL", "tbl_schl", sc[["year", "indicateur", "lib", "valeur", "u"]], ["Année", "Code de l'indicateur", "Indicateur", "Valeur", "Unité"],
+           ["0", "@", "@", "[>=100]#,##0;0.0", "@"], ["SCHL_Annee", "SCHL_Indic", None, "SCHL_Valeur", None],
+           "SCHL, Rapport sur le marché locatif 2025 · logements reloués, hausses à échantillon constant", [11, 38, 62, 14, 12],
+           "une année et un indicateur du rapport")
 
 # ================================================================== Calculs (masquée)
 k = sheet("Calculs", GREY)
@@ -1221,7 +1260,7 @@ label(me, f"B{R_CV}", "Conventions")
 for i, t in enumerate([
     "Cases jaunes : entrées modifiables (protégées par une validation des données). Texte bleu : données sources. Vert : valeur lue ailleurs. Noir : calcul.",
     "La feuille « Calculs » (masquée : clic droit sur un onglet → Afficher) contient les séries des graphiques ; ses NA() sont volontaires.",
-    "Chaque bandeau de feuille cite sa source. Les données brutes sont dans les six derniers onglets, en tableaux Excel nommés.",
+    "Chaque bandeau de feuille cite sa source. Les données brutes sont dans les cinq derniers onglets, en tableaux Excel nommés.",
 ]):
     me[f"B{R_CV + 1 + i}"], me[f"B{R_CV + 1 + i}"].font = t, F(10, color=INK2)
 
@@ -1286,7 +1325,7 @@ for i, t in enumerate([
 # ================================================================== ordre, impression, enregistrement
 wb.remove(wb["Sheet"])
 ORDER = ["Accueil", "Tableau de bord", "Carte provinces", "Carte villes", "Scénarios", "Simulateur", "Excel 365", "Mode d'emploi",
-         "Loyers Montréal", "Grandes villes", "IPC Montréal", "IPC provinces", "Loyers trimestriels", "SCHL", "Calculs"]
+         "Loyers Montréal", "Séries annuelles", "IPC provinces", "Loyers trimestriels", "SCHL", "Calculs"]
 ORDER = [tr_sheetname(nm) for nm in ORDER]
 assert sorted(ORDER) == sorted(wb.sheetnames), set(ORDER) ^ set(wb.sheetnames)
 wb._sheets = [wb[nm] for nm in ORDER]

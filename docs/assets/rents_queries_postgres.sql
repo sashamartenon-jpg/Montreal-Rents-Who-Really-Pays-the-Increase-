@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Loyers à Montréal : les 12 requêtes analytiques, version PostgreSQL
--- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_postgres.sql, sur la même base.
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_postgres.sql, sur la même base.
 -- Le niveau est indiqué en tête de chacune.
 -- =====================================================================
 

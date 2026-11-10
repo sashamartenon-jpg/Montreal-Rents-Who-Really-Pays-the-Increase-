@@ -1,6 +1,6 @@
 """Version SQL Server (T-SQL) de la base et des requêtes :
-  sql/sqlserver/loyers_sqlserver.sql    schéma, vues, données (lots séparés par GO)
-  sql/sqlserver/requetes_sqlserver.sql  les 12 requêtes analytiques
+  sql/sqlserver/rents_database_sqlserver.sql    schéma, vues, données (lots séparés par GO)
+  sql/sqlserver/rents_queries_sqlserver.sql  les 12 requêtes analytiques
 
 Dérivée des scripts SQLite du projet (sql/schema/*.sql, sql/*.sql) et de data/loyers.sqlite, pour que
 les versions ne divergent jamais. Les requêtes et les vues sont traduites par sqlglot (sqlite → tsql),
@@ -29,7 +29,7 @@ from sqlglot import exp
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "sql" / "sqlserver"
 TABLES = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8")
-VUES = (ROOT / "sql" / "schema" / "02_vues.sql").read_text(encoding="utf-8")
+VUES = (ROOT / "sql" / "schema" / "02_views.sql").read_text(encoding="utf-8")
 REQUETES = sorted((ROOT / "sql").glob("[0-9][0-9]_*.sql"))
 
 
@@ -151,7 +151,7 @@ BASE = """-- ===================================================================
 --   1. Dans SSMS ou Azure Data Studio, créer une base vide et la sélectionner (pas master) :
 --        CREATE DATABASE loyers;
 --   2. Ouvrir ce fichier sur la base « loyers » et l'exécuter (F5) : « Commands completed successfully ».
---   3. ÉTAPE 2 : ouvrir requetes_sqlserver.sql sur la même base et l'exécuter.
+--   3. ÉTAPE 2 : ouvrir rents_queries_sqlserver.sql sur la même base et l'exécuter.
 -- À exécuter une seule fois : une 2e exécution renvoie « There is already an object named … ».
 -- Les vues sont dans des lots séparés (GO), comme SQL Server l'exige.
 -- =====================================================================
@@ -167,14 +167,14 @@ GO
 
 REQ = """-- =====================================================================
 -- Loyers à Montréal : les 12 requêtes analytiques, version SQL Server (T-SQL)
--- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_sqlserver.sql, sur la même base (sinon « Invalid object name »).
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_sqlserver.sql, sur la même base (sinon « Invalid object name »).
 -- Traduites des requêtes SQLite du projet par src/sqlserver.py. Le niveau est indiqué en tête de chacune.
 -- =====================================================================
 
 """ + "\n\n".join(requetes) + "\n"
 
 # ---------------------------------------------------------------- validation : deux parseurs T-SQL
-for name, script in (("loyers_sqlserver.sql", BASE), ("requetes_sqlserver.sql", REQ)):
+for name, script in (("rents_database_sqlserver.sql", BASE), ("rents_queries_sqlserver.sql", REQ)):
     for batch in re.split(r"^GO$", script, flags=re.M):
         for stmt in sqlglot.parse(batch, read="tsql", error_level=sqlglot.ErrorLevel.RAISE):
             pass
@@ -183,7 +183,7 @@ n_stmt = sum(len([s for s in sqlglot.parse(b, read="tsql") if s is not None]) fo
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 from sqlfluff.core import FluffConfig, Linter
 linter = Linter(config=FluffConfig(overrides={"dialect": "tsql", "large_file_skip_byte_limit": 0}))
-for name, script in (("loyers_sqlserver.sql", BASE), ("requetes_sqlserver.sql", REQ)):
+for name, script in (("rents_database_sqlserver.sql", BASE), ("rents_queries_sqlserver.sql", REQ)):
     parsed = linter.parse_string(script, fname=name)
     errors = [str(v) for v in parsed.violations]
     unparsable = [seg.raw[:120] for seg in parsed.tree.recursive_crawl("unparsable")] if parsed.tree else ["(arbre vide)"]

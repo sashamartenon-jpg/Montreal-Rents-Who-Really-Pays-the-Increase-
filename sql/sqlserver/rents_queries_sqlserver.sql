@@ -1,6 +1,6 @@
 ﻿-- =====================================================================
 -- Loyers à Montréal : les 12 requêtes analytiques, version SQL Server (T-SQL)
--- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_sqlserver.sql, sur la même base (sinon « Invalid object name »).
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_sqlserver.sql, sur la même base (sinon « Invalid object name »).
 -- Traduites des requêtes SQLite du projet par src/sqlserver.py. Le niveau est indiqué en tête de chacune.
 -- =====================================================================
 

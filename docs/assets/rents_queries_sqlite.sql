@@ -1,8 +1,8 @@
 -- Les requêtes analytiques du projet « Loyers à Montréal », du niveau débutant au niveau avancé.
--- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers.sql, sur la même base (SQLite 3.25+). Le niveau est indiqué en tête de chacune.
+-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_sqlite.sql, sur la même base (SQLite 3.25+). Le niveau est indiqué en tête de chacune.
 -- Sources : Statistique Canada et SCHL, Licence du gouvernement ouvert – Canada.
 
--- ===================================================================== 01_controle_qualite.sql
+-- ===================================================================== 01_quality_check.sql
 -- Contrôle qualité : couverture, valeurs manquantes et cotes de fiabilité de chaque table de faits
 -- Niveau : Débutant
 SELECT 'fait_loyer' AS source, COUNT(*) AS lignes, MIN(annee) || '-' || MAX(annee) AS periode,
@@ -23,7 +23,7 @@ SELECT 'ipc_provinces', COUNT(*), MIN(annee) || '-' || MAX(annee), COUNT(DISTINC
 FROM ipc_provinces;
 
 
--- ===================================================================== 02_variation_par_type.sql
+-- ===================================================================== 02_change_by_unit_type.sql
 -- Variation annuelle du loyer à Montréal, pour chaque type de logement (LAG avec PARTITION BY)
 -- Niveau : Intermédiaire
 WITH v AS (
@@ -40,7 +40,7 @@ WHERE annee >= 2023
 ORDER BY chambres, annee;
 
 
--- ===================================================================== 03_moyenne_mobile.sql
+-- ===================================================================== 03_moving_average.sql
 -- Tendance lissée : moyenne mobile sur 3 ans de la hausse annuelle (2 chambres, Montréal)
 -- Niveau : Avancé
 WITH v AS (
@@ -60,7 +60,7 @@ WHERE annee >= 2015
 ORDER BY annee;
 
 
--- ===================================================================== 04_loyer_reel.sql
+-- ===================================================================== 04_real_rent.sql
 -- Loyer réel (dollars de 2025) : jointure avec l'IPC de Montréal
 -- Niveau : Débutant
 WITH base AS (SELECT ipc AS ipc_2025 FROM ipc WHERE annee = 2025 AND geo_id = 'Montreal')
@@ -76,7 +76,7 @@ WHERE f.geo_id = 'Montreal' AND f.annee IN (1992, 2019, 2025)
 ORDER BY l.chambres, f.annee;
 
 
--- ===================================================================== 05_rythme_par_periode.sql
+-- ===================================================================== 05_pace_by_period.sql
 -- Hausse réelle et taux de croissance annuel composé, 1992-2019 vs 2019-2025 (2 chambres)
 -- Niveau : Intermédiaire
 WITH reel AS (
@@ -94,7 +94,7 @@ JOIN reel a ON a.annee = p.debut
 JOIN reel b ON b.annee = p.fin;
 
 
--- ===================================================================== 06_classement_villes.sql
+-- ===================================================================== 06_city_ranking.sql
 -- Classement des six grandes villes selon la hausse du 2 chambres, 2019 -> 2025
 -- Niveau : Intermédiaire
 WITH h AS (
@@ -112,7 +112,7 @@ FROM h
 ORDER BY rang;
 
 
--- ===================================================================== 07_rang_montreal_par_annee.sql
+-- ===================================================================== 07_montreal_rank_by_year.sql
 -- Montréal reste-t-elle la moins chère ? Rang et niveau relatif chaque année (RANK et MAX ... PARTITION BY)
 -- Niveau : Avancé
 WITH r AS (
@@ -128,7 +128,7 @@ WHERE geo_id = 'Montreal' AND annee IN (1995, 2005, 2015, 2019, 2023, 2024, 2025
 ORDER BY annee;
 
 
--- ===================================================================== 08_prime_de_relocation.sql
+-- ===================================================================== 08_relocation_premium.sql
 -- Écart entre le loyer d'un 2 chambres reloué (SCHL) et le loyer moyen de tous les locataires
 -- Niveau : Débutant
 SELECT r.annee,
@@ -143,7 +143,7 @@ WHERE r.indicateur = 'loyer_moyen_reloues_2ch' AND r.geo_id = 'Montreal'
 ORDER BY r.annee;
 
 
--- ===================================================================== 09_demande_vs_paye.sql
+-- ===================================================================== 09_asking_vs_paid.sql
 -- Loyer demandé vs loyer payé : dernier trimestre disponible de chaque région (ROW_NUMBER par groupe)
 -- Niveau : Avancé
 WITH dernier AS (
@@ -173,7 +173,7 @@ WHERE p.demande IS NOT NULL AND p.paye IS NOT NULL
 ORDER BY rang;
 
 
--- ===================================================================== 10_provinces_loyer_inflation.sql
+-- ===================================================================== 10_provinces_rent_vs_inflation.sql
 -- Provinces : hausse des loyers (IPC du loyer) en 2025 et depuis 2019, comparée à l'inflation
 -- Niveau : Intermédiaire
 WITH b AS (
@@ -197,7 +197,7 @@ FROM b
 ORDER BY rang_2025;
 
 
--- ===================================================================== 11_inoccupation_vs_loyer.sql
+-- ===================================================================== 11_vacancy_vs_rent.sql
 -- Années où l'inoccupation a augmenté ET le loyer a monté de plus de 5 % (Montréal, 2 chambres)
 -- Niveau : Avancé
 WITH s AS (
@@ -216,7 +216,7 @@ WHERE taux > taux_prec AND 1.0 * loyer / loyer_prec - 1 > 0.05
 ORDER BY annee;
 
 
--- ===================================================================== 12_vues_quebec.sql
+-- ===================================================================== 12_quebec_views.sql
 -- Requête sur les vues : régions du Québec, écart demandé / payé et hausse provinciale des loyers en 2025
 -- Niveau : Intermédiaire
 SELECT e.nom,

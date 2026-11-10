@@ -13,8 +13,7 @@ SHEETS = {
     "Simulateur": "Simulator",
     "Mode d'emploi": "How-to",
     "Loyers Montréal": "Rents Montreal",
-    "Grandes villes": "Major cities",
-    "IPC Montréal": "CPI Montreal",
+    "Séries annuelles": "Annual series",
     "IPC provinces": "CPI provinces",
     "Loyers trimestriels": "Quarterly rents",
     "SCHL": "CMHC",
@@ -328,24 +327,36 @@ STRINGS = {
     "CONVENTIONS": "CONVENTIONS",
     "Cases jaunes : entrées modifiables (protégées par une validation des données). Texte bleu : données sources. Vert : valeur lue ailleurs. Noir : calcul.":
         "Yellow cells: editable inputs (guarded by data validation). Blue text: source data. Green: value read elsewhere. Black: calculation.",
-    "Chaque bandeau de feuille cite sa source. Les données brutes sont dans les six derniers onglets, en tableaux Excel nommés.":
-        "Each sheet banner cites its source. The raw data sits in the last six tabs, as named Excel tables.",
+    "Chaque bandeau de feuille cite sa source. Les données brutes sont dans les cinq derniers onglets, en tableaux Excel nommés.":
+        "Each sheet banner cites its source. The raw data sits in the last five tabs, as named Excel tables.",
     "La feuille « Calculs » (masquée : clic droit sur un onglet → Afficher) contient les séries des graphiques ; ses NA() sont volontaires.":
         "The “Calculs” sheet (hidden: right-click a tab → Unhide) holds the chart series; its NA() values are intentional.",
 
     # ---------- feuilles de données (en-têtes et bandeaux)
     "Loyers Montréal": "Rents Montreal",
-    "Grandes villes": "Major cities",
-    "IPC Montréal": "CPI Montreal",
+    "Séries annuelles": "Annual series",
     "IPC provinces": "CPI provinces",
     "Loyers trimestriels": "Quarterly rents",
     "Loyer moyen ($/mois)": "Average rent ($/month)",
+    "Code de l'indicateur": "Indicator code",
+    "Loyer moyen d'un 2 chambres reloué à un nouveau locataire": "Average rent of a 2-bedroom re-let to a new tenant",
+    "Hausse du loyer des 2 chambres reloués": "Rent increase, re-let 2-bedroom units",
+    "Hausse du loyer des 2 chambres non reloués (locataires en place)": "Rent increase, 2-bedroom units not re-let (sitting tenants)",
+    "Hausse du loyer des 2 chambres à échantillon constant": "Rent increase, 2-bedroom units, fixed sample",
+    "Taux d'inoccupation, immeubles de 3 logements et plus": "Vacancy rate, buildings with 3 or more units",
+    "Une ligne": "One row",
+    "Plages nommées": "Named ranges",
+    "Texte bleu : donnée saisie depuis la source, sans formule": "Blue text: value entered from the source, no formula",
+    "une année et un type de logement": "one year and one unit type",
+    "une année (loyer d'un 2 chambres dans six villes, IPC de Montréal)": "one year (two-bedroom rent in six cities, Montreal CPI)",
+    "une année et une province (ou le Canada)": "one year and one province (or Canada)",
+    "un trimestre, une région et une estimation (loyer demandé ou payé)": "one quarter, one metro area and one estimate (asking or paid rent)",
+    "une année et un indicateur du rapport": "one year and one indicator of the report",
+    "IPC Montréal (2002 = 100)": "Montreal CPI (2002 = 100)",
+    "Statistique Canada · 34-10-0133-01 : loyer moyen d'un 2 chambres, octobre · 18-10-0005-01 : IPC d'ensemble de Montréal, moyenne annuelle":
+        "Statistics Canada · 34-10-0133-01: average two-bedroom rent, October · 18-10-0005-01: Montreal all-items CPI, annual average",
     "Statistique Canada 34-10-0133-01 · loyers moyens SCHL, immeubles de 3 logements et plus, octobre":
         "Statistics Canada 34-10-0133-01 · CMHC average rents, buildings with 3+ units, October",
-    "Statistique Canada 34-10-0133-01 · loyer moyen d'un 2 chambres, octobre":
-        "Statistics Canada 34-10-0133-01 · average two-bedroom rent, October",
-    "Statistique Canada 18-10-0005-01 · moyenne annuelle": "Statistics Canada 18-10-0005-01 · annual average",
-    "IPC d'ensemble (2002 = 100)": "All-items CPI (2002 = 100)",
     "Statistique Canada 18-10-0005-01 · 2002 = 100 · le loyer suit les mêmes logements d'une année à l'autre":
         "Statistics Canada 18-10-0005-01 · 2002 = 100 · rent tracks the same units from one year to the next",
     "Code": "Code",

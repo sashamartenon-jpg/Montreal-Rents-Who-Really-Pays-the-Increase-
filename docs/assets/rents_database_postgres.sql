@@ -2,8 +2,8 @@
 -- Base « Loyers à Montréal » pour PostgreSQL : schéma, vues, données
 -- Générée par src/postgres.py depuis les scripts SQLite du projet et data/loyers.sqlite.
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide :
---   createdb loyers && psql -d loyers -f loyers_postgres.sql
--- ÉTAPE 2 : psql -d loyers -f requetes_postgres.sql
+--   createdb loyers && psql -d loyers -f rents_database_postgres.sql
+-- ÉTAPE 2 : psql -d loyers -f rents_queries_postgres.sql
 -- =====================================================================
 BEGIN;
 -- =====================================================================

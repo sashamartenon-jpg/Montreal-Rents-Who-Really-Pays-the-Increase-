@@ -1,6 +1,6 @@
 -- Base « Loyers à Montréal » : export complet (schéma, données, vues), SQLite 3.25+
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide, une seule fois.
--- ÉTAPE 2 : exécuter requetes_loyers_montreal.sql sur la même base.
+-- ÉTAPE 2 : exécuter rents_queries_sqlite.sql sur la même base.
 BEGIN TRANSACTION;
 CREATE TABLE dim_estimation (                            -- type d'estimation du tableau 46-10-0092
   code        TEXT PRIMARY KEY CHECK (code IN ('A', 'P')),

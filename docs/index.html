@@ -1216,11 +1216,11 @@ function renderText() {
   ];
   document.getElementById("impl").innerHTML = impl.map(c => `<article class="card"><span class="who">${c.who}</span><h3>${c.h}</h3><p>${c.p}</p><p class="dec"><b>${fr ? "Décision" : "Decision"}</b>${c.d}</p></article>`).join("");
   const SK = fr ? [
-    ["excel.html", "Excel", "Classeur sans macro", "Deux cartes en graphiques Excel, tableau de bord, scénarios 2030, 1 273 formules."],
+    ["excel.html", "Excel", "Classeur sans macro", "Deux cartes en graphiques Excel, tableau de bord, scénarios 2030, 1 272 formules."],
     ["sql.html", "SQL", "Base en étoile et 12 requêtes", "12 tables, 5 vues, fonctions de fenêtre, CTE. Exécutables dans ton navigateur."],
     ["carte.html", "Carte", "Carte interactive du Canada", "Loyers demandés et payés dans 42 villes, hausse des loyers par province."]
   ] : [
-    ["excel.html", "Excel", "Macro-free workbook", "Two maps built as Excel charts, dashboard, 2030 scenarios, 1,273 formulas."],
+    ["excel.html", "Excel", "Macro-free workbook", "Two maps built as Excel charts, dashboard, 2030 scenarios, 1,272 formulas."],
     ["sql.html", "SQL", "Star schema and 12 queries", "12 tables, 5 views, window functions, CTEs. Runnable in your browser."],
     ["carte.html", "Map", "Interactive map of Canada", "Asking and paid rents in 42 cities, rent increases by province."]
   ];

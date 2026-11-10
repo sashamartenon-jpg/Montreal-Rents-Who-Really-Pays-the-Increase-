@@ -84,7 +84,7 @@ def excel_facts():
     rank = find("E", "=RANK(D")
     assert d["E9"].value.startswith("=(SUMIFS") and d["H9"].value.startswith("=IFERROR"), "cellules du tableau de bord déplacées"
     visible = [ws.title for ws in wb.worksheets if ws.sheet_state == "visible"]
-    assert len(visible) == 14 and len(wb.worksheets) == 15, "nombre de feuilles changé : revoir le texte de la page Excel (8 feuilles + 6 sources)"
+    assert len(visible) == 13 and len(wb.worksheets) == 14, "nombre de feuilles changé : revoir le texte de la page Excel (8 feuilles + 5 sources)"
     return n, {
         "__XLF_DASH_E9__": d["E9"].value, "__XLF_DASH_H9__": d["H9"].value,
         "__XLF_CALC_RANK__": rank.value, "__XLF_CALC_SORT__": k.cell(row=rank.row, column=6).value,
@@ -193,7 +193,7 @@ DEMO_EVAL = ""  # évaluateur retiré du site (réservé à un prochain projet) 
 n_formulas, xlf, n_visible, n_sheets = excel_facts()
 SQL_FILES = sorted((ROOT / "sql").glob("*.sql"))
 DDL_T = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8").strip()
-DDL_V = (ROOT / "sql" / "schema" / "02_vues.sql").read_text(encoding="utf-8").strip()
+DDL_V = (ROOT / "sql" / "schema" / "02_views.sql").read_text(encoding="utf-8").strip()
 N_TABLES, N_VUES = len(re.findall(r"^CREATE TABLE", DDL_T, re.M)), len(re.findall(r"^CREATE VIEW", DDL_V, re.M))
 import csv
 DICO = list(csv.DictReader((ROOT / "data" / "ref" / "dictionnaire.csv").open(encoding="utf-8"), delimiter=";"))
@@ -230,11 +230,11 @@ def en_num(x, d=2):
 """, encoding="utf-8")
 (DOCS / "_redirects").unlink(missing_ok=True)
 def ko(rel):
-    """Taille d'un fichier de docs/ en Ko, pour l'afficher à côté du lien de téléchargement."""
-    return f"{(DOCS / rel).stat().st_size / 1024:.0f} Ko"
-SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/loyers.sql"),
-         "__SZ_REQ__": ko("assets/requetes_loyers_montreal.sql"), "__SZ_PG__": ko("assets/loyers_postgres.sql"),
-         "__SZ_MSSQL__": ko("assets/loyers_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/requetes_sqlserver.sql"), "__SZ_REQ_PG__": ko("assets/requetes_postgres.sql"),
+    """Taille d'un fichier de docs/ en Ko (KB en anglais, clé « ko » de PAGE_EN), affichée à côté du lien de téléchargement."""
+    return f"{(DOCS / rel).stat().st_size / 1024:.0f} <span data-i18n=\"ko\">Ko</span>"
+SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/rents_database_sqlite.sql"),
+         "__SZ_REQ__": ko("assets/rents_queries_sqlite.sql"), "__SZ_PG__": ko("assets/rents_database_postgres.sql"),
+         "__SZ_MSSQL__": ko("assets/rents_database_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/rents_queries_sqlserver.sql"), "__SZ_REQ_PG__": ko("assets/rents_queries_postgres.sql"),
          "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
 common = {
     **SIZES,

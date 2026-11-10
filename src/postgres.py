@@ -1,4 +1,4 @@
-"""Version PostgreSQL de la base : sql/postgres/loyers_postgres.sql (schéma, vues, données).
+"""Version PostgreSQL de la base : sql/postgres/rents_database_postgres.sql (schéma, vues, données).
 
 Dérivée des scripts SQLite du projet (sql/schema/*.sql) et des données de data/loyers.sqlite,
 pour que les deux versions ne divergent jamais. Chaque instruction est validée par le parseur
@@ -15,9 +15,9 @@ import sqlite3
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "sql" / "postgres" / "loyers_postgres.sql"
+OUT = ROOT / "sql" / "postgres" / "rents_database_postgres.sql"
 TABLES = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8")
-VUES = (ROOT / "sql" / "schema" / "02_vues.sql").read_text(encoding="utf-8")
+VUES = (ROOT / "sql" / "schema" / "02_views.sql").read_text(encoding="utf-8")
 
 
 def to_pg(sql):
@@ -75,8 +75,8 @@ header = """-- =================================================================
 -- Base « Loyers à Montréal » pour PostgreSQL : schéma, vues, données
 -- Générée par src/postgres.py depuis les scripts SQLite du projet et data/loyers.sqlite.
 -- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide :
---   createdb loyers && psql -d loyers -f loyers_postgres.sql
--- ÉTAPE 2 : psql -d loyers -f requetes_postgres.sql
+--   createdb loyers && psql -d loyers -f rents_database_postgres.sql
+-- ÉTAPE 2 : psql -d loyers -f rents_queries_postgres.sql
 -- =====================================================================
 BEGIN;
 """
@@ -88,7 +88,7 @@ from pglast.parser import ParseError
 try:
     stmts = parse_sql(script)
 except ParseError as e:
-    raise SystemExit(f"loyers_postgres.sql : syntaxe PostgreSQL invalide : {e}")
+    raise SystemExit(f"rents_database_postgres.sql : syntaxe PostgreSQL invalide : {e}")
 n_tables = sum(1 for s in stmts if s.stmt.__class__.__name__ == "CreateStmt")
 n_views = sum(1 for s in stmts if s.stmt.__class__.__name__ == "ViewStmt")
 n_idx = sum(1 for s in stmts if s.stmt.__class__.__name__ == "IndexStmt")
@@ -96,7 +96,7 @@ n_ins = sum(1 for s in stmts if s.stmt.__class__.__name__ == "InsertStmt")
 assert n_tables == len(order) and n_views == VUES.count("CREATE VIEW"), (n_tables, n_views)
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(script, encoding="utf-8")
-(ROOT / "docs" / "assets" / "loyers_postgres.sql").write_text(script, encoding="utf-8")
+(ROOT / "docs" / "assets" / "rents_database_postgres.sql").write_text(script, encoding="utf-8")
 # ---------------------------------------------------------------- les 12 requêtes, version PostgreSQL
 # Seul écart : ROUND(x, n) sur un double precision → ROUND((x)::numeric, n). Le reste est du SQL standard.
 reqs = []
@@ -105,14 +105,14 @@ for f in sorted((ROOT / "sql").glob("[0-9][0-9]_*.sql")):
     reqs.append(round_numeric(q) + ";")
 REQ = ("-- =====================================================================\n"
        "-- Loyers à Montréal : les 12 requêtes analytiques, version PostgreSQL\n"
-       "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS loyers_postgres.sql, sur la même base.\n"
+       "-- ÉTAPE 2 SUR 2 : à exécuter APRÈS rents_database_postgres.sql, sur la même base.\n"
        "-- Le niveau est indiqué en tête de chacune.\n"
        "-- =====================================================================\n\n" + "\n\n".join(reqs) + "\n")
 try:
     assert len(parse_sql(REQ)) == len(reqs)
 except ParseError as e:
-    raise SystemExit(f"requetes_postgres.sql : syntaxe PostgreSQL invalide : {e}")
-(OUT.parent / "requetes_postgres.sql").write_text(REQ, encoding="utf-8")
-(ROOT / "docs" / "assets" / "requetes_postgres.sql").write_text(REQ, encoding="utf-8")
+    raise SystemExit(f"rents_queries_postgres.sql : syntaxe PostgreSQL invalide : {e}")
+(OUT.parent / "rents_queries_postgres.sql").write_text(REQ, encoding="utf-8")
+(ROOT / "docs" / "assets" / "rents_queries_postgres.sql").write_text(REQ, encoding="utf-8")
 
 print(f"PostgreSQL : {OUT.relative_to(ROOT)} · {n_tables} tables, {n_views} vues, {n_idx} index, {n_ins} INSERT · {len(stmts)} instructions validées par pglast")

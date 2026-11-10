@@ -43,7 +43,7 @@ data/ref/        contours des provinces (Natural Earth, via sane-topojson, MIT),
 data/clean/      tables propres et statistiques calculées (stats.json : test de Chow, effet de composition)
 sql/schema/      création des tables et des vues (SQLite, source)
 sql/             12 requêtes commentées (SQLite)
-sql/sqlserver/   base et requêtes en T-SQL (SQL Server) · sql/postgres/ : base et requêtes pour PostgreSQL
+sql/sqlserver/   rents_database_sqlserver.sql puis rents_queries_sqlserver.sql (T-SQL) · sql/postgres/ : les deux mêmes fichiers pour PostgreSQL
 src/             fetch_statcan · pipeline · build_db · sqlserver · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
 docs/            site publié ; assets/ contient les fichiers téléchargeables (classeurs Excel, scripts SQL et requêtes par moteur) et loyers.sqlite, lue par la console SQL de la page

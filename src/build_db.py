@@ -18,7 +18,7 @@ DB = ROOT / "data" / "loyers.sqlite"
 SITE_DB = ROOT / "docs" / "assets" / "loyers.sqlite"
 
 SCHEMA_DIR = SQL / "schema"  # DDL : tables, contraintes, index (01) puis vues (02)
-DUMP = ROOT / "docs" / "assets" / "loyers.sql"
+DUMP = ROOT / "docs" / "assets" / "rents_database_sqlite.sql"
 
 
 PROVINCES = [("NL", "Terre-Neuve-et-Labrador", "province"), ("PE", "Île-du-Prince-Édouard", "province"),
@@ -111,26 +111,26 @@ def check(results, k):
     """Chaque requête qui produit un chiffre publié est comparée au calcul Python."""
     r = {x["file"]: x for x in results}
     rows = lambda f: r[f]["rows"]
-    qa = {x[0]: x for x in rows("01_controle_qualite.sql")}
+    qa = {x[0]: x for x in rows("01_quality_check.sql")}
     assert qa["fait_loyer"][4] == 0 and qa["ipc_provinces"][4] == 0, qa
-    var = [x for x in rows("02_variation_par_type.sql") if x[1] == "2 chambres" and x[0] == 2025][0]
+    var = [x for x in rows("02_change_by_unit_type.sql") if x[1] == "2 chambres" and x[0] == 2025][0]
     assert abs(var[3] - k["hausse_annuelle_2025"]) < 0.05, var
-    rythme = rows("05_rythme_par_periode.sql")
+    rythme = rows("05_pace_by_period.sql")
     assert abs(rythme[0][1] - k["hausse_reelle_1992_2019"]) < 0.05 and abs(rythme[1][1] - k["hausse_reelle_2019_2025"]) < 0.05, rythme
-    villes = rows("06_classement_villes.sql")
+    villes = rows("06_city_ranking.sql")
     assert villes[0][1] == "Montréal" and abs(villes[0][4] - k["hausse_2019_2025_par_ville"]["Montreal"]) < 0.05, villes
     # recoupement entre deux requêtes : le rang de Montréal (07) doit découler des loyers 2025 de la requête 06
-    rang = [x for x in rows("07_rang_montreal_par_annee.sql") if x[0] == 2025][0]
+    rang = [x for x in rows("07_montreal_rank_by_year.sql") if x[0] == 2025][0]
     mtl_2025 = [x for x in villes if x[1] == "Montréal"][0][3]
     assert rang[2] == 1 + sum(1 for x in villes if x[3] < mtl_2025), rang
-    reloc = rows("08_prime_de_relocation.sql")[-1]
+    reloc = rows("08_relocation_premium.sql")[-1]
     assert reloc[0] == 2025 and reloc[3] == k["prime_relocation_2025"], reloc
-    mtl = [x for x in rows("09_demande_vs_paye.sql") if x[1] == "Montréal"][0]
+    mtl = [x for x in rows("09_asking_vs_paid.sql") if x[1] == "Montréal"][0]
     assert mtl[6] == k["mtl_ecart_dernier"] and abs(mtl[7] - k["mtl_ecart_pct_dernier"]) < 0.05, mtl
-    prov = rows("10_provinces_loyer_inflation.sql")
+    prov = rows("10_provinces_rent_vs_inflation.sql")
     qc = [x for x in prov if x[1] == "Québec"][0]
     assert qc[0] == k["qc_rang_hausse_2025"] and abs(qc[2] - k["qc_hausse_loyer_2025"]) < 0.05, qc
-    vq = {x[0]: x for x in rows("12_vues_quebec.sql")}
+    vq = {x[0]: x for x in rows("12_quebec_views.sql")}
     assert vq["Montréal"][3] == k["mtl_ecart_pct_dernier"] and vq["Montréal"][4] == k["qc_hausse_loyer_2025"], vq["Montréal"]
 
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     with sqlite3.connect(DB) as c_:  # export complet en SQL pur : schéma + données, rejouable dans n'importe quel SQLite
         DUMP.write_text("-- Base « Loyers à Montréal » : export complet (schéma, données, vues), SQLite 3.25+\n"
                         "-- ÉTAPE 1 SUR 2 : exécuter ce fichier en premier, dans une base vide, une seule fois.\n"
-                        "-- ÉTAPE 2 : exécuter requetes_loyers_montreal.sql sur la même base.\n"
+                        "-- ÉTAPE 2 : exécuter rents_queries_sqlite.sql sur la même base.\n"
                         + "\n".join(c_.iterdump()) + "\n", encoding="utf-8")
     (ROOT / "docs" / "data" / "sql_results.json").write_text(json.dumps(res, ensure_ascii=False), encoding="utf-8")
     for x in res:
