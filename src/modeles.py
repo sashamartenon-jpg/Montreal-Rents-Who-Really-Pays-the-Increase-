@@ -49,6 +49,17 @@ ASSO = [
     ("Observer le loyer", ["loyer", "cote"], 790, 600, [("RMR", "0,n"), ("TRIM", "0,n"), ("EST", "0,n")], "fait_loyer_trimestriel"),
 ]
 EW, AW, AH = 220, 170, 0
+# Version anglaise des deux schémas. Le MCD est conceptuel : ses libellés se traduisent. Le MLD est lu dans la
+# base : ses noms de tables et de colonnes sont ceux de la base (français) et restent tels quels, avec un lexique.
+EN = {
+    "TYPE DE LOGEMENT": "UNIT TYPE", "GRANDE VILLE": "LARGE CITY", "INDICATEUR SCHL": "CMHC INDICATOR", "ANNÉE": "YEAR",
+    "PROVINCE": "PROVINCE", "RÉGION MÉTROPOLITAINE": "METROPOLITAN AREA", "TRIMESTRE": "QUARTER", "ESTIMATION": "ESTIMATE",
+    "Mesurer le loyer": "Measure rent", "Mesurer l'inoccupation": "Measure vacancy", "Indicer les prix": "Index prices",
+    "Publier (SCHL)": "Publish (CMHC)", "Indicer le loyer": "Index rent", "Appartenir": "Belong to", "Observer le loyer": "Observe rent",
+    "libellé": "label", "chambres": "bedrooms", "unité": "unit", "nom": "name", "niveau": "level", "annee": "year", "periode": "quarter",
+    "loyer": "rent", "taux": "rate", "ipc": "cpi", "valeur": "value", "ipc_loyer": "rent_cpi", "ipc_ensemble": "all_items_cpi", "cote": "grade",
+}
+tr = lambda s, lang: EN.get(s, s) if lang == "en" else s
 
 
 def ent_box(key):
@@ -72,12 +83,15 @@ def clip(box, tx, ty):
     return cx + dx * s, cy + dy * s
 
 
-def mcd_svg():
+def mcd_svg(lang="fr"):
     W, H = 1270, 830
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="{FONT}">',
            f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
-           f'<text x="40" y="{H - 22}" font-size="12" fill="{INK2}">Modèle conceptuel de données (Merise) · identifiants soulignés · '
-           f'ANNÉE et TRIMESTRE sont des entités temporelles non traduites en tables</text>']
+           f'<text x="40" y="{H - 22}" font-size="12" fill="{INK2}">' + (
+               "Modèle conceptuel de données (Merise) · identifiants soulignés · "
+               "ANNÉE et TRIMESTRE sont des entités temporelles non traduites en tables" if lang == "fr" else
+               "Conceptual data model (Merise) · identifiers underlined · "
+               "YEAR and QUARTER are time entities, not turned into tables") + '</text>']
     links, labels = [], []
     for a in ASSO:
         ab = asso_box(a)
@@ -98,18 +112,18 @@ def mcd_svg():
         x, y, w, h = ent_box(k)
         out.append(f'<g><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="#ffffff" stroke="{BLUE}" stroke-width="1.6"/>'
                    f'<path d="M{x} {y + 10} a10 10 0 0 1 10 -10 h{w - 20} a10 10 0 0 1 10 10 v22 h-{w} z" fill="{BLUE}"/>'
-                   f'<text x="{x + 12}" y="{y + 21}" font-size="12.5" font-weight="700" fill="#ffffff" letter-spacing=".04em">{esc(t)}</text>'
-                   f'<text x="{x + 12}" y="{y + 54}" font-size="12.5" fill="{INK}" text-decoration="underline" font-family="{MONO}">{esc(ident)}</text>')
+                   f'<text x="{x + 12}" y="{y + 21}" font-size="12.5" font-weight="700" fill="#ffffff" letter-spacing=".04em">{esc(tr(t, lang))}</text>'
+                   f'<text x="{x + 12}" y="{y + 54}" font-size="12.5" fill="{INK}" text-decoration="underline" font-family="{MONO}">{esc(tr(ident, lang))}</text>')
         for i, at in enumerate(attrs):
-            out.append(f'<text x="{x + 12}" y="{y + 76 + 22 * i}" font-size="12.5" fill="{INK2}" font-family="{MONO}">{esc(at)}</text>')
+            out.append(f'<text x="{x + 12}" y="{y + 76 + 22 * i}" font-size="12.5" fill="{INK2}" font-family="{MONO}">{esc(tr(at, lang))}</text>')
         out.append('</g>')
     for a in ASSO:
         name, attrs, *_ = a
         x, y, w, h = asso_box(a)
         out.append(f'<g><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{h / 2 if not attrs else 22}" fill="{PINK_L}" stroke="{PINK}" stroke-width="1.6"/>'
-                   f'<text x="{x + w / 2}" y="{y + 22}" font-size="12.5" font-weight="700" text-anchor="middle" fill="#a21f50">{esc(name)}</text>')
+                   f'<text x="{x + w / 2}" y="{y + 22}" font-size="12.5" font-weight="700" text-anchor="middle" fill="#a21f50">{esc(tr(name, lang))}</text>')
         for i, at in enumerate(attrs):
-            out.append(f'<text x="{x + w / 2}" y="{y + 44 + 20 * i}" font-size="12" text-anchor="middle" fill="{INK}" font-family="{MONO}">{esc(at)}</text>')
+            out.append(f'<text x="{x + w / 2}" y="{y + 44 + 20 * i}" font-size="12" text-anchor="middle" fill="{INK}" font-family="{MONO}">{esc(tr(at, lang))}</text>')
         out.append('</g>')
     out += labels
     out.append('</svg>')
@@ -145,9 +159,9 @@ def card_pill(cx, cy, txt):
             f'font-family="{MONO}">{txt}</text></g>')
 
 
-def mld_svg(info):
+def mld_svg(info, lang="fr"):
     assert set(info) == set(LAYOUT), f"Tables sans position dans le MLD : {set(info) ^ set(LAYOUT)}"
-    W, H = 1460, 700
+    W, H = 1460, (700 if lang == "fr" else 742)
     rowy = {}
     boxes, arrows, cards, seen = [], [], [], set()
     for t, (cols, fks) in info.items():
@@ -159,7 +173,7 @@ def mld_svg(info):
                      f'<path d="M{x} {y + 10} a10 10 0 0 1 10 -10 h{TW - 20} a10 10 0 0 1 10 10 v{HH - 10} h-{TW} z" fill="{col}"/>'
                      f'<text x="{x + 12}" y="{y + 21}" font-size="13" font-weight="700" fill="#ffffff" font-family="{MONO}">{esc(t)}</text>'
                      f'<text x="{x + TW - 10}" y="{y + 21}" font-size="10" fill="#ffffff" text-anchor="end" opacity=".9">'
-                     f'{"fait" if fact else "dimension"}</text>')
+                     f'{("fait" if lang == "fr" else "fact") if fact else "dimension"}</text>')
         for i, (name, typ, pk) in enumerate(cols):
             cy = y + HH + RH * i + 16
             rowy[(t, name)] = cy - 4
@@ -194,8 +208,17 @@ def mld_svg(info):
            f'<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
            f'<path d="M0 0 L10 5 L0 10 z" fill="{INK2}"/></marker></defs>',
            f'<rect width="{W}" height="{H}" fill="#ffffff"/>', *arrows, *boxes, *cards,
-           f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Modèle logique (relationnel) généré depuis la base · '
-           f'souligné : clé primaire · # : clé étrangère, flèche vers la clé référencée · 1,1 / 0,n : cardinalités · rose : faits, bleu : dimensions</text>', '</svg>']
+           *([f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Modèle logique (relationnel) généré depuis la base · '
+              f'souligné : clé primaire · # : clé étrangère, flèche vers la clé référencée · 1,1 / 0,n : cardinalités · rose : faits, bleu : dimensions</text>']
+             if lang == "fr" else
+             [f'<text x="30" y="{H - 60}" font-size="12" fill="{INK2}">Logical (relational) model generated from the database · '
+              f'underlined: primary key · #: foreign key, arrow to the referenced key · 1,1 / 0,n: cardinalities · pink: facts, blue: dimensions</text>',
+              f'<text x="30" y="{H - 38}" font-size="12" fill="{INK2}">Table and column names are the database\'s own, in French: '
+              f'fait = fact · loyer = rent · logement = unit type · chambres = bedrooms · annee = year · periode = quarter · taux = rate · '
+              f'inoccupation = vacancy</text>',
+              f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">ipc = CPI · ensemble = all items · cote = reliability grade · '
+              f'libelle = label · nom = name · niveau = level · unite = unit · valeur = value · indicateur = indicator · '
+              f'rmr = metro area · schl = CMHC · roulement = turnover · trimestriel = quarterly</text>']), '</svg>']
     return "\n".join(out)
 
 
@@ -236,7 +259,13 @@ if __name__ == "__main__":
     check_mcd(info)
     (OUT / "mcd.svg").write_text(mcd_svg(), encoding="utf-8")
     (OUT / "mld.svg").write_text(mld_svg(info), encoding="utf-8")
-    for n in ("mcd", "mld"):
+    (OUT / "mcd_en.svg").write_text(mcd_svg("en"), encoding="utf-8")
+    (OUT / "mld_en.svg").write_text(mld_svg(info, "en"), encoding="utf-8")
+    # chaque libellé du MCD a sa traduction : aucun texte français ne reste dans la version anglaise
+    manquants = [x for x in [e[0] for e in ENT.values()] + [a[0] for a in ASSO] + [at for e in ENT.values() for at in e[2]]
+                 + [at for a in ASSO for at in a[1]] if x not in EN and x not in ("latitude", "longitude")]
+    assert not manquants, f"Libellés du MCD sans traduction anglaise : {manquants}"
+    for n in ("mcd", "mld", "mcd_en", "mld_en"):
         png(OUT / f"{n}.svg", OUT / f"{n}.png")
     # Fichiers téléchargeables individuellement (pas d'archive : chaque fichier est utile seul)
     assets = ROOT / "docs" / "assets"
