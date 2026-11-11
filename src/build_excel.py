@@ -58,7 +58,7 @@ import os
 import re as _re
 LANG = os.environ.get("XL_LANG", "fr")
 if LANG == "en":
-    OUT = ROOT / "docs" / "assets" / "modele_loyers_montreal_en.xlsx"
+    OUT = ROOT / "docs" / "assets" / "montreal_rents_workbook.xlsx"
     from xl_en import FORMATS as _FM, SHEETS as _SH, STRINGS as _ST
     _SHEET_PATTERNS = []
     for _fr, _en in _SH.items():
@@ -418,7 +418,7 @@ data_sheet("IPC provinces", "tbl_ipc_provinces", ipcp[["annee", "code", "provinc
 data_sheet("Loyers trimestriels", "tbl_trimestriel", tq[["trimestre", "geo_id", "nom", "est", "loyer", "fiab"]],
            ["Trimestre", "ID", "Région métropolitaine", "Estimation", "Loyer ($)", "Fiabilité"], ["@", "0", "@", "@", MONEY, "@"],
            ["T_Periode", "T_ID", None, "T_Est", "T_Loyer", None],
-           f"Statistique Canada 46-10-0092-01 · 2 chambres · les {len(ids)} régions où loyer demandé et payé sont publiés", [15, 9, 42, 17, 15, 26],
+           f"Statistique Canada 46-10-0092-01 · 2 chambres · les {len(ids)} régions où loyer demandé et payé sont publiés", [15, 9, 47, 17, 15, 26],
            "un trimestre, une région et une estimation (loyer demandé ou payé)")
 # Le code reste : c'est la clé lue par SOMME.SI.ENS. Le libellé le rend lisible sans ouvrir le dictionnaire.
 SCHL_LIB = {"loyer_moyen_reloues_2ch": "Loyer moyen d'un 2 chambres reloué à un nouveau locataire",
@@ -430,7 +430,7 @@ sc = schl.assign(lib=schl.indicateur.map(SCHL_LIB), u=schl.unite.map({"dollars":
 assert sc.lib.notna().all() and sc.u.notna().all(), "indicateur ou unité SCHL sans libellé"
 data_sheet("SCHL", "tbl_schl", sc[["year", "indicateur", "lib", "valeur", "u"]], ["Année", "Code de l'indicateur", "Indicateur", "Valeur", "Unité"],
            ["0", "@", "@", "[>=100]#,##0;0.0", "@"], ["SCHL_Annee", "SCHL_Indic", None, "SCHL_Valeur", None],
-           "SCHL, Rapport sur le marché locatif 2025 · logements reloués, hausses à échantillon constant", [11, 38, 62, 14, 12],
+           "SCHL, Rapport sur le marché locatif 2025 · logements reloués, hausses à échantillon constant", [11, 38, 67, 14, 12],
            "une année et un indicateur du rapport")
 
 # ================================================================== Calculs (masquée)
@@ -870,8 +870,9 @@ for i in range(5):
     c = cp.cell(row=32, column=2 + 2 * i)
     c.fill = fill(CLASS_COLORS[i])
     cp.cell(row=32, column=3 + 2 * i, value=f"=\"≥ \"&Calculs!C{SP + i}").font = F(9, color=INK2)
-note(cp, "B34", "Contours : Natural Earth (domaine public), projection conique conforme de Lambert (paramètres de Statistique Canada), "
-                "calculée par src/geo.py. Territoires : pas d'IPC provincial publié.")
+# fusion B:K avec retour à la ligne : une note sur une seule ligne filerait sous le graphique en colonne L
+merge(cp, "B34:K35", tr("Contours : Natural Earth (domaine public), projection conique conforme de Lambert (paramètres de Statistique Canada), "
+                        "calculée par src/geo.py. Territoires : pas d'IPC provincial publié."), F(9, color=INK3, italic=True), WRAPL)
 cp.freeze_panes = "A7"
 
 # ================================================================== Carte villes
@@ -950,8 +951,8 @@ color_series(chq.series[1], BLUE, width=31750)
 for s_ in chq.series:
     s_.marker.symbol, s_.marker.size = "circle", 6
 cv.add_chart(chq, "L38")
-note(cv, "B58", "Positions : projection conique conforme de Lambert (src/geo.py). Contours : Natural Earth. "
-                "Estimations expérimentales de Statistique Canada (46-10-0092-01).")
+merge(cv, "B58:K59", tr("Positions : projection conique conforme de Lambert (src/geo.py). Contours : Natural Earth. "
+                        "Estimations expérimentales de Statistique Canada (46-10-0092-01)."), F(9, color=INK3, italic=True), WRAPL)
 cv.freeze_panes = "A7"
 
 # ================================================================== Scénarios
@@ -982,6 +983,7 @@ for i, (lab_, src_, f_) in enumerate(scen):
     merge(sc, f"B{r}:C{r}", lab_, F(10, True), fill_color=WHITE, border=BOX)
     sc[f"D{r}"], sc[f"E{r}"] = src_, f_
     sc[f"D{r}"].font = F(9, color=INK2)
+    sc[f"D{r}"].alignment = Alignment(horizontal="left", vertical="center", shrink_to_fit=True)
     sc[f"F{r}"] = 0
     sc[f"F{r}"].font, sc[f"F{r}"].fill, sc[f"F{r}"].border, sc[f"F{r}"].number_format = INPUT_FONT, fill("FFF6C2"), BOX, PCT_S
     sc[f"F{r}"].alignment = Alignment(horizontal="center")
@@ -1059,6 +1061,7 @@ res = [
 ]
 for r, lab_, f_, fmt in res:
     s[f"B{r}"] = lab_
+    s[f"B{r}"].alignment = Alignment(horizontal="left", vertical="center", shrink_to_fit=True)
     s[f"C{r}"] = f_
     s[f"C{r}"].number_format, s[f"C{r}"].border, s[f"C{r}"].font, s[f"C{r}"].alignment = fmt, BOX, F(10, True), RIGHT
 s["C19"].comment = Comment(tr("SCHL, Rapport sur le marché locatif 2025, figure 1. Publié pour les 2 chambres seulement."), "Projet Loyers Montréal")

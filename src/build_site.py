@@ -234,7 +234,7 @@ def ko(rel):
 SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/rents_database_sqlite.sql"),
          "__SZ_REQ__": ko("assets/rents_queries_sqlite.sql"), "__SZ_PG__": ko("assets/rents_database_postgres.sql"),
          "__SZ_MSSQL__": ko("assets/rents_database_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/rents_queries_sqlserver.sql"), "__SZ_REQ_PG__": ko("assets/rents_queries_postgres.sql"),
-         "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/modele_loyers_montreal_en.xlsx")}
+         "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/montreal_rents_workbook.xlsx")}
 common = {
     **SIZES,
     "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", "\u202f"),

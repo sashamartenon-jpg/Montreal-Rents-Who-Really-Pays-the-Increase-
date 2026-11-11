@@ -16,7 +16,7 @@ from PIL import Image, ImageChops
 import os
 ROOT = Path(__file__).resolve().parents[1]
 LANG = os.environ.get("XL_LANG", "fr")
-SRC = ROOT / "docs" / "assets" / ("modele_loyers_montreal.xlsx" if LANG == "fr" else "modele_loyers_montreal_en.xlsx")
+SRC = ROOT / "docs" / "assets" / ("modele_loyers_montreal.xlsx" if LANG == "fr" else "montreal_rents_workbook.xlsx")
 OUT = ROOT / "docs" / "assets" / "excel" / ("" if LANG == "fr" else "en")
 OUT.mkdir(parents=True, exist_ok=True)
 SHEETS = ({"Accueil": "accueil", "Tableau de bord": "tableau-de-bord", "Carte provinces": "carte-provinces",
