@@ -49,14 +49,14 @@ ASSO = [
     ("Observer le loyer", ["loyer", "cote"], 790, 600, [("RMR", "0,n"), ("TRIM", "0,n"), ("EST", "0,n")], "fait_loyer_trimestriel"),
 ]
 EW, AW, AH = 220, 170, 0
-# Version anglaise des deux schémas. Le MCD est conceptuel : ses libellés se traduisent. Le MLD est lu dans la
-# base : ses noms de tables et de colonnes sont ceux de la base (français) et restent tels quels, avec un lexique.
+# Version anglaise des deux schémas : le MCD est traduit et confronté à la base anglaise (src/english.py) ;
+# le MLD anglais est dessiné à partir de cette base, comme le MLD français l'est à partir de la base française.
 EN = {
     "TYPE DE LOGEMENT": "UNIT TYPE", "GRANDE VILLE": "LARGE CITY", "INDICATEUR SCHL": "CMHC INDICATOR", "ANNÉE": "YEAR",
     "PROVINCE": "PROVINCE", "RÉGION MÉTROPOLITAINE": "METROPOLITAN AREA", "TRIMESTRE": "QUARTER", "ESTIMATION": "ESTIMATE",
     "Mesurer le loyer": "Measure rent", "Mesurer l'inoccupation": "Measure vacancy", "Indicer les prix": "Index prices",
     "Publier (SCHL)": "Publish (CMHC)", "Indicer le loyer": "Index rent", "Appartenir": "Belong to", "Observer le loyer": "Observe rent",
-    "libellé": "label", "chambres": "bedrooms", "unité": "unit", "nom": "name", "niveau": "level", "annee": "year", "periode": "quarter",
+    "libellé": "label", "chambres": "bedrooms", "unité": "unit", "nom": "name", "niveau": "level", "annee": "year", "periode": "period",
     "loyer": "rent", "taux": "rate", "ipc": "cpi", "valeur": "value", "ipc_loyer": "rent_cpi", "ipc_ensemble": "all_items_cpi", "cote": "grade",
 }
 tr = lambda s, lang: EN.get(s, s) if lang == "en" else s
@@ -140,8 +140,8 @@ LAYOUT = {  # table : (x, y)
 TW, RH, HH = 250, 22, 32
 
 
-def schema():
-    con = sqlite3.connect(DB)
+def schema(db=DB):
+    con = sqlite3.connect(db)
     tables = [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
     info = {}
     for t in tables:
@@ -159,9 +159,9 @@ def card_pill(cx, cy, txt):
             f'font-family="{MONO}">{txt}</text></g>')
 
 
-def mld_svg(info, lang="fr"):
+def mld_svg(info, lang="fr", LAYOUT=LAYOUT):
     assert set(info) == set(LAYOUT), f"Tables sans position dans le MLD : {set(info) ^ set(LAYOUT)}"
-    W, H = 1460, (700 if lang == "fr" else 742)
+    W, H = 1460, 700
     rowy = {}
     boxes, arrows, cards, seen = [], [], [], set()
     for t, (cols, fks) in info.items():
@@ -211,18 +211,12 @@ def mld_svg(info, lang="fr"):
            *([f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Modèle logique (relationnel) généré depuis la base · '
               f'souligné : clé primaire · # : clé étrangère, flèche vers la clé référencée · 1,1 / 0,n : cardinalités · rose : faits, bleu : dimensions</text>']
              if lang == "fr" else
-             [f'<text x="30" y="{H - 60}" font-size="12" fill="{INK2}">Logical (relational) model generated from the database · '
-              f'underlined: primary key · #: foreign key, arrow to the referenced key · 1,1 / 0,n: cardinalities · pink: facts, blue: dimensions</text>',
-              f'<text x="30" y="{H - 38}" font-size="12" fill="{INK2}">Table and column names are the database\'s own, in French: '
-              f'fait = fact · loyer = rent · logement = unit type · chambres = bedrooms · annee = year · periode = quarter · taux = rate · '
-              f'inoccupation = vacancy</text>',
-              f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">ipc = CPI · ensemble = all items · cote = reliability grade · '
-              f'libelle = label · nom = name · niveau = level · unite = unit · valeur = value · indicateur = indicator · '
-              f'rmr = metro area · schl = CMHC · roulement = turnover · trimestriel = quarterly</text>']), '</svg>']
+             [f'<text x="30" y="{H - 18}" font-size="12" fill="{INK2}">Logical (relational) model generated from the database · '
+              f'underlined: primary key · #: foreign key, arrow to the referenced key · 1,1 / 0,n: cardinalities · pink: facts, blue: dimensions</text>']), '</svg>']
     return "\n".join(out)
 
 
-def check_mcd(info):
+def check_mcd(info, ENT=ENT, ASSO=ASSO):
     """Le MCD doit se traduire dans la base réelle : entités -> tables, associations porteuses -> tables de faits."""
     cols = {t: {c[0] for c in info[t][0]} for t in info}
     for k, (_, ident, attrs, *_ , table) in ENT.items():
@@ -260,7 +254,14 @@ if __name__ == "__main__":
     (OUT / "mcd.svg").write_text(mcd_svg(), encoding="utf-8")
     (OUT / "mld.svg").write_text(mld_svg(info), encoding="utf-8")
     (OUT / "mcd_en.svg").write_text(mcd_svg("en"), encoding="utf-8")
-    (OUT / "mld_en.svg").write_text(mld_svg(info, "en"), encoding="utf-8")
+    # version anglaise : base anglaise produite par src/english.py, mêmes positions, mêmes contrôles
+    from english import IDENT, MIR
+    T = lambda x: IDENT.get(x, x)
+    info_en = schema(MIR / "data" / "loyers.sqlite")
+    check_mcd(info_en, {k: (t, T(i), a, x, y, T(tb) if tb else None) for k, (t, i, a, x, y, tb) in ENT.items()},
+              [(n, [T(a) for a in at], x, y, links, T(tb) if tb else None) for n, at, x, y, links, tb in ASSO])
+    assert all(EN[a] == T(a) for _, at, *_ in ASSO for a in at), "attributs du MCD anglais différents des colonnes de la base anglaise"
+    (OUT / "mld_en.svg").write_text(mld_svg(info_en, "en", {T(k): v for k, v in LAYOUT.items()}), encoding="utf-8")
     # chaque libellé du MCD a sa traduction : aucun texte français ne reste dans la version anglaise
     manquants = [x for x in [e[0] for e in ENT.values()] + [a[0] for a in ASSO] + [at for e in ENT.values() for at in e[2]]
                  + [at for a in ASSO for at in a[1]] if x not in EN and x not in ("latitude", "longitude")]

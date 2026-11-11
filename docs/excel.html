@@ -1034,7 +1034,7 @@ window.PAGE_EN = {
   FX.schema = {
     faint: .55,
     build(a, cv) {
-      let S; try { S = JSON.parse(cv.dataset.schema); } catch (e) { return null; }
+      let S; try { S = JSON.parse((window.LANG === "en" && cv.dataset.schemaEn) || cv.dataset.schema); } catch (e) { return null; }   /* schéma de la base dans la langue affichée */
       const dims = S.t.filter(n => n.startsWith("dim_")), facts = S.t.filter(n => !n.startsWith("dim_"));
       const cx = a.x + a.w / 2, cy = a.y + a.h / 2, rx = a.w * (a.faint ? .44 : .36), ry = a.h * .4, pos = {};
       dims.forEach((n, i) => { const an = -Math.PI / 2 + TAU * (i + .5) / dims.length; pos[n] = { n, x: cx + Math.cos(an) * rx, y: cy + Math.sin(an) * ry, an, dim: true }; });

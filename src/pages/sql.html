@@ -2,14 +2,14 @@
 <meta name="description" content="Base SQL en modèle en étoile (__N_TABLES__ tables, __N_VUES__ vues) pour SQL Server, PostgreSQL et SQLite, et __N_SQL__ requêtes analytiques sur les loyers, exécutables dans le navigateur.">
 __HEADER__
 <main id="main">
-  <div class="heroband"><canvas class="herofx" data-fx="schema" data-schema='__SCHEMA_JSON__' aria-hidden="true"></canvas><div class="wrap phero">
+  <div class="heroband"><canvas class="herofx" data-fx="schema" data-schema='__SCHEMA_JSON__' data-schema-en='__SCHEMA_JSON_EN__' aria-hidden="true"></canvas><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · SQL</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Une base modélisée, <mark>__N_SQL__ requêtes</mark>, zéro chiffre non vérifié</h1>
     <p class="hero-in" style="--d:.16s" data-i18n="lede">J'ai modélisé puis codé la base du projet en SQL : modèle conceptuel, modèle logique, __N_TABLES__ tables avec clés et contraintes et __N_VUES__ vues analytiques. Chaque chiffre du site est recalculé en SQL et recoupé avec le classeur Excel : au moindre écart, la construction du site s'arrête.</p>
     <ul class="proves" data-i18n="chips">
       <li>MCD / MLD (Merise)</li><li>3e forme normale</li><li>Clés et contraintes CHECK</li><li>Vues</li><li>CTE (WITH)</li><li>Fonctions de fenêtre (LAG, RANK)</li><li>SQL Server</li><li>PostgreSQL</li><li>SQLite</li>
     </ul>
-    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/rents_database_sqlserver.sql" download data-i18n="dl1">Base SQL Server (T-SQL) ↗</a><a class="btn" href="#fichiers" data-i18n="dl2">PostgreSQL, SQLite ↓</a></p>
+    <p style="margin-top:18px;display:flex;flex-wrap:wrap;gap:8px"><a class="btn primary" href="assets/rents_database_sqlserver.sql" data-en-href="assets/rents_database_sqlserver_en.sql" download data-i18n="dl1">Base SQL Server (T-SQL) ↗</a><a class="btn" href="#fichiers" data-i18n="dl2">PostgreSQL, SQLite ↓</a></p>
   </div></div>
 
   <section class="block">
@@ -65,9 +65,9 @@ __HEADER__
       <p class="intro" data-i18n="fI">Chaque moteur a son dialecte : prendre la ligne du moteur utilisé, puis exécuter les deux fichiers <b>dans l'ordre</b>. Le fichier ① crée les tables et les vues et charge les données ; le fichier ② ne fonctionne qu'après, sur la même base. Les trois versions ont été exécutées sans erreur sur SQL Server 2022, PostgreSQL 16 et SQLite 3.</p>
       <div class="tablewrap"><table class="data files">
         <tr><th data-i18n="fH1">Moteur</th><th data-i18n="fH2">① D'abord : la base (tables, vues, données)</th><th data-i18n="fH3">② Ensuite : les __N_SQL__ requêtes</th></tr>
-        <tr><td><b>SQL Server 2016+</b><br><span class="small">SSMS, Azure Data Studio</span></td><td><a href="assets/rents_database_sqlserver.sql" download>rents_database_sqlserver.sql</a> <span class="small">· __SZ_MSSQL__</span></td><td><a href="assets/rents_queries_sqlserver.sql" download>rents_queries_sqlserver.sql</a> <span class="small">· __SZ_REQ_MSSQL__</span></td></tr>
-        <tr><td><b>PostgreSQL 12+</b><br><span class="small">psql, pgAdmin, DBeaver</span></td><td><a href="assets/rents_database_postgres.sql" download>rents_database_postgres.sql</a> <span class="small">· __SZ_PG__</span></td><td><a href="assets/rents_queries_postgres.sql" download>rents_queries_postgres.sql</a> <span class="small">· __SZ_REQ_PG__</span></td></tr>
-        <tr><td><b>SQLite 3.25+</b><br><span class="small">DB Browser for SQLite, DBeaver</span></td><td><a href="assets/rents_database_sqlite.sql" download>rents_database_sqlite.sql</a> <span class="small">· __SZ_SQL__</span></td><td><a href="assets/rents_queries_sqlite.sql" download>rents_queries_sqlite.sql</a> <span class="small">· __SZ_REQ__</span></td></tr>
+        <tr><td><b>SQL Server 2016+</b><br><span class="small">SSMS, Azure Data Studio</span></td><td data-i18n="fc_d_sqlserver"><a href="assets/rents_database_sqlserver.sql" download>rents_database_sqlserver.sql</a> <span class="small">· __SZ_MSSQL__</span></td><td data-i18n="fc_q_sqlserver"><a href="assets/rents_queries_sqlserver.sql" download>rents_queries_sqlserver.sql</a> <span class="small">· __SZ_REQ_MSSQL__</span></td></tr>
+        <tr><td><b>PostgreSQL 12+</b><br><span class="small">psql, pgAdmin, DBeaver</span></td><td data-i18n="fc_d_postgres"><a href="assets/rents_database_postgres.sql" download>rents_database_postgres.sql</a> <span class="small">· __SZ_PG__</span></td><td data-i18n="fc_q_postgres"><a href="assets/rents_queries_postgres.sql" download>rents_queries_postgres.sql</a> <span class="small">· __SZ_REQ_PG__</span></td></tr>
+        <tr><td><b>SQLite 3.25+</b><br><span class="small">DB Browser for SQLite, DBeaver</span></td><td data-i18n="fc_d_sqlite"><a href="assets/rents_database_sqlite.sql" download>rents_database_sqlite.sql</a> <span class="small">· __SZ_SQL__</span></td><td data-i18n="fc_q_sqlite"><a href="assets/rents_queries_sqlite.sql" download>rents_queries_sqlite.sql</a> <span class="small">· __SZ_REQ__</span></td></tr>
       </table></div>
       <h3 data-i18n="hT" style="margin-top:22px">Mode d'emploi</h3>
       <ul class="howto">
@@ -83,6 +83,7 @@ __HEADER__
 </main>
 __FOOTER__
 <script id="sqlres" type="application/json">__SQL_JSON__</script>
+<script id="sqlres-en" type="application/json">__SQL_JSON_EN__</script>
 <script>__COMMON_JS__</script>
 <script>
 window.PAGE_EN = {
@@ -94,18 +95,24 @@ window.PAGE_EN = {
   dl1: `SQL Server database (T-SQL) ↗`, dl2: `PostgreSQL, SQLite ↓`,
   mK: `Modelling`,
   mT: `From conceptual model to database`,
-  mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. The logical model shows the database's own table and column names, which are in French, with a glossary under the diagram.`,
+  mI: `I modelled the data before coding it: a conceptual model (Merise) for the objects and their links, then a relational logical model. The logical model is drawn from the database itself, and the conceptual model is checked against the database at every build: they cannot drift from the code. In English, the diagrams, the queries and the files use the English version of the database, derived from the French one and checked against it at every build.`,
   mTabC: `Conceptual model (MCD)`, mTabL: `Logical model (MLD)`,
   mCapC: `Seven associations. Example: a metro area belongs to exactly one province (1,1); a province holds zero or more metro areas (0,n). YEAR and QUARTER are time entities, not turned into tables.`,
   mCapL: `Six fact tables (pink) and six dimensions (blue). Each data-bearing association of the conceptual model becomes a fact table whose composite primary key joins the identifiers of the linked entities. On each link: a fact row references exactly one row of the dimension (1,1); a dimension row is referenced by zero or more rows (0,n).`,
   mVol: `__SQL_VOLUMES_EN__`,
   fT: `The scripts, by engine`,
-  fI: `Each engine has its own dialect: take the row of the engine you use, then run the two files <b>in order</b>. File ① creates the tables and views and loads the data; file ② only works after it, on the same database. All three versions were run without errors on SQL Server 2022, PostgreSQL 16 and SQLite 3.`,
+  fI: `Each engine has its own dialect: take the row of the engine you use, then run the two files <b>in order</b>. File ① creates the tables and views and loads the data; file ② only works after it, on the same database. The French versions were run without errors on SQL Server 2022, PostgreSQL 16 and SQLite 3. The English versions offered here are derived from them automatically: same results on PostgreSQL 16 and SQLite 3, syntax validated for SQL Server.`,
+  fc_d_sqlserver: `<a href="assets/rents_database_sqlserver_en.sql" download>rents_database_sqlserver_en.sql</a> <span class="small">· __SZ_EN_database_sqlserver__</span>`,
+  fc_q_sqlserver: `<a href="assets/rents_queries_sqlserver_en.sql" download>rents_queries_sqlserver_en.sql</a> <span class="small">· __SZ_EN_queries_sqlserver__</span>`,
+  fc_d_postgres: `<a href="assets/rents_database_postgres_en.sql" download>rents_database_postgres_en.sql</a> <span class="small">· __SZ_EN_database_postgres__</span>`,
+  fc_q_postgres: `<a href="assets/rents_queries_postgres_en.sql" download>rents_queries_postgres_en.sql</a> <span class="small">· __SZ_EN_queries_postgres__</span>`,
+  fc_d_sqlite: `<a href="assets/rents_database_sqlite_en.sql" download>rents_database_sqlite_en.sql</a> <span class="small">· __SZ_EN_database_sqlite__</span>`,
+  fc_q_sqlite: `<a href="assets/rents_queries_sqlite_en.sql" download>rents_queries_sqlite_en.sql</a> <span class="small">· __SZ_EN_queries_sqlite__</span>`,
   ko: `KB`, fH1: `Engine`, fH2: `① First: the database (tables, views, data)`, fH3: `② Then: the __N_SQL__ queries`,
   hT: `How to run them`,
-  h1s: `<b>SQL Server 2016+</b> · in SSMS or Azure Data Studio, create an empty database (<code>CREATE DATABASE loyers;</code>) and select it instead of <code>master</code>; ① run <code>rents_<wbr>database_<wbr>sqlserver.sql</code> (F5); ② open <code>rents_<wbr>queries_<wbr>sqlserver.sql</code> on the same database and run it.`,
-  h2s: `<b>PostgreSQL 12+</b> · <code>createdb loyers</code>; ① <code>psql -d loyers -f rents_<wbr>database_<wbr>postgres.sql</code>; ② <code>psql -d loyers -f rents_<wbr>queries_<wbr>postgres.sql</code>.`,
-  h3s: `<b>SQLite 3.25+</b> · open an empty database (DB Browser for SQLite, DBeaver or an online editor); ① run <code>rents_<wbr>database_<wbr>sqlite.sql</code>; ② run <code>rents_<wbr>queries_<wbr>sqlite.sql</code>.`,
+  h1s: `<b>SQL Server 2016+</b> · in SSMS or Azure Data Studio, create an empty database (<code>CREATE DATABASE rents;</code>) and select it instead of <code>master</code>; ① run <code>rents_<wbr>database_<wbr>sqlserver_<wbr>en.sql</code> (F5); ② open <code>rents_<wbr>queries_<wbr>sqlserver_<wbr>en.sql</code> on the same database and run it.`,
+  h2s: `<b>PostgreSQL 12+</b> · <code>createdb rents</code>; ① <code>psql -d rents -f rents_<wbr>database_<wbr>postgres_<wbr>en.sql</code>; ② <code>psql -d rents -f rents_<wbr>queries_<wbr>postgres_<wbr>en.sql</code>.`,
+  h3s: `<b>SQLite 3.25+</b> · open an empty database (DB Browser for SQLite, DBeaver or an online editor); ① run <code>rents_<wbr>database_<wbr>sqlite_<wbr>en.sql</code>; ② run <code>rents_<wbr>queries_<wbr>sqlite_<wbr>en.sql</code>.`,
   hN: `File ① runs once: run again on the same database, it stops on "table already exists". Running file ② without file ① returns "object not found" (<i>Invalid object name</i>, <i>no such table</i>).`,
   coT: `Console: run the queries yourself`,
   coI: `SQLite runs in your browser (sql.js). Pick a query, edit it or write your own, then run it. Shortcut: Ctrl+Enter.`,
@@ -115,7 +122,11 @@ window.PAGE_EN = {
   qlN: `Each query carries its level: <span class="lvl D">Beginner</span> 3 queries out of 12, aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> 6 queries, one CTE with a pivot, a ranking or a LAG, query over views · <span class="lvl A">Advanced</span> 3 queries, combined windows (ROWS frame, two partitioned windows, ROW_NUMBER per group).`,
   pgL: `← Excel`, pgR: `Analysis →`
 };
-const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
+/* Deux bases : la française (source) et l'anglaise, qui en est dérivée et donne les mêmes résultats.
+   SQLRES suit la langue affichée : requêtes, noms de colonnes et résultats précalculés. */
+const RES = { fr: JSON.parse(document.getElementById("sqlres").textContent), en: JSON.parse(document.getElementById("sqlres-en").textContent) };
+const lang = () => window.LANG === "en" ? "en" : "fr";
+let SQLRES = RES[lang()];
 const LVL = { "Débutant": "Beginner", "Intermédiaire": "Intermediate", "Avancé": "Advanced" };
 const tr = (fr, en) => window.LANG === "en" ? en : fr;
 const NOTES = {
@@ -144,11 +155,17 @@ const NOTES = {
   "11_vacancy_vs_rent.sql": { niv: "Intermédiaire", q: "Quand les loyers ont-ils monté malgré plus de logements vacants ?", tags: ["JOIN sur 2 clés", "LAG", "Filtre sur valeurs calculées"], tags_en: ["JOIN on 2 keys", "LAG", "Filter on computed values"], why: "Les deux séries sont alignées par année, puis LAG compare chaque année à la précédente. Trois années répondent au critère, dont 2025.",
     q_en: "When did rents rise despite more vacant units?", why_en: "The two series are aligned by year, then LAG compares each year to the previous one. Three years meet the criterion, 2025 among them." }
 };
-const SCHEMA_TXT = [["fait_loyer", "annee, geo_id, unit_id, loyer"], ["fait_loyer_trimestriel", "periode, geo_id, estimation (A/P), loyer, cote"],
-  ["fait_inoccupation", "annee, geo_id, taux"], ["ipc_provinces", "annee, code, ipc_loyer, ipc_ensemble"], ["ipc", "annee, geo_id, ipc"],
-  ["schl_roulement", "annee, geo_id, indicateur, valeur"], ["dim_logement", "unit_id, libelle_fr, chambres"], ["dim_geo", "geo_id, libelle_fr"], ["dim_rmr", "geo_id, nom, province, lat, lon"],
-  ["dim_province", "code, nom, niveau"], ["dim_estimation", "code, libelle"], ["dim_indicateur", "code, libelle, unite"],
-  ["Vues", "v_loyer_reel, v_variation_annuelle, v_dernier_trimestre, v_ecart_demande_paye, v_ipc_provinces_variation"]];
+const SCHEMA_TXT = {
+  fr: [["fait_loyer", "annee, geo_id, unit_id, loyer"], ["fait_loyer_trimestriel", "periode, geo_id, estimation (A/P), loyer, cote"],
+    ["fait_inoccupation", "annee, geo_id, taux"], ["ipc_provinces", "annee, code, ipc_loyer, ipc_ensemble"], ["ipc", "annee, geo_id, ipc"],
+    ["schl_roulement", "annee, geo_id, indicateur, valeur"], ["dim_logement", "unit_id, libelle_fr, chambres"], ["dim_geo", "geo_id, libelle_fr"], ["dim_rmr", "geo_id, nom, province, lat, lon"],
+    ["dim_province", "code, nom, niveau"], ["dim_estimation", "code, libelle"], ["dim_indicateur", "code, libelle, unite"],
+    ["Vues", "v_loyer_reel, v_variation_annuelle, v_dernier_trimestre, v_ecart_demande_paye, v_ipc_provinces_variation"]],
+  en: [["fact_rent", "year, geo_id, unit_id, rent"], ["fact_rent_quarterly", "period, geo_id, estimate (A/P), rent, grade"],
+    ["fact_vacancy", "year, geo_id, rate"], ["cpi_provinces", "year, code, rent_cpi, all_items_cpi"], ["cpi", "year, geo_id, cpi"],
+    ["cmhc_turnover", "year, geo_id, indicator, value"], ["dim_unit_type", "unit_id, label_en, bedrooms"], ["dim_city", "geo_id, label_en"], ["dim_metro_area", "geo_id, name, province, lat, lon"],
+    ["dim_province", "code, name, level"], ["dim_estimate", "code, label"], ["dim_indicator", "code, label, unit"],
+    ["Views", "v_real_rent, v_annual_change, v_latest_quarter, v_asking_paid_gap, v_cpi_provinces_change"]] };
 document.querySelectorAll(".mtabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".mtabs button").forEach(x => x.setAttribute("aria-pressed", x === b));
   document.getElementById("m-mcd").hidden = b.dataset.m !== "mcd";
@@ -169,20 +186,26 @@ function drawQlist() {
 }
 drawQlist();
 
-const st = { i: 0, db: null, loading: null, stat: null, out: null };
+const st = { i: 0, db: null, dbs: {}, SQL: null, loading: null, stat: null, out: null };
 /* L'état et le dernier résultat sont mémorisés sous une forme indépendante de la langue (une fonction, des lignes brutes) :
    au changement de langue, la ligne d'état et le tableau se réécrivent, format des nombres compris. */
 function setStat(f) { st.stat = f; document.getElementById("sql-stat").textContent = f(); }
 function setOut(cols, rows) { st.out = cols ? [cols, rows] : null; document.getElementById("sql-out").innerHTML = cols ? resultTable(cols, rows) : ""; }
 function loadSQL() {
-  if (st.loading) return st.loading;
-  setStat(() => tr("Chargement de SQLite…", "Loading SQLite…"));
-  st.loading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); })
-    .then(() => initSqlJs({ locateFile: f => "assets/" + f }))
-    .then(SQL => fetch("assets/loyers.sqlite").then(r => { if (!r.ok) throw new Error("db"); return r.arrayBuffer(); }).then(b => { st.db = new SQL.Database(new Uint8Array(b)); }))
-    .then(() => { setStat(() => tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run")); })
-    .catch(() => { setStat(() => tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown.")); });
-  return st.loading;
+  /* sql.js se charge une fois ; chaque base (française, anglaise) se charge à la première demande */
+  const L = lang();
+  if (st.loading && st.loading.L === L) return st.loading;
+  st.db = st.dbs[L] || null;
+  if (!st.db) setStat(() => tr("Chargement de SQLite…", "Loading SQLite…"));
+  const engine = st.SQL ? Promise.resolve(st.SQL)
+    : new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); })
+        .then(() => initSqlJs({ locateFile: f => "assets/" + f })).then(SQL => (st.SQL = SQL));
+  const p = engine
+    .then(SQL => st.dbs[L] || fetch("assets/" + (L === "en" ? "rents_en.sqlite" : "loyers.sqlite")).then(r => { if (!r.ok) throw new Error("db"); return r.arrayBuffer(); }).then(b => (st.dbs[L] = new SQL.Database(new Uint8Array(b)))))
+    .then(db => { if (lang() === L) { st.db = db; setStat(() => tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run")); } })
+    .catch(() => { if (lang() === L) setStat(() => tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown.")); });
+  p.L = L; st.loading = p;
+  return p;
 }
 async function runSQL() {
   const err = document.getElementById("sql-err"); err.hidden = true;
@@ -206,7 +229,7 @@ function drawTabs() {
 drawTabs();
 document.getElementById("sql-editor").value = SQLRES[st.i].sql;
 function drawSchema() {
-  document.getElementById("schema").innerHTML = `<p style='margin:0 0 6px;font-family:var(--font-body)'>${tr("Tables", "Tables")}</p>` + SCHEMA_TXT.map(([n, c]) => `<b>${n}</b>${c}`).join("<br>");
+  document.getElementById("schema").innerHTML = `<p style='margin:0 0 6px;font-family:var(--font-body)'>${tr("Tables", "Tables")}</p>` + SCHEMA_TXT[lang()].map(([n, c]) => `<b>${n}</b>${c}`).join("<br>");
 }
 drawSchema();
 setOut(SQLRES[0].columns, SQLRES[0].rows);
@@ -215,6 +238,15 @@ document.getElementById("sql-editor").addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSQL(); }
   if (e.key === "Tab") { e.preventDefault(); const el = e.target; el.setRangeText("  ", el.selectionStart, el.selectionEnd, "end"); }
 });
-document.addEventListener("langchange", () => { drawQlist(); drawTabs(); drawSchema(); if (st.stat) setStat(st.stat); if (st.out) setOut(st.out[0], st.out[1]); });
+/* Changement de langue : la requête choisie, son résultat, la liste des tables et la base passent dans l'autre langue.
+   Une requête écrite à la main est remplacée par la requête choisie : ses noms de tables n'existent pas dans l'autre base. */
+document.addEventListener("langchange", () => {
+  SQLRES = RES[lang()];
+  drawQlist(); drawTabs(); drawSchema();
+  document.getElementById("sql-editor").value = SQLRES[st.i].sql;
+  document.getElementById("sql-err").hidden = true;
+  setOut(SQLRES[st.i].columns, SQLRES[st.i].rows);
+  loadSQL();
+});
 loadSQL();
 </script>

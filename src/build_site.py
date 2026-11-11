@@ -120,6 +120,7 @@ MOTION_JS = (SRC / "pages" / "motion.js").read_text(encoding="utf-8")
 I18N_JS = (SRC / "pages" / "i18n.js").read_text(encoding="utf-8")
 data = (DOCS / "data" / "data.json").read_text(encoding="utf-8").replace("</", "<\\/")
 sqlres = (DOCS / "data" / "sql_results.json").read_text(encoding="utf-8").replace("</", "<\\/")
+sqlres_en = (DOCS / "data" / "sql_results_en.json").read_text(encoding="utf-8").replace("</", "<\\/")   # base anglaise (src/english.py)
 carte_json = (DOCS / "data" / "carte.json").read_text(encoding="utf-8").replace("</", "<\\/")
 geo_json = (DOCS / "data" / "canada_provinces.geojson").read_text(encoding="utf-8")
 _REG = [v for v in json.loads(carte_json.replace("<\\/", "</"))["villes"] if v["lat"] is not None]   # 42 RMR, sans l'agrégat national
@@ -140,9 +141,9 @@ def scene_json():
     assert sum(v["mtl"] for v in villes) == 1 and len(villes) >= 10, "scène : Montréal ou régions manquantes"
     return json.dumps({"villes": villes}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
-def schema_json():
+def schema_json(lang="fr"):
     """Tables et clés étrangères lues dans sql/schema/01_tables.sql, pour le motif animé du bandeau de la page SQL."""
-    src = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8")
+    src = (ROOT / "sql" / ("schema" if lang == "fr" else "en/schema") / "01_tables.sql").read_text(encoding="utf-8")
     tables, links = [], []
     for name, body in re.findall(r"CREATE TABLE (\w+)\s*\((.*?)\n\);", src, flags=re.S):
         tables.append(name)
@@ -241,14 +242,16 @@ def ko(rel):
 SIZES = {"__SZ_SQLITE__": ko("assets/loyers.sqlite"), "__SZ_SQL__": ko("assets/rents_database_sqlite.sql"),
          "__SZ_REQ__": ko("assets/rents_queries_sqlite.sql"), "__SZ_PG__": ko("assets/rents_database_postgres.sql"),
          "__SZ_MSSQL__": ko("assets/rents_database_sqlserver.sql"), "__SZ_REQ_MSSQL__": ko("assets/rents_queries_sqlserver.sql"), "__SZ_REQ_PG__": ko("assets/rents_queries_postgres.sql"),
-         "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/montreal_rents_workbook.xlsx")}
+         "__SZ_XL__": ko("assets/modele_loyers_montreal.xlsx"), "__SZ_XL_EN__": ko("assets/montreal_rents_workbook.xlsx"),
+         **{f"__SZ_EN_{k}_{e}__": f"{(DOCS / 'assets' / f'rents_{k}_{e}_en.sql').stat().st_size / 1024:.0f} KB"
+            for k in ("database", "queries") for e in ("sqlserver", "postgres", "sqlite")}}
 common = {
     **SIZES,
     "__XL_FORMULAS__": f"{n_formulas:,}".replace(",", "\u202f"),
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
     "__N_PAYE__": str(N_PAYE), "__N_BOTH__": str(N_BOTH), "__N_DEMANDE__": str(N_DEMANDE), "__N_REG__": str(N_REG),
     "__N_SQL__": str(len(SQL_FILES)), "__N_TABLES__": str(N_TABLES), "__N_VUES__": str(N_VUES),
-    "__SCHEMA_JSON__": schema_json(),
+    "__SCHEMA_JSON__": schema_json(), "__SCHEMA_JSON_EN__": schema_json("en"),
     "__XL_SHEETS__": str(n_sheets - 1), "__XL_VISIBLE__": str(n_visible),
     "__PERIODE__": INS["periode_derniere"],
     "__CHOW_RUPT__": str(stats["chow_rupture"]), "__CHOW_F__": fr_num(stats["chow_f_2019"], 1),
@@ -328,7 +331,7 @@ written["index.html"] = (SKELETON + body + "\n</html>\n", body)
 for fname, _ in PAGES[1:]:
     tpl = (SRC / "pages" / fname).read_text(encoding="utf-8")
     head_part, rest = tpl.split("__HEADER__", 1)
-    rest = rest.replace("__FOOTER__", "").replace("__SQL_JSON__", sqlres)
+    rest = rest.replace("__FOOTER__", "").replace("__SQL_JSON__", sqlres).replace("__SQL_JSON_EN__", sqlres_en)
     rest = rest.replace("__CARTE_JSON__", carte_json).replace("__GEO_JSON__", geo_json)
     page = SKELETON + head_part + FONTS + CSS + "\n" + header(fname) + rest
     page = fill(page) + f"\n<script>{MOTION_JS}</script>\n<script>{I18N_JS}</script>\n</html>\n"

@@ -42,7 +42,7 @@ data/raw/        extractions officielles (Statistique Canada, SCHL) et coordonn�
 data/ref/        contours des provinces (Natural Earth, via sane-topojson, MIT), dictionnaire de données
 data/clean/      tables propres et statistiques calculées (stats.json : test de Chow, effet de composition)
 sql/schema/      création des tables et des vues (SQLite, source)
-sql/             12 requêtes commentées (SQLite)
+sql/             12 requêtes commentées (SQLite) ; sql/en/ : la version anglaise, générée
 sql/sqlserver/   rents_database_sqlserver.sql puis rents_queries_sqlserver.sql (T-SQL) · sql/postgres/ : les deux mêmes fichiers pour PostgreSQL
 src/             fetch_statcan · pipeline · build_db · sqlserver · postgres · modeles · build_excel (+ geo) · render_excel · build_site (+ rupture)
 src/pages/       pages Carte, Excel, SQL ; code commun et animations
@@ -58,6 +58,7 @@ python src/pipeline.py
 python src/build_db.py
 python src/sqlserver.py       # version SQL Server (T-SQL) de la base et des 12 requêtes (validée par sqlglot et sqlfluff)
 python src/postgres.py        # version PostgreSQL de la base et des 12 requêtes (validée par pglast)
+python src/english.py         # version anglaise de la base, des requêtes et des fichiers, dérivée de la française et comparée à elle
 python src/modeles.py         # MCD, MLD et fichiers téléchargeables de la base
 python src/build_excel.py
 python src/render_excel.py    # captures des feuilles (LibreOffice requis)
