@@ -104,6 +104,10 @@ def run_all(con):
         cols = [d[0] for d in cur.description]
         out.append({"file": f.name, "title": text.splitlines()[0].lstrip("- ").strip(),
                     "sql": text.strip(), "columns": cols, "rows": cur.fetchall()})
+    # répartition annoncée sur la page SQL : un quart débutant, la moitié intermédiaire, un quart avancé
+    niv = [x["sql"].splitlines()[1].split(":")[1].strip() for x in out]
+    n = {k: niv.count(k) for k in ("Débutant", "Intermédiaire", "Avancé")}
+    assert sum(n.values()) == len(out) and n["Débutant"] * 4 == len(out) == n["Avancé"] * 4, n
     return out
 
 

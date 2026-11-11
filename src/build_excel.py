@@ -1071,7 +1071,8 @@ label(s, "F4", "Comparaison")
 for i, (lab_, f_) in enumerate([("Ton loyer", "=C5"), ("Moyenne, tous locataires", "=C11"), ("2 ch. reloué (SCHL)", "=C19")]):
     s[f"F{5 + i}"], s[f"G{5 + i}"] = lab_, f_
     s[f"G{5 + i}"].number_format = MONEY
-s.column_dimensions["F"].width, s.column_dimensions["G"].width = 24, 12
+s.column_dimensions["F"].width, s.column_dimensions["G"].width = 26, 12
+s.column_dimensions["H"].width = s.column_dimensions["I"].width = 17      # le graphique (12,5 cm) tient sous le bandeau
 chs = BarChart()
 chs.type = "bar"
 style_chart(chs, "Ton loyer comparé au marché (2025)", yfmt='#,##0 "$"', legend=False, w=12.5, h=6.5)
@@ -1215,29 +1216,37 @@ banner(me, "Mode d'emploi : les fonctions du classeur, de la plus simple à la p
 me.column_dimensions["A"].width = 2
 for c_, w_ in zip("BCDEFGHIJ", [16, 24, 62, 32, 2, 2, 2, 2, 2]):
     me.column_dimensions[c_].width = w_
-canvas(me, 4, 46, 1, 10)
-label(me, "B5", "Les fonctions, par niveau")
+canvas(me, 4, 48, 1, 10)
 FN = [
-    ("Simple", "SOMME.SI.ENS", "Lit un loyer dans les tableaux sources selon plusieurs critères (année, type, trimestre…). La fonction la plus utilisée du classeur.", "Partout · ex. Tableau de bord"),
-    ("Simple", "MAX.SI.ENS / MIN.SI.ENS", "Le loyer demandé le plus élevé et le plus bas parmi les 16 régions, sans trier le tableau.", "Carte villes, repères du marché"),
-    ("Simple", "SI.CONDITIONS", "Le statut d'abordabilité en une seule formule lisible, au lieu de SI imbriqués.", "Simulateur"),
-    ("Simple", "LIEN_HYPERTEXTE", "Les boutons de navigation entre les feuilles.", "Accueil, bandeaux"),
+    ("Débutant", "SI + ET + SIERREUR", "Teste une condition ou neutralise une erreur : le message si les années sont inversées, les points qu'une série affiche ou non.", "Tableau de bord, Calculs"),
+    ("Débutant", "SI.CONDITIONS", "Le statut d'abordabilité en une seule formule lisible, au lieu de SI imbriqués.", "Simulateur"),
+    ("Débutant", "Liste déroulante", "Validation des données : une case jaune n'accepte qu'une année, un type de logement ou une ville de la liste.", "Tableau de bord, Cartes, Simulateur"),
+    ("Débutant", "LIEN_HYPERTEXTE", "Les boutons de navigation entre les feuilles.", "Accueil, bandeaux"),
+    ("Intermédiaire", "SOMME.SI.ENS", "Lit un loyer dans les tableaux sources selon plusieurs critères (année, type, trimestre…). La fonction la plus utilisée du classeur.", "Partout · ex. Tableau de bord"),
+    ("Intermédiaire", "MAX.SI.ENS / MIN.SI.ENS", "Le loyer demandé le plus élevé et le plus bas parmi les 16 régions, sans trier le tableau.", "Carte villes, repères du marché"),
     ("Intermédiaire", "INDEX + EQUIV", "Retrouve une valeur par sa position : la fiche de la ville choisie, le tri des classements.", "Cartes, Tableau de bord"),
     ("Intermédiaire", "RANG + INDEX/EQUIV", "Trie les villes par hausse sans macro : RANG classe, INDEX/EQUIV reconstruit la liste triée.", "Calculs (alimente les graphiques)"),
     ("Intermédiaire", "CENTILE", "Découpe les valeurs en quintiles : les 5 classes de couleur des cartes.", "Calculs, légendes des cartes"),
     ("Intermédiaire", "CHOISIR + EQUIV", "Bascule les cartes d'un indicateur à l'autre à partir d'une liste déroulante.", "Calculs"),
-    ("Avancée", "NPM (NPER)", "Le nombre d'années pour que le loyer moyen rattrape le prix des annonces, pour chaque scénario.", "Scénarios"),
-    ("Avancée", "NA() dans les séries", "Un point NA() n'est pas tracé : les classes de couleur des cartes et les périodes des courbes.", "Calculs (feuille masquée)"),
-    ("Avancée", "Graphique en nuage de points", "Les deux cartes : les contours projetés sont une série de lignes, chaque ville ou province une série de points.", "Carte provinces, Carte villes"),
-    ("Excel 365", "RECHERCHEX à deux critères", "Le loyer du marché pour un type et une année, en un seul appel.", "Excel 365"),
-    ("Excel 365", "LET", "Des étapes nommées dans la formule : lisible et plus rapide à vérifier.", "Excel 365"),
-    ("Excel 365", "FILTRE + TRIER + UNIQUE", "Extraire, classer et dédoublonner un portefeuille sans colonnes intermédiaires.", "Excel 365"),
+    ("Intermédiaire", "NPM (NPER)", "Le nombre d'années pour que le loyer moyen rattrape le prix des annonces, pour chaque scénario.", "Scénarios"),
+    ("Intermédiaire", "RECHERCHEX à deux critères", "Le loyer du marché pour un type et une année, en un seul appel.", "Excel 365"),
+    ("Avancé", "NA() dans les séries", "Un point NA() n'est pas tracé : les classes de couleur des cartes et les périodes des courbes.", "Calculs (feuille masquée)"),
+    ("Avancé", "Graphique en nuage de points", "Les deux cartes : les contours projetés sont une série de lignes, chaque ville ou province une série de points.", "Carte provinces, Carte villes"),
+    ("Avancé", "LET", "Des étapes nommées dans la formule : lisible et plus rapide à vérifier.", "Excel 365"),
+    ("Avancé", "FILTRE + TRIER + UNIQUE", "Extraire, classer et dédoublonner un portefeuille sans colonnes intermédiaires.", "Excel 365"),
 ]
+# répartition annoncée sur la feuille et sur le site : un quart débutant, la moitié intermédiaire, un quart avancé
+NIV_N = {n: sum(1 for f in FN if f[0] == n) for n in ("Débutant", "Intermédiaire", "Avancé")}
+assert sum(NIV_N.values()) == len(FN) and NIV_N["Débutant"] * 4 == len(FN) == NIV_N["Avancé"] * 4, NIV_N
+me["B5"] = (f"{len(FN)} FONCTIONS ET OUTILS PAR NIVEAU : {NIV_N['Débutant']} DÉBUTANT, {NIV_N['Intermédiaire']} INTERMÉDIAIRE, {NIV_N['Avancé']} AVANCÉ"
+            if LANG == "fr" else
+            f"{len(FN)} FUNCTIONS AND TOOLS BY LEVEL: {NIV_N['Débutant']} BEGINNER, {NIV_N['Intermédiaire']} INTERMEDIATE, {NIV_N['Avancé']} ADVANCED")
+me["B5"].font = F(8, True, INK3)
 header_row(me, 6, 2, ["Niveau", "Fonction ou outil", "Ce qu'elle fait ici", "Où la voir"])
 for i, (niv, fn, desc, ou) in enumerate(FN):
     r = 7 + i
     me[f"B{r}"] = niv
-    me[f"B{r}"].font = F(9, True, {"Simple": "1A6B3C", "Intermédiaire": BLUE_D, "Avancée": PINK_D, "Excel 365": VIOLET}[niv])
+    me[f"B{r}"].font = F(9, True, {"Débutant": "1A6B3C", "Intermédiaire": BLUE_D, "Avancé": PINK_D}[niv])
     me[f"C{r}"] = fn
     me[f"C{r}"].font = F(10, True)
     me[f"D{r}"] = desc

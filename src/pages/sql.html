@@ -54,7 +54,7 @@ __HEADER__
     <div class="wrap">
       <h2 data-i18n="qlT">Les requêtes, une par une</h2>
       <p class="intro" data-i18n="qlI">Pour chaque requête : la question posée, les techniques utilisées, le code et le résultat.</p>
-      <p class="note" style="margin-bottom:10px" data-i18n="qlN">Chaque requête porte son niveau : <span class="lvl D">Débutant</span> agrégats, jointures et règles de trois · <span class="lvl I">Intermédiaire</span> CTE, pivots, classements · <span class="lvl A">Avancé</span> fonctions de fenêtre (LAG, ROW_NUMBER, cadres ROWS).</p>
+      <p class="note" style="margin-bottom:10px" data-i18n="qlN">Chaque requête porte son niveau : <span class="lvl D">Débutant</span> 3 requêtes sur 12, agrégats, jointures et règles de trois · <span class="lvl I">Intermédiaire</span> 6 requêtes, une CTE avec un pivot, un classement ou un LAG, requête sur des vues · <span class="lvl A">Avancé</span> 3 requêtes, fenêtres combinées (cadre ROWS, deux fenêtres partitionnées, ROW_NUMBER par groupe).</p>
       <div id="qlist"></div>
     </div>
   </section>
@@ -112,7 +112,7 @@ window.PAGE_EN = {
   run: `Run`, edL: `SQL query`,
   qlT: `The queries, one by one`,
   qlI: `For each query: the question asked, the techniques used, the code and the result.`,
-  qlN: `Each query carries its level: <span class="lvl D">Beginner</span> aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> CTEs, pivots, rankings · <span class="lvl A">Advanced</span> window functions (LAG, ROW_NUMBER, ROWS frames).`,
+  qlN: `Each query carries its level: <span class="lvl D">Beginner</span> 3 queries out of 12, aggregates, joins and simple ratios · <span class="lvl I">Intermediate</span> 6 queries, one CTE with a pivot, a ranking or a LAG, query over views · <span class="lvl A">Advanced</span> 3 queries, combined windows (ROWS frame, two partitioned windows, ROW_NUMBER per group).`,
   pgL: `← Excel`, pgR: `Analysis →`
 };
 const SQLRES = JSON.parse(document.getElementById("sqlres").textContent);
@@ -141,7 +141,7 @@ const NOTES = {
     q_en: "Which province saw the strongest rent increase in 2025?", why_en: "Quebec comes first in 2025 (+7.8%) but only 4th over 2019-2025: the Quebec surge is recent and concentrated in 2024 and 2025." },
   "12_quebec_views.sql": { niv: "Intermédiaire", q: "Au Québec, où l'écart entre annonce et loyer payé est-il le plus fort ?", tags: ["Requête sur des vues", "JOIN sur 2 clés", "NULLS LAST"], tags_en: ["Query over views", "JOIN on 2 keys", "NULLS LAST"], why: "La logique (dernier trimestre publié, pivot, variation de l'IPC) vit dans les vues ; la requête finale tient en dix lignes. Sherbrooke (+35,4 %) devance Montréal (+33,8 %). Les régions sans loyer payé publié restent visibles en fin de liste.",
     q_en: "In Quebec, where is the gap between listings and rent paid the widest?", why_en: "The logic (latest published quarter, pivot, CPI change) lives in the views; the final query fits in ten lines. Sherbrooke (+35.4%) edges out Montreal (+33.8%). Areas without a published paid rent stay visible at the end of the list." },
-  "11_vacancy_vs_rent.sql": { niv: "Avancé", q: "Quand les loyers ont-ils monté malgré plus de logements vacants ?", tags: ["JOIN sur 2 clés", "LAG", "Filtre sur valeurs calculées"], tags_en: ["JOIN on 2 keys", "LAG", "Filter on computed values"], why: "Les deux séries sont alignées par année, puis LAG compare chaque année à la précédente. Trois années répondent au critère, dont 2025.",
+  "11_vacancy_vs_rent.sql": { niv: "Intermédiaire", q: "Quand les loyers ont-ils monté malgré plus de logements vacants ?", tags: ["JOIN sur 2 clés", "LAG", "Filtre sur valeurs calculées"], tags_en: ["JOIN on 2 keys", "LAG", "Filter on computed values"], why: "Les deux séries sont alignées par année, puis LAG compare chaque année à la précédente. Trois années répondent au critère, dont 2025.",
     q_en: "When did rents rise despite more vacant units?", why_en: "The two series are aligned by year, then LAG compares each year to the previous one. Three years meet the criterion, 2025 among them." }
 };
 const SCHEMA_TXT = [["fait_loyer", "annee, geo_id, unit_id, loyer"], ["fait_loyer_trimestriel", "periode, geo_id, estimation (A/P), loyer, cote"],

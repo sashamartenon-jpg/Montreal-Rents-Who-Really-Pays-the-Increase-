@@ -217,8 +217,8 @@ ORDER BY rang_2025;
 
 -- ===================================================================== 11_vacancy_vs_rent.sql
 -- Années où l'inoccupation a augmenté ET le loyer a monté de plus de 5 % (Montréal, 2 chambres)
--- Niveau : Avancé
--- EN: Years when vacancy rose AND rent went up by more than 5% (Montreal, two-bedroom) · Level: Advanced
+-- Niveau : Intermédiaire
+-- EN: Years when vacancy rose AND rent went up by more than 5% (Montreal, two-bedroom) · Level: Intermediate
 WITH s AS (
   SELECT f.annee, f.loyer, v.taux,
          LAG(f.loyer) OVER (ORDER BY f.annee) AS loyer_prec,
