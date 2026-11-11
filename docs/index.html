@@ -570,25 +570,22 @@ main .howto li { text-align: justify; hyphens: manual; -webkit-hyphens: manual; 
 .dico code { font-size: .78rem; }
 .dico code.vw { color: var(--warm-ink); } .dico code.tb { color: var(--link); }
 select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; max-width: 100%; }
-/* --------- scène de défilement : du graphique à la carte, puis l'analyse */
-.scene { position: relative; height: 330vh; background: var(--bg); }
-.scene-pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
-.scene-layer { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform, opacity; }
-.scene-layer svg { width: min(94vw, 980px); height: auto; max-height: 76vh; display: block; }
-#sc-map { opacity: 0; }
-#sc-map .ring { fill: var(--map-land); stroke: var(--surface); stroke-width: 1; }
-#sc-map circle { opacity: 0; transform: scale(.3); transform-origin: center; transform-box: fill-box; transition: opacity .45s, transform .45s cubic-bezier(.2,.9,.3,1.4); stroke: var(--surface); stroke-width: 1.5; }
-#sc-map circle.on { opacity: 1; transform: scale(1); }
-#sc-map .sclbl { font: 600 15px var(--font-body); fill: var(--warm-ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0; transition: opacity .45s; }
-#sc-map .sclbl.on { opacity: 1; }
-.scene-cap { position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%); width: min(92vw, 34em); margin: 0; text-align: center; font: 300 clamp(1.25rem, 2.5vw, 1.9rem)/1.3 var(--font-display); letter-spacing: -.015em; color: var(--ink); opacity: 0; transition: opacity .35s; pointer-events: none; }
+/* --------- scène de défilement : la courbe devient un montant, puis une ligne d'horizon (canevas) */
+.scene { display: none; position: relative; height: 470vh; background: #0b1528; }
+.scene.ready { display: block; }
+.scene-pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden;
+  background: radial-gradient(60% 50% at 20% 28%, rgba(47, 134, 214, .22), rgba(47, 134, 214, 0) 70%),
+              radial-gradient(52% 46% at 82% 64%, rgba(224, 69, 123, .17), rgba(224, 69, 123, 0) 70%),
+              linear-gradient(180deg, #0b1528 0%, #10203a 100%); }
+#sc-canvas { position: absolute; left: 0; top: 0; display: block; }
+.scene-cap { position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%); width: min(92vw, 34em); margin: 0; text-align: center; font: 300 clamp(1.25rem, 2.5vw, 1.9rem)/1.3 var(--font-display); letter-spacing: -.015em; color: #f3f7fd; opacity: 0; transition: opacity .35s; pointer-events: none; }
 .scene-cap b { font-weight: 600; }
 .scene-cap.on { opacity: 1; }
-.scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
-#sc-chart .scax { font: 12px var(--font-mono); fill: var(--ink-3); }
-#sc-chart .scbreak { font: 600 13px var(--font-mono); fill: var(--warm-ink); }
-@media (prefers-reduced-motion: reduce) { .scene { display: none; } }
-@media (max-height: 500px) { .scene { display: none; } }
+.scene-src { hyphens: manual; position: absolute; left: 50%; bottom: 3.4vh; transform: translateX(-50%); width: min(92vw, 62em); margin: 0; text-align: center; font: .72rem/1.35 var(--font-mono); color: rgba(214, 226, 244, .66); opacity: 0; transition: opacity .35s; pointer-events: none; }
+.scene-src.on { opacity: 1; }
+.scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(214, 226, 244, .72); transition: opacity .3s; }
+@media (prefers-reduced-motion: reduce) { .scene, .scene.ready { display: none; } }
+@media (max-height: 500px) { .scene, .scene.ready { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
@@ -640,12 +637,14 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 
   <section class="scene" id="voyage" aria-hidden="true">
     <div class="scene-pin">
+      <canvas id="sc-canvas"></canvas>
       <p class="scene-hint" data-i18n="scnH">Défile pour traverser les données</p>
-      <div class="scene-layer" id="sc-chart"></div>
-      <div class="scene-layer" id="sc-map"></div>
-      <p class="scene-cap" id="sc-cap1" data-i18n="scn1">34 ans de loyers à Montréal : en 2019, <b>la courbe casse</b>.</p>
-      <p class="scene-cap" id="sc-cap2" data-i18n="scn2">Et l'écart entre annonces et loyers payés se retrouve <b>partout au pays</b>.</p>
-      <p class="scene-cap" id="sc-cap3" data-i18n="scn3">Pourquoi ? <b>Place à l'analyse.</b></p>
+      <p class="scene-cap" id="sc-cap1" data-i18n="scn1"></p>
+      <p class="scene-cap" id="sc-cap2" data-i18n="scn2"></p>
+      <p class="scene-cap" id="sc-cap3" data-i18n="scn3"></p>
+      <p class="scene-cap" id="sc-cap4" data-i18n="scn4"></p>
+      <p class="scene-src" id="sc-src1" data-i18n="scnS1"></p>
+      <p class="scene-src" id="sc-src2" data-i18n="scnS2"></p>
     </div>
   </section>
 
@@ -875,11 +874,13 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <div class="tip" id="tip" hidden></div>
 
 <script id="data" type="application/json">{"meta":{"base_year":2025,"sources":[{"id":"34-10-0133-01","title":"SCHL, loyers moyens pour les régions de 10 000 habitants et plus","url":"https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=3410013301"},{"id":"34-10-0127-01","title":"SCHL, taux d'inoccupation, immeubles d'appartements de six logements et plus","url":"https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=3410012701"},{"id":"18-10-0005-01","title":"Indice des prix à la consommation, moyenne annuelle","url":"https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=1810000501"},{"id":"SCHL RML 2025","title":"SCHL, Rapport sur le marché locatif 2025 (figures 1 et 9, fiche Montréal)","url":"https://www.cmhc-schl.gc.ca/fr/professionals/housing-markets-data-and-research/market-reports/rental-market-reports-major-centres"},{"id":"46-10-0092-01","title":"Prix des loyers demandés et des loyers payés (estimations expérimentales)","url":"https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=4610009201"},{"id":"18-10-0005-01 (provinces)","title":"Indice des prix à la consommation, loyer et ensemble, par province","url":"https://www150.statcan.gc.ca/t1/tbl1/fr/tv.action?pid=1810000501"}]},"units":[{"unit_id":"studio","label_fr":"Studio","label_en":"Studio"},{"unit_id":"1ch","label_fr":"1 chambre","label_en":"1 bedroom"},{"unit_id":"2ch","label_fr":"2 chambres","label_en":"2 bedrooms"},{"unit_id":"3ch","label_fr":"3 chambres","label_en":"3 bedrooms"}],"geos":[{"geo_id":"Montreal","label_fr":"Montréal","label_en":"Montreal"},{"geo_id":"Quebec","label_fr":"Québec","label_en":"Quebec City"},{"geo_id":"Ottawa-Gatineau","label_fr":"Ottawa-Gatineau","label_en":"Ottawa-Gatineau"},{"geo_id":"Toronto","label_fr":"Toronto","label_en":"Toronto"},{"geo_id":"Calgary","label_fr":"Calgary","label_en":"Calgary"},{"geo_id":"Vancouver","label_fr":"Vancouver","label_en":"Vancouver"}],"rents":[{"year":1992,"unit_id":"1ch","nom":428,"real":812.0,"yoy":null},{"year":1993,"unit_id":"1ch","nom":428,"real":800.0,"yoy":0.0},{"year":1994,"unit_id":"1ch","nom":425,"real":806.0,"yoy":-0.7},{"year":1995,"unit_id":"1ch","nom":433,"real":807.0,"yoy":1.9},{"year":1996,"unit_id":"1ch","nom":435,"real":798.0,"yoy":0.5},{"year":1997,"unit_id":"1ch","nom":431,"real":780.0,"yoy":-0.9},{"year":1998,"unit_id":"1ch","nom":438,"real":780.0,"yoy":1.6},{"year":1999,"unit_id":"1ch","nom":452,"real":792.0,"yoy":3.2},{"year":2000,"unit_id":"1ch","nom":458,"real":784.0,"yoy":1.3},{"year":2001,"unit_id":"1ch","nom":476,"real":796.0,"yoy":3.9},{"year":2002,"unit_id":"1ch","nom":505,"real":828.0,"yoy":6.1},{"year":2003,"unit_id":"1ch","nom":528,"real":845.0,"yoy":4.6},{"year":2004,"unit_id":"1ch","nom":539,"real":846.0,"yoy":2.1},{"year":2005,"unit_id":"1ch","nom":562,"real":863.0,"yoy":4.3},{"year":2006,"unit_id":"1ch","nom":574,"real":866.0,"yoy":2.1},{"year":2007,"unit_id":"1ch","nom":581,"real":863.0,"yoy":1.2},{"year":2008,"unit_id":"1ch","nom":594,"real":865.0,"yoy":2.2},{"year":2009,"unit_id":"1ch","nom":604,"real":872.0,"yoy":1.7},{"year":2010,"unit_id":"1ch","nom":627,"real":895.0,"yoy":3.8},{"year":2011,"unit_id":"1ch","nom":641,"real":890.0,"yoy":2.2},{"year":2012,"unit_id":"1ch","nom":637,"real":867.0,"yoy":-0.6},{"year":2013,"unit_id":"1ch","nom":651,"real":879.0,"yoy":2.2},{"year":2014,"unit_id":"1ch","nom":655,"real":871.0,"yoy":0.6},{"year":2015,"unit_id":"1ch","nom":668,"real":877.0,"yoy":2.0},{"year":2016,"unit_id":"1ch","nom":679,"real":884.0,"yoy":1.6},{"year":2017,"unit_id":"1ch","nom":698,"real":899.0,"yoy":2.8},{"year":2018,"unit_id":"1ch","nom":720,"real":911.0,"yoy":3.2},{"year":2019,"unit_id":"1ch","nom":754,"real":933.0,"yoy":4.7},{"year":2020,"unit_id":"1ch","nom":810,"real":993.0,"yoy":7.4},{"year":2021,"unit_id":"1ch","nom":821,"real":970.0,"yoy":1.4},{"year":2022,"unit_id":"1ch","nom":912,"real":1011.0,"yoy":11.1},{"year":2023,"unit_id":"1ch","nom":960,"real":1012.0,"yoy":5.3},{"year":2024,"unit_id":"1ch","nom":1051,"real":1079.0,"yoy":9.5},{"year":2025,"unit_id":"1ch","nom":1131,"real":1131.0,"yoy":7.6},{"year":1992,"unit_id":"2ch","nom":488,"real":926.0,"yoy":null},{"year":1993,"unit_id":"2ch","nom":484,"real":905.0,"yoy":-0.8},{"year":1994,"unit_id":"2ch","nom":484,"real":918.0,"yoy":0.0},{"year":1995,"unit_id":"2ch","nom":494,"real":921.0,"yoy":2.1},{"year":1996,"unit_id":"2ch","nom":491,"real":900.0,"yoy":-0.6},{"year":1997,"unit_id":"2ch","nom":491,"real":888.0,"yoy":0.0},{"year":1998,"unit_id":"2ch","nom":499,"real":889.0,"yoy":1.6},{"year":1999,"unit_id":"2ch","nom":506,"real":887.0,"yoy":1.4},{"year":2000,"unit_id":"2ch","nom":509,"real":872.0,"yoy":0.6},{"year":2001,"unit_id":"2ch","nom":529,"real":885.0,"yoy":3.9},{"year":2002,"unit_id":"2ch","nom":552,"real":905.0,"yoy":4.3},{"year":2003,"unit_id":"2ch","nom":575,"real":920.0,"yoy":4.2},{"year":2004,"unit_id":"2ch","nom":594,"real":933.0,"yoy":3.3},{"year":2005,"unit_id":"2ch","nom":616,"real":946.0,"yoy":3.7},{"year":2006,"unit_id":"2ch","nom":636,"real":960.0,"yoy":3.2},{"year":2007,"unit_id":"2ch","nom":647,"real":961.0,"yoy":1.7},{"year":2008,"unit_id":"2ch","nom":659,"real":959.0,"yoy":1.9},{"year":2009,"unit_id":"2ch","nom":669,"real":966.0,"yoy":1.5},{"year":2010,"unit_id":"2ch","nom":700,"real":999.0,"yoy":4.6},{"year":2011,"unit_id":"2ch","nom":719,"real":999.0,"yoy":2.7},{"year":2012,"unit_id":"2ch","nom":711,"real":968.0,"yoy":-1.1},{"year":2013,"unit_id":"2ch","nom":730,"real":986.0,"yoy":2.7},{"year":2014,"unit_id":"2ch","nom":739,"real":983.0,"yoy":1.2},{"year":2015,"unit_id":"2ch","nom":760,"real":997.0,"yoy":2.8},{"year":2016,"unit_id":"2ch","nom":791,"real":1030.0,"yoy":4.1},{"year":2017,"unit_id":"2ch","nom":782,"real":1007.0,"yoy":-1.1},{"year":2018,"unit_id":"2ch","nom":809,"real":1024.0,"yoy":3.5},{"year":2019,"unit_id":"2ch","nom":855,"real":1058.0,"yoy":5.7},{"year":2020,"unit_id":"2ch","nom":903,"real":1107.0,"yoy":5.6},{"year":2021,"unit_id":"2ch","nom":932,"real":1101.0,"yoy":3.2},{"year":2022,"unit_id":"2ch","nom":1022,"real":1133.0,"yoy":9.7},{"year":2023,"unit_id":"2ch","nom":1096,"real":1155.0,"yoy":7.2},{"year":2024,"unit_id":"2ch","nom":1176,"real":1207.0,"yoy":7.3},{"year":2025,"unit_id":"2ch","nom":1346,"real":1346.0,"yoy":14.5},{"year":1992,"unit_id":"3ch","nom":583,"real":1106.0,"yoy":null},{"year":1993,"unit_id":"3ch","nom":576,"real":1076.0,"yoy":-1.2},{"year":1994,"unit_id":"3ch","nom":583,"real":1106.0,"yoy":1.2},{"year":1995,"unit_id":"3ch","nom":599,"real":1117.0,"yoy":2.7},{"year":1996,"unit_id":"3ch","nom":583,"real":1069.0,"yoy":-2.7},{"year":1997,"unit_id":"3ch","nom":592,"real":1071.0,"yoy":1.5},{"year":1998,"unit_id":"3ch","nom":596,"real":1062.0,"yoy":0.7},{"year":1999,"unit_id":"3ch","nom":613,"real":1075.0,"yoy":2.9},{"year":2000,"unit_id":"3ch","nom":630,"real":1079.0,"yoy":2.8},{"year":2001,"unit_id":"3ch","nom":650,"real":1087.0,"yoy":3.2},{"year":2002,"unit_id":"3ch","nom":687,"real":1126.0,"yoy":5.7},{"year":2003,"unit_id":"3ch","nom":710,"real":1136.0,"yoy":3.3},{"year":2004,"unit_id":"3ch","nom":727,"real":1141.0,"yoy":2.4},{"year":2005,"unit_id":"3ch","nom":742,"real":1140.0,"yoy":2.1},{"year":2006,"unit_id":"3ch","nom":775,"real":1170.0,"yoy":4.4},{"year":2007,"unit_id":"3ch","nom":806,"real":1198.0,"yoy":4.0},{"year":2008,"unit_id":"3ch","nom":799,"real":1163.0,"yoy":-0.9},{"year":2009,"unit_id":"3ch","nom":812,"real":1173.0,"yoy":1.6},{"year":2010,"unit_id":"3ch","nom":860,"real":1228.0,"yoy":5.9},{"year":2011,"unit_id":"3ch","nom":865,"real":1201.0,"yoy":0.6},{"year":2012,"unit_id":"3ch","nom":875,"real":1191.0,"yoy":1.2},{"year":2013,"unit_id":"3ch","nom":878,"real":1185.0,"yoy":0.3},{"year":2014,"unit_id":"3ch","nom":898,"real":1195.0,"yoy":2.3},{"year":2015,"unit_id":"3ch","nom":952,"real":1249.0,"yoy":6.0},{"year":2016,"unit_id":"3ch","nom":956,"real":1245.0,"yoy":0.4},{"year":2017,"unit_id":"3ch","nom":965,"real":1242.0,"yoy":0.9},{"year":2018,"unit_id":"3ch","nom":1007,"real":1274.0,"yoy":4.4},{"year":2019,"unit_id":"3ch","nom":1070,"real":1325.0,"yoy":6.3},{"year":2020,"unit_id":"3ch","nom":1112,"real":1363.0,"yoy":3.9},{"year":2021,"unit_id":"3ch","nom":1144,"real":1352.0,"yoy":2.9},{"year":2022,"unit_id":"3ch","nom":1230,"real":1363.0,"yoy":7.5},{"year":2023,"unit_id":"3ch","nom":1323,"real":1394.0,"yoy":7.6},{"year":2024,"unit_id":"3ch","nom":1488,"real":1527.0,"yoy":12.5},{"year":2025,"unit_id":"3ch","nom":1626,"real":1626.0,"yoy":9.3},{"year":1992,"unit_id":"studio","nom":347,"real":658.0,"yoy":null},{"year":1993,"unit_id":"studio","nom":351,"real":656.0,"yoy":1.2},{"year":1994,"unit_id":"studio","nom":349,"real":662.0,"yoy":-0.6},{"year":1995,"unit_id":"studio","nom":350,"real":653.0,"yoy":0.3},{"year":1996,"unit_id":"studio","nom":356,"real":653.0,"yoy":1.7},{"year":1997,"unit_id":"studio","nom":359,"real":649.0,"yoy":0.8},{"year":1998,"unit_id":"studio","nom":365,"real":650.0,"yoy":1.7},{"year":1999,"unit_id":"studio","nom":372,"real":652.0,"yoy":1.9},{"year":2000,"unit_id":"studio","nom":380,"real":651.0,"yoy":2.2},{"year":2001,"unit_id":"studio","nom":404,"real":676.0,"yoy":6.3},{"year":2002,"unit_id":"studio","nom":423,"real":693.0,"yoy":4.7},{"year":2003,"unit_id":"studio","nom":441,"real":706.0,"yoy":4.3},{"year":2004,"unit_id":"studio","nom":459,"real":721.0,"yoy":4.1},{"year":2005,"unit_id":"studio","nom":466,"real":716.0,"yoy":1.5},{"year":2006,"unit_id":"studio","nom":481,"real":726.0,"yoy":3.2},{"year":2007,"unit_id":"studio","nom":490,"real":728.0,"yoy":1.9},{"year":2008,"unit_id":"studio","nom":500,"real":728.0,"yoy":2.0},{"year":2009,"unit_id":"studio","nom":514,"real":742.0,"yoy":2.8},{"year":2010,"unit_id":"studio","nom":526,"real":751.0,"yoy":2.3},{"year":2011,"unit_id":"studio","nom":549,"real":763.0,"yoy":4.4},{"year":2012,"unit_id":"studio","nom":539,"real":734.0,"yoy":-1.8},{"year":2013,"unit_id":"studio","nom":555,"real":749.0,"yoy":3.0},{"year":2014,"unit_id":"studio","nom":569,"real":757.0,"yoy":2.5},{"year":2015,"unit_id":"studio","nom":573,"real":752.0,"yoy":0.7},{"year":2016,"unit_id":"studio","nom":586,"real":763.0,"yoy":2.3},{"year":2017,"unit_id":"studio","nom":597,"real":769.0,"yoy":1.9},{"year":2018,"unit_id":"studio","nom":641,"real":811.0,"yoy":7.4},{"year":2019,"unit_id":"studio","nom":655,"real":811.0,"yoy":2.2},{"year":2020,"unit_id":"studio","nom":703,"real":862.0,"yoy":7.3},{"year":2021,"unit_id":"studio","nom":712,"real":841.0,"yoy":1.3},{"year":2022,"unit_id":"studio","nom":785,"real":870.0,"yoy":10.3},{"year":2023,"unit_id":"studio","nom":809,"real":853.0,"yoy":3.1},{"year":2024,"unit_id":"studio","nom":892,"real":915.0,"yoy":10.3},{"year":2025,"unit_id":"studio","nom":1005,"real":1005.0,"yoy":12.7}],"cities":[{"year":1992,"geo":"Calgary","nom":598,"yoy":null},{"year":1993,"geo":"Calgary","nom":584,"yoy":-2.3},{"year":1994,"geo":"Calgary","nom":585,"yoy":0.2},{"year":1995,"geo":"Calgary","nom":584,"yoy":-0.2},{"year":1996,"geo":"Calgary","nom":595,"yoy":1.9},{"year":1997,"geo":"Calgary","nom":635,"yoy":6.7},{"year":1998,"geo":"Calgary","nom":707,"yoy":11.3},{"year":1999,"geo":"Calgary","nom":739,"yoy":4.5},{"year":2000,"geo":"Calgary","nom":740,"yoy":0.1},{"year":2001,"geo":"Calgary","nom":783,"yoy":5.8},{"year":2002,"geo":"Calgary","nom":804,"yoy":2.7},{"year":2003,"geo":"Calgary","nom":804,"yoy":0.0},{"year":2004,"geo":"Calgary","nom":806,"yoy":0.2},{"year":2005,"geo":"Calgary","nom":808,"yoy":0.2},{"year":2006,"geo":"Calgary","nom":960,"yoy":18.8},{"year":2007,"geo":"Calgary","nom":1089,"yoy":13.4},{"year":2008,"geo":"Calgary","nom":1148,"yoy":5.4},{"year":2009,"geo":"Calgary","nom":1099,"yoy":-4.3},{"year":2010,"geo":"Calgary","nom":1069,"yoy":-2.7},{"year":2011,"geo":"Calgary","nom":1084,"yoy":1.4},{"year":2012,"geo":"Calgary","nom":1150,"yoy":6.1},{"year":2013,"geo":"Calgary","nom":1224,"yoy":6.4},{"year":2014,"geo":"Calgary","nom":1322,"yoy":8.0},{"year":2015,"geo":"Calgary","nom":1332,"yoy":0.8},{"year":2016,"geo":"Calgary","nom":1258,"yoy":-5.6},{"year":2017,"geo":"Calgary","nom":1247,"yoy":-0.9},{"year":2018,"geo":"Calgary","nom":1272,"yoy":2.0},{"year":2019,"geo":"Calgary","nom":1305,"yoy":2.6},{"year":2020,"geo":"Calgary","nom":1323,"yoy":1.4},{"year":2021,"geo":"Calgary","nom":1355,"yoy":2.4},{"year":2022,"geo":"Calgary","nom":1466,"yoy":8.2},{"year":2023,"geo":"Calgary","nom":1695,"yoy":15.6},{"year":2024,"geo":"Calgary","nom":1882,"yoy":11.0},{"year":2025,"geo":"Calgary","nom":1914,"yoy":1.7},{"year":1992,"geo":"Montreal","nom":488,"yoy":null},{"year":1993,"geo":"Montreal","nom":484,"yoy":-0.8},{"year":1994,"geo":"Montreal","nom":484,"yoy":0.0},{"year":1995,"geo":"Montreal","nom":494,"yoy":2.1},{"year":1996,"geo":"Montreal","nom":491,"yoy":-0.6},{"year":1997,"geo":"Montreal","nom":491,"yoy":0.0},{"year":1998,"geo":"Montreal","nom":499,"yoy":1.6},{"year":1999,"geo":"Montreal","nom":506,"yoy":1.4},{"year":2000,"geo":"Montreal","nom":509,"yoy":0.6},{"year":2001,"geo":"Montreal","nom":529,"yoy":3.9},{"year":2002,"geo":"Montreal","nom":552,"yoy":4.3},{"year":2003,"geo":"Montreal","nom":575,"yoy":4.2},{"year":2004,"geo":"Montreal","nom":594,"yoy":3.3},{"year":2005,"geo":"Montreal","nom":616,"yoy":3.7},{"year":2006,"geo":"Montreal","nom":636,"yoy":3.2},{"year":2007,"geo":"Montreal","nom":647,"yoy":1.7},{"year":2008,"geo":"Montreal","nom":659,"yoy":1.9},{"year":2009,"geo":"Montreal","nom":669,"yoy":1.5},{"year":2010,"geo":"Montreal","nom":700,"yoy":4.6},{"year":2011,"geo":"Montreal","nom":719,"yoy":2.7},{"year":2012,"geo":"Montreal","nom":711,"yoy":-1.1},{"year":2013,"geo":"Montreal","nom":730,"yoy":2.7},{"year":2014,"geo":"Montreal","nom":739,"yoy":1.2},{"year":2015,"geo":"Montreal","nom":760,"yoy":2.8},{"year":2016,"geo":"Montreal","nom":791,"yoy":4.1},{"year":2017,"geo":"Montreal","nom":782,"yoy":-1.1},{"year":2018,"geo":"Montreal","nom":809,"yoy":3.5},{"year":2019,"geo":"Montreal","nom":855,"yoy":5.7},{"year":2020,"geo":"Montreal","nom":903,"yoy":5.6},{"year":2021,"geo":"Montreal","nom":932,"yoy":3.2},{"year":2022,"geo":"Montreal","nom":1022,"yoy":9.7},{"year":2023,"geo":"Montreal","nom":1096,"yoy":7.2},{"year":2024,"geo":"Montreal","nom":1176,"yoy":7.3},{"year":2025,"geo":"Montreal","nom":1346,"yoy":14.5},{"year":1992,"geo":"Ottawa-Gatineau","nom":647,"yoy":null},{"year":1993,"geo":"Ottawa-Gatineau","nom":667,"yoy":3.1},{"year":1994,"geo":"Ottawa-Gatineau","nom":676,"yoy":1.3},{"year":1995,"geo":"Ottawa-Gatineau","nom":677,"yoy":0.1},{"year":1996,"geo":"Ottawa-Gatineau","nom":679,"yoy":0.3},{"year":1997,"geo":"Ottawa-Gatineau","nom":669,"yoy":-1.5},{"year":1998,"geo":"Ottawa-Gatineau","nom":687,"yoy":2.7},{"year":1999,"geo":"Ottawa-Gatineau","nom":706,"yoy":2.8},{"year":2000,"geo":"Ottawa-Gatineau","nom":778,"yoy":10.2},{"year":2001,"geo":"Ottawa-Gatineau","nom":811,"yoy":4.2},{"year":2002,"geo":"Ottawa-Gatineau","nom":832,"yoy":2.6},{"year":2003,"geo":"Ottawa-Gatineau","nom":842,"yoy":1.2},{"year":2004,"geo":"Ottawa-Gatineau","nom":856,"yoy":1.7},{"year":2005,"geo":"Ottawa-Gatineau","nom":837,"yoy":-2.2},{"year":2006,"geo":"Ottawa-Gatineau","nom":853,"yoy":1.9},{"year":2007,"geo":"Ottawa-Gatineau","nom":866,"yoy":1.5},{"year":2008,"geo":"Ottawa-Gatineau","nom":896,"yoy":3.5},{"year":2009,"geo":"Ottawa-Gatineau","nom":924,"yoy":3.1},{"year":2010,"geo":"Ottawa-Gatineau","nom":940,"yoy":1.7},{"year":2011,"geo":"Ottawa-Gatineau","nom":972,"yoy":3.4},{"year":2012,"geo":"Ottawa-Gatineau","nom":986,"yoy":1.4},{"year":2013,"geo":"Ottawa-Gatineau","nom":1003,"yoy":1.7},{"year":2014,"geo":"Ottawa-Gatineau","nom":1009,"yoy":0.6},{"year":2015,"geo":"Ottawa-Gatineau","nom":1037,"yoy":2.8},{"year":2016,"geo":"Ottawa-Gatineau","nom":1055,"yoy":1.7},{"year":2017,"geo":"Ottawa-Gatineau","nom":1080,"yoy":2.4},{"year":2018,"geo":"Ottawa-Gatineau","nom":1133,"yoy":4.9},{"year":2019,"geo":"Ottawa-Gatineau","nom":1236,"yoy":9.1},{"year":2020,"geo":"Ottawa-Gatineau","nom":1310,"yoy":6.0},{"year":2021,"geo":"Ottawa-Gatineau","nom":1375,"yoy":5.0},{"year":2022,"geo":"Ottawa-Gatineau","nom":1494,"yoy":8.7},{"year":2023,"geo":"Ottawa-Gatineau","nom":1544,"yoy":3.3},{"year":2024,"geo":"Ottawa-Gatineau","nom":1687,"yoy":9.3},{"year":2025,"geo":"Ottawa-Gatineau","nom":1764,"yoy":4.6},{"year":1992,"geo":"Quebec","nom":501,"yoy":null},{"year":1993,"geo":"Quebec","nom":502,"yoy":0.2},{"year":1994,"geo":"Quebec","nom":501,"yoy":-0.2},{"year":1995,"geo":"Quebec","nom":513,"yoy":2.4},{"year":1996,"geo":"Quebec","nom":511,"yoy":-0.4},{"year":1997,"geo":"Quebec","nom":513,"yoy":0.4},{"year":1998,"geo":"Quebec","nom":513,"yoy":0.0},{"year":1999,"geo":"Quebec","nom":511,"yoy":-0.4},{"year":2000,"geo":"Quebec","nom":518,"yoy":1.4},{"year":2001,"geo":"Quebec","nom":538,"yoy":3.9},{"year":2002,"geo":"Quebec","nom":550,"yoy":2.2},{"year":2003,"geo":"Quebec","nom":567,"yoy":3.1},{"year":2004,"geo":"Quebec","nom":596,"yoy":5.1},{"year":2005,"geo":"Quebec","nom":621,"yoy":4.2},{"year":2006,"geo":"Quebec","nom":637,"yoy":2.6},{"year":2007,"geo":"Quebec","nom":641,"yoy":0.6},{"year":2008,"geo":"Quebec","nom":653,"yoy":1.9},{"year":2009,"geo":"Quebec","nom":676,"yoy":3.5},{"year":2010,"geo":"Quebec","nom":692,"yoy":2.4},{"year":2011,"geo":"Quebec","nom":718,"yoy":3.8},{"year":2012,"geo":"Quebec","nom":741,"yoy":3.2},{"year":2013,"geo":"Quebec","nom":757,"yoy":2.2},{"year":2014,"geo":"Quebec","nom":775,"yoy":2.4},{"year":2015,"geo":"Quebec","nom":788,"yoy":1.7},{"year":2016,"geo":"Quebec","nom":808,"yoy":2.5},{"year":2017,"geo":"Quebec","nom":820,"yoy":1.5},{"year":2018,"geo":"Quebec","nom":839,"yoy":2.3},{"year":2019,"geo":"Quebec","nom":862,"yoy":2.7},{"year":2020,"geo":"Quebec","nom":899,"yoy":4.3},{"year":2021,"geo":"Quebec","nom":945,"yoy":5.1},{"year":2022,"geo":"Quebec","nom":976,"yoy":3.3},{"year":2023,"geo":"Quebec","nom":1040,"yoy":6.6},{"year":2024,"geo":"Quebec","nom":1159,"yoy":11.4},{"year":2025,"geo":"Quebec","nom":1277,"yoy":10.2},{"year":1992,"geo":"Toronto","nom":754,"yoy":null},{"year":1993,"geo":"Toronto","nom":773,"yoy":2.5},{"year":1994,"geo":"Toronto","nom":784,"yoy":1.4},{"year":1995,"geo":"Toronto","nom":805,"yoy":2.7},{"year":1996,"geo":"Toronto","nom":819,"yoy":1.7},{"year":1997,"geo":"Toronto","nom":821,"yoy":0.2},{"year":1998,"geo":"Toronto","nom":881,"yoy":7.3},{"year":1999,"geo":"Toronto","nom":916,"yoy":4.0},{"year":2000,"geo":"Toronto","nom":979,"yoy":6.9},{"year":2001,"geo":"Toronto","nom":1027,"yoy":4.9},{"year":2002,"geo":"Toronto","nom":1047,"yoy":1.9},{"year":2003,"geo":"Toronto","nom":1040,"yoy":-0.7},{"year":2004,"geo":"Toronto","nom":1052,"yoy":1.2},{"year":2005,"geo":"Toronto","nom":1052,"yoy":0.0},{"year":2006,"geo":"Toronto","nom":1067,"yoy":1.4},{"year":2007,"geo":"Toronto","nom":1061,"yoy":-0.6},{"year":2008,"geo":"Toronto","nom":1095,"yoy":3.2},{"year":2009,"geo":"Toronto","nom":1096,"yoy":0.1},{"year":2010,"geo":"Toronto","nom":1123,"yoy":2.5},{"year":2011,"geo":"Toronto","nom":1149,"yoy":2.3},{"year":2012,"geo":"Toronto","nom":1183,"yoy":3.0},{"year":2013,"geo":"Toronto","nom":1213,"yoy":2.5},{"year":2014,"geo":"Toronto","nom":1251,"yoy":3.1},{"year":2015,"geo":"Toronto","nom":1288,"yoy":3.0},{"year":2016,"geo":"Toronto","nom":1327,"yoy":3.0},{"year":2017,"geo":"Toronto","nom":1404,"yoy":5.8},{"year":2018,"geo":"Toronto","nom":1467,"yoy":4.5},{"year":2019,"geo":"Toronto","nom":1562,"yoy":6.5},{"year":2020,"geo":"Toronto","nom":1635,"yoy":4.7},{"year":2021,"geo":"Toronto","nom":1679,"yoy":2.7},{"year":2022,"geo":"Toronto","nom":1779,"yoy":6.0},{"year":2023,"geo":"Toronto","nom":1961,"yoy":10.2},{"year":2024,"geo":"Toronto","nom":1974,"yoy":0.7},{"year":2025,"geo":"Toronto","nom":2046,"yoy":3.6},{"year":1992,"geo":"Vancouver","nom":771,"yoy":null},{"year":1993,"geo":"Vancouver","nom":790,"yoy":2.5},{"year":1994,"geo":"Vancouver","nom":812,"yoy":2.8},{"year":1995,"geo":"Vancouver","nom":826,"yoy":1.7},{"year":1996,"geo":"Vancouver","nom":845,"yoy":2.3},{"year":1997,"geo":"Vancouver","nom":852,"yoy":0.8},{"year":1998,"geo":"Vancouver","nom":870,"yoy":2.1},{"year":1999,"geo":"Vancouver","nom":864,"yoy":-0.7},{"year":2000,"geo":"Vancouver","nom":890,"yoy":3.0},{"year":2001,"geo":"Vancouver","nom":919,"yoy":3.3},{"year":2002,"geo":"Vancouver","nom":954,"yoy":3.8},{"year":2003,"geo":"Vancouver","nom":965,"yoy":1.2},{"year":2004,"geo":"Vancouver","nom":984,"yoy":2.0},{"year":2005,"geo":"Vancouver","nom":1004,"yoy":2.0},{"year":2006,"geo":"Vancouver","nom":1045,"yoy":4.1},{"year":2007,"geo":"Vancouver","nom":1084,"yoy":3.7},{"year":2008,"geo":"Vancouver","nom":1124,"yoy":3.7},{"year":2009,"geo":"Vancouver","nom":1169,"yoy":4.0},{"year":2010,"geo":"Vancouver","nom":1195,"yoy":2.2},{"year":2011,"geo":"Vancouver","nom":1237,"yoy":3.5},{"year":2012,"geo":"Vancouver","nom":1261,"yoy":1.9},{"year":2013,"geo":"Vancouver","nom":1281,"yoy":1.6},{"year":2014,"geo":"Vancouver","nom":1311,"yoy":2.3},{"year":2015,"geo":"Vancouver","nom":1368,"yoy":4.3},{"year":2016,"geo":"Vancouver","nom":1450,"yoy":6.0},{"year":2017,"geo":"Vancouver","nom":1552,"yoy":7.0},{"year":2018,"geo":"Vancouver","nom":1649,"yoy":6.2},{"year":2019,"geo":"Vancouver","nom":1748,"yoy":6.0},{"year":2020,"geo":"Vancouver","nom":1792,"yoy":2.5},{"year":2021,"geo":"Vancouver","nom":1824,"yoy":1.8},{"year":2022,"geo":"Vancouver","nom":2002,"yoy":9.8},{"year":2023,"geo":"Vancouver","nom":2181,"yoy":8.9},{"year":2024,"geo":"Vancouver","nom":2314,"yoy":6.1},{"year":2025,"geo":"Vancouver","nom":2363,"yoy":2.1}],"vacancy":[{"year":1992,"geo":"Calgary","v":5.6},{"year":1993,"geo":"Calgary","v":5.9},{"year":1994,"geo":"Calgary","v":5.0},{"year":1995,"geo":"Calgary","v":3.6},{"year":1996,"geo":"Calgary","v":1.5},{"year":1997,"geo":"Calgary","v":0.5},{"year":1998,"geo":"Calgary","v":0.5},{"year":1999,"geo":"Calgary","v":2.8},{"year":2000,"geo":"Calgary","v":1.2},{"year":2001,"geo":"Calgary","v":1.1},{"year":2002,"geo":"Calgary","v":2.8},{"year":2003,"geo":"Calgary","v":4.3},{"year":2004,"geo":"Calgary","v":4.1},{"year":2005,"geo":"Calgary","v":1.4},{"year":2006,"geo":"Calgary","v":0.5},{"year":2007,"geo":"Calgary","v":1.5},{"year":2008,"geo":"Calgary","v":2.1},{"year":2009,"geo":"Calgary","v":5.4},{"year":2010,"geo":"Calgary","v":3.4},{"year":2011,"geo":"Calgary","v":1.8},{"year":2012,"geo":"Calgary","v":1.3},{"year":2013,"geo":"Calgary","v":1.0},{"year":2014,"geo":"Calgary","v":1.4},{"year":2015,"geo":"Calgary","v":5.3},{"year":2016,"geo":"Calgary","v":6.9},{"year":2017,"geo":"Calgary","v":6.2},{"year":2018,"geo":"Calgary","v":3.9},{"year":2019,"geo":"Calgary","v":3.7},{"year":2020,"geo":"Calgary","v":6.5},{"year":2021,"geo":"Calgary","v":5.1},{"year":2022,"geo":"Calgary","v":2.7},{"year":2023,"geo":"Calgary","v":1.4},{"year":2024,"geo":"Calgary","v":4.8},{"year":2025,"geo":"Calgary","v":5.0},{"year":1998,"geo":"Montreal","v":5.2},{"year":1999,"geo":"Montreal","v":3.3},{"year":2000,"geo":"Montreal","v":1.5},{"year":2001,"geo":"Montreal","v":0.7},{"year":2002,"geo":"Montreal","v":0.7},{"year":2003,"geo":"Montreal","v":1.1},{"year":2004,"geo":"Montreal","v":1.6},{"year":2005,"geo":"Montreal","v":2.2},{"year":2006,"geo":"Montreal","v":3.0},{"year":2007,"geo":"Montreal","v":3.3},{"year":2008,"geo":"Montreal","v":2.7},{"year":2009,"geo":"Montreal","v":2.9},{"year":2010,"geo":"Montreal","v":3.0},{"year":2011,"geo":"Montreal","v":2.8},{"year":2012,"geo":"Montreal","v":3.1},{"year":2013,"geo":"Montreal","v":3.2},{"year":2014,"geo":"Montreal","v":3.8},{"year":2015,"geo":"Montreal","v":4.5},{"year":2016,"geo":"Montreal","v":4.6},{"year":2017,"geo":"Montreal","v":2.9},{"year":2018,"geo":"Montreal","v":2.0},{"year":2019,"geo":"Montreal","v":1.6},{"year":2020,"geo":"Montreal","v":3.3},{"year":2021,"geo":"Montreal","v":3.5},{"year":2022,"geo":"Montreal","v":2.2},{"year":2023,"geo":"Montreal","v":1.9},{"year":2024,"geo":"Montreal","v":2.5},{"year":2025,"geo":"Montreal","v":3.3},{"year":1992,"geo":"Ottawa-Gatineau","v":1.8},{"year":1993,"geo":"Ottawa-Gatineau","v":2.4},{"year":1994,"geo":"Ottawa-Gatineau","v":3.5},{"year":1995,"geo":"Ottawa-Gatineau","v":4.8},{"year":1996,"geo":"Ottawa-Gatineau","v":5.4},{"year":1997,"geo":"Ottawa-Gatineau","v":5.0},{"year":1998,"geo":"Ottawa-Gatineau","v":2.8},{"year":1999,"geo":"Ottawa-Gatineau","v":1.2},{"year":2000,"geo":"Ottawa-Gatineau","v":0.4},{"year":2001,"geo":"Ottawa-Gatineau","v":0.7},{"year":2002,"geo":"Ottawa-Gatineau","v":1.6},{"year":2003,"geo":"Ottawa-Gatineau","v":2.4},{"year":2004,"geo":"Ottawa-Gatineau","v":3.5},{"year":2005,"geo":"Ottawa-Gatineau","v":3.3},{"year":2006,"geo":"Ottawa-Gatineau","v":2.6},{"year":2007,"geo":"Ottawa-Gatineau","v":2.4},{"year":2008,"geo":"Ottawa-Gatineau","v":1.5},{"year":2009,"geo":"Ottawa-Gatineau","v":1.5},{"year":2010,"geo":"Ottawa-Gatineau","v":1.7},{"year":2011,"geo":"Ottawa-Gatineau","v":1.5},{"year":2012,"geo":"Ottawa-Gatineau","v":2.6},{"year":2013,"geo":"Ottawa-Gatineau","v":3.3},{"year":2014,"geo":"Ottawa-Gatineau","v":3.3},{"year":2015,"geo":"Ottawa-Gatineau","v":3.9},{"year":2016,"geo":"Ottawa-Gatineau","v":3.4},{"year":2017,"geo":"Ottawa-Gatineau","v":2.2},{"year":2018,"geo":"Ottawa-Gatineau","v":1.5},{"year":2019,"geo":"Ottawa-Gatineau","v":1.8},{"year":2020,"geo":"Ottawa-Gatineau","v":3.4},{"year":2021,"geo":"Ottawa-Gatineau","v":2.8},{"year":2022,"geo":"Ottawa-Gatineau","v":1.9},{"year":2023,"geo":"Ottawa-Gatineau","v":2.0},{"year":2024,"geo":"Ottawa-Gatineau","v":2.5},{"year":2025,"geo":"Ottawa-Gatineau","v":3.4},{"year":1992,"geo":"Quebec","v":6.7},{"year":1993,"geo":"Quebec","v":6.2},{"year":1994,"geo":"Quebec","v":7.1},{"year":1995,"geo":"Quebec","v":6.2},{"year":1996,"geo":"Quebec","v":6.4},{"year":1997,"geo":"Quebec","v":6.5},{"year":1998,"geo":"Quebec","v":5.1},{"year":1999,"geo":"Quebec","v":3.4},{"year":2000,"geo":"Quebec","v":1.5},{"year":2001,"geo":"Quebec","v":0.7},{"year":2002,"geo":"Quebec","v":0.4},{"year":2003,"geo":"Quebec","v":0.4},{"year":2004,"geo":"Quebec","v":1.1},{"year":2005,"geo":"Quebec","v":1.5},{"year":2006,"geo":"Quebec","v":1.5},{"year":2007,"geo":"Quebec","v":1.4},{"year":2008,"geo":"Quebec","v":0.6},{"year":2009,"geo":"Quebec","v":0.5},{"year":2010,"geo":"Quebec","v":1.1},{"year":2011,"geo":"Quebec","v":1.6},{"year":2012,"geo":"Quebec","v":2.1},{"year":2013,"geo":"Quebec","v":2.4},{"year":2014,"geo":"Quebec","v":3.2},{"year":2015,"geo":"Quebec","v":4.3},{"year":2016,"geo":"Quebec","v":5.4},{"year":2017,"geo":"Quebec","v":4.7},{"year":2018,"geo":"Quebec","v":3.5},{"year":2019,"geo":"Quebec","v":2.5},{"year":2020,"geo":"Quebec","v":2.7},{"year":2021,"geo":"Quebec","v":2.7},{"year":2022,"geo":"Quebec","v":1.5},{"year":2023,"geo":"Quebec","v":0.9},{"year":2024,"geo":"Quebec","v":1.0},{"year":2025,"geo":"Quebec","v":2.6},{"year":1992,"geo":"Toronto","v":2.0},{"year":1993,"geo":"Toronto","v":1.9},{"year":1994,"geo":"Toronto","v":1.2},{"year":1995,"geo":"Toronto","v":0.8},{"year":1996,"geo":"Toronto","v":1.2},{"year":1997,"geo":"Toronto","v":0.8},{"year":1998,"geo":"Toronto","v":0.8},{"year":1999,"geo":"Toronto","v":0.8},{"year":2000,"geo":"Toronto","v":0.6},{"year":2001,"geo":"Toronto","v":0.9},{"year":2002,"geo":"Toronto","v":2.5},{"year":2003,"geo":"Toronto","v":3.8},{"year":2004,"geo":"Toronto","v":4.4},{"year":2005,"geo":"Toronto","v":3.7},{"year":2006,"geo":"Toronto","v":3.2},{"year":2007,"geo":"Toronto","v":3.2},{"year":2008,"geo":"Toronto","v":2.0},{"year":2009,"geo":"Toronto","v":3.0},{"year":2010,"geo":"Toronto","v":2.1},{"year":2011,"geo":"Toronto","v":1.4},{"year":2012,"geo":"Toronto","v":1.7},{"year":2013,"geo":"Toronto","v":1.6},{"year":2014,"geo":"Toronto","v":1.6},{"year":2015,"geo":"Toronto","v":1.5},{"year":2016,"geo":"Toronto","v":1.3},{"year":2017,"geo":"Toronto","v":1.0},{"year":2018,"geo":"Toronto","v":1.1},{"year":2019,"geo":"Toronto","v":1.5},{"year":2020,"geo":"Toronto","v":3.4},{"year":2021,"geo":"Toronto","v":4.6},{"year":2022,"geo":"Toronto","v":1.6},{"year":2023,"geo":"Toronto","v":1.4},{"year":2024,"geo":"Toronto","v":2.5},{"year":2025,"geo":"Toronto","v":3.0},{"year":1992,"geo":"Vancouver","v":1.6},{"year":1993,"geo":"Vancouver","v":1.1},{"year":1994,"geo":"Vancouver","v":0.8},{"year":1995,"geo":"Vancouver","v":1.1},{"year":1996,"geo":"Vancouver","v":1.1},{"year":1997,"geo":"Vancouver","v":1.5},{"year":1998,"geo":"Vancouver","v":2.7},{"year":1999,"geo":"Vancouver","v":2.7},{"year":2000,"geo":"Vancouver","v":1.3},{"year":2001,"geo":"Vancouver","v":1.0},{"year":2002,"geo":"Vancouver","v":1.4},{"year":2003,"geo":"Vancouver","v":2.0},{"year":2004,"geo":"Vancouver","v":1.3},{"year":2005,"geo":"Vancouver","v":1.3},{"year":2006,"geo":"Vancouver","v":0.7},{"year":2007,"geo":"Vancouver","v":0.7},{"year":2008,"geo":"Vancouver","v":0.5},{"year":2009,"geo":"Vancouver","v":2.1},{"year":2010,"geo":"Vancouver","v":1.9},{"year":2011,"geo":"Vancouver","v":1.4},{"year":2012,"geo":"Vancouver","v":1.8},{"year":2013,"geo":"Vancouver","v":1.7},{"year":2014,"geo":"Vancouver","v":1.0},{"year":2015,"geo":"Vancouver","v":0.8},{"year":2016,"geo":"Vancouver","v":0.7},{"year":2017,"geo":"Vancouver","v":0.9},{"year":2018,"geo":"Vancouver","v":1.0},{"year":2019,"geo":"Vancouver","v":1.1},{"year":2020,"geo":"Vancouver","v":2.6},{"year":2021,"geo":"Vancouver","v":1.2},{"year":2022,"geo":"Vancouver","v":0.9},{"year":2023,"geo":"Vancouver","v":0.9},{"year":2024,"geo":"Vancouver","v":1.6},{"year":2025,"geo":"Vancouver","v":3.7}],"cpi":[{"year":1992,"cpi":86.4,"infl":null},{"year":1993,"cpi":87.7,"infl":1.5},{"year":1994,"cpi":86.4,"infl":-1.5},{"year":1995,"cpi":87.9,"infl":1.7},{"year":1996,"cpi":89.4,"infl":1.7},{"year":1997,"cpi":90.6,"infl":1.3},{"year":1998,"cpi":92.0,"infl":1.5},{"year":1999,"cpi":93.5,"infl":1.6},{"year":2000,"cpi":95.7,"infl":2.4},{"year":2001,"cpi":98.0,"infl":2.4},{"year":2002,"cpi":100.0,"infl":2.0},{"year":2003,"cpi":102.4,"infl":2.4},{"year":2004,"cpi":104.4,"infl":2.0},{"year":2005,"cpi":106.7,"infl":2.2},{"year":2006,"cpi":108.6,"infl":1.8},{"year":2007,"cpi":110.3,"infl":1.6},{"year":2008,"cpi":112.6,"infl":2.1},{"year":2009,"cpi":113.5,"infl":0.8},{"year":2010,"cpi":114.8,"infl":1.1},{"year":2011,"cpi":118.0,"infl":2.8},{"year":2012,"cpi":120.4,"infl":2.0},{"year":2013,"cpi":121.4,"infl":0.8},{"year":2014,"cpi":123.2,"infl":1.5},{"year":2015,"cpi":124.9,"infl":1.4},{"year":2016,"cpi":125.9,"infl":0.8},{"year":2017,"cpi":127.3,"infl":1.1},{"year":2018,"cpi":129.5,"infl":1.7},{"year":2019,"cpi":132.4,"infl":2.2},{"year":2020,"cpi":133.7,"infl":1.0},{"year":2021,"cpi":138.7,"infl":3.7},{"year":2022,"cpi":147.9,"infl":6.6},{"year":2023,"cpi":155.5,"infl":5.1},{"year":2024,"cpi":159.7,"infl":2.7},{"year":2025,"cpi":163.9,"infl":2.6}],"insights":{"loyer_2ch_2025":1346,"loyer_2ch_2019":855,"hausse_nominale_2019_2025":57.4,"inflation_2019_2025":23.8,"hausse_reelle_1992_2019":14.3,"hausse_reelle_2019_2025":27.2,"hausse_annuelle_2025":14.5,"ratio_mtl_tor_2015":59.0,"ratio_mtl_tor_2025":65.8,"inoccupation_mtl_2024":2.5,"inoccupation_mtl_2025":3.3,"hausse_2025_par_ville":{"Calgary":1.7,"Montreal":14.5,"Ottawa-Gatineau":4.6,"Quebec":10.2,"Toronto":3.6,"Vancouver":2.1},"hausse_2019_2025_par_ville":{"Calgary":46.7,"Montreal":57.4,"Ottawa-Gatineau":42.7,"Quebec":48.1,"Toronto":31.0,"Vancouver":35.2},"loyer_reloues_2ch_2025":1644,"prime_relocation_2025":298,"prime_relocation_pct_2025":22.1,"hausse_reloues_2025":17.2,"hausse_non_reloues_2025":6.0,"hausse_meme_echantillon_2025":7.2,"inoccupation_3plus_2025":2.9,"mtl_demande_dernier":1820.0,"mtl_paye_dernier":1360.0,"mtl_ecart_dernier":460,"mtl_ecart_pct_dernier":33.8,"mtl_var_demande":-5.2,"mtl_var_paye":12.4,"periode_derniere":"2026 T2","periode_il_y_a_un_an":"2025 T2","qc_hausse_loyer_ipc":33.8,"qc_hausse_reelle_ipc":9.5,"qc_hausse_loyer_2025":7.8,"qc_rang_hausse_2025":1},"turnover":[{"year":2022,"indicateur":"loyer_moyen_reloues_2ch","valeur":1235.0},{"year":2023,"indicateur":"loyer_moyen_reloues_2ch","valeur":1310.0},{"year":2024,"indicateur":"loyer_moyen_reloues_2ch","valeur":1407.0},{"year":2025,"indicateur":"loyer_moyen_reloues_2ch","valeur":1644.0},{"year":2024,"indicateur":"hausse_loyer_reloues_2ch","valeur":18.7},{"year":2025,"indicateur":"hausse_loyer_reloues_2ch","valeur":17.2},{"year":2024,"indicateur":"hausse_loyer_non_reloues_2ch","valeur":4.7},{"year":2025,"indicateur":"hausse_loyer_non_reloues_2ch","valeur":6.0},{"year":2025,"indicateur":"hausse_loyer_meme_echantillon_2ch","valeur":7.2},{"year":2025,"indicateur":"taux_inoccupation_3plus","valeur":2.9}]}</script>
-<script id="scene-data" type="application/json">{"w":1000,"h":538.9,"rings":[[359.5,396.3,319.2,383.1,318.9,356.5,293.4,295.0,335.8,203.2,408.1,230.7,359.5,396.3],[335.8,203.2,293.4,295.0,318.9,356.5,319.2,383.1,233.1,344.6,237.3,334.4,232.3,336.8,229.2,331.5,233.8,332.5,235.2,324.8,228.2,327.8,225.7,321.8,231.7,309.7,225.5,313.3,215.3,306.0,221.4,306.7,215.9,304.0,218.9,298.8,212.8,298.5,209.6,291.3,222.7,289.2,212.9,283.5,222.0,276.6,225.5,284.3,229.5,272.3,211.8,280.7,221.7,266.1,218.2,252.2,225.7,262.0,226.0,251.2,212.7,253.9,211.0,243.6,220.8,240.7,216.4,234.1,232.1,225.1,224.9,227.9,233.9,214.1,226.0,199.4,233.2,146.4,225.8,139.7,211.6,141.7,213.8,121.2,271.7,166.7,335.8,203.2],[197.2,226.1,199.3,230.9,194.1,233.0,204.7,231.2,190.8,239.5,191.0,228.1,197.2,226.1],[215.6,267.6,211.5,269.8,217.1,256.2,215.6,267.6],[195.3,244.5,190.7,245.5,189.9,259.1,188.9,239.1,195.3,244.5],[221.9,314.2,226.4,351.7,214.1,340.3,219.0,332.9,210.6,333.1,205.2,320.8,210.9,319.7,199.7,304.2,206.9,300.2,200.6,297.4,203.9,293.1,221.9,314.2],[571.4,298.9,515.3,361.7,512.2,422.3,447.6,415.7,468.5,244.4,524.1,250.1,522.0,264.4,526.5,276.6,528.5,269.8,536.1,270.3,541.8,291.2,538.6,298.2,554.8,293.2,571.4,298.9],[848.6,403.7,834.8,424.0,819.6,431.3,803.6,404.4,789.5,406.2,795.1,392.0,826.8,381.5,828.5,393.7,833.6,392.1,848.6,403.7],[872.1,292.9,867.6,285.5,810.7,316.0,803.4,300.2,805.9,325.3,797.6,319.5,786.0,323.9,780.8,312.1,777.3,318.5,774.3,309.0,763.3,302.0,764.9,290.9,760.0,285.9,767.8,288.0,763.8,279.8,776.5,284.2,793.2,279.1,793.5,266.3,779.1,256.7,773.6,234.7,765.0,231.9,767.4,219.9,756.3,221.7,759.7,218.9,748.1,202.9,765.1,213.5,762.4,217.5,771.4,217.6,770.0,225.9,775.9,220.4,774.0,229.3,784.5,226.0,783.4,233.9,795.5,236.1,797.6,240.8,788.2,243.5,802.0,250.5,812.1,249.0,815.2,260.1,820.1,253.0,823.3,260.2,824.8,252.3,844.0,252.2,827.5,278.4,830.8,283.6,840.8,260.7,847.4,258.0,853.7,266.9,858.1,258.6,866.5,261.3,872.8,270.2,869.4,274.4,878.0,276.4,872.1,292.9],[885.2,285.8,889.6,316.4,891.1,306.1,898.0,304.1,895.5,312.5,904.4,308.9,907.0,315.4,910.5,304.5,920.0,302.1,923.9,317.2,931.2,307.6,929.5,320.8,934.6,324.5,937.2,313.3,948.7,334.2,944.3,337.3,939.7,330.6,937.0,337.7,935.0,328.3,928.1,324.8,922.2,347.6,924.5,331.1,883.5,356.6,885.1,339.3,877.1,343.1,884.4,331.0,879.1,326.7,876.3,298.5,880.0,285.8,885.2,285.8],[847.0,407.6,867.3,401.8,870.6,395.6,884.3,399.1,856.2,426.4,848.1,448.2,837.1,436.3,849.1,415.5,854.5,418.7,860.1,410.0,844.6,417.4,847.0,407.6],[878.5,390.1,883.6,391.2,883.8,380.7,891.2,383.1,877.5,395.5,877.4,371.5,882.3,382.8,878.5,390.1],[408.1,230.7,309.4,189.7,311.5,174.1,295.4,168.0,298.9,156.7,291.9,139.9,301.1,115.5,296.6,93.7,308.8,79.8,302.4,75.0,310.0,60.9,300.1,52.7,317.6,29.4,320.7,36.0,325.0,27.1,334.1,27.1,331.0,32.9,359.0,35.5,336.5,38.1,330.4,40.5,333.2,43.4,343.0,38.7,344.6,44.0,358.7,43.7,369.8,35.5,371.0,58.4,381.7,50.2,376.4,61.0,386.6,58.8,395.3,66.3,385.2,89.6,416.6,144.3,427.9,147.9,435.4,161.6,478.8,179.8,468.5,244.4,408.1,230.7],[475.9,-1.0,472.9,9.5,458.7,12.4,455.2,6.0,470.5,2.0,459.4,1.5,460.3,-4.4,451.3,0.1,445.9,-6.6,457.5,-9.4,450.0,-12.0,459.3,-12.6,453.7,-15.8,461.5,-16.3,462.7,-21.5,475.9,-1.0],[432.1,5.1,439.9,8.0,443.9,22.7,415.9,31.9,409.3,40.8,395.3,41.0,390.2,22.3,412.4,2.6,413.4,-7.2,426.7,-3.5,432.1,5.1],[464.6,37.7,451.6,82.3,416.2,69.7,415.2,75.2,416.5,68.1,444.8,75.1,436.2,66.0,417.6,59.7,416.2,52.8,433.3,51.6,419.7,47.0,425.8,30.8,446.6,25.2,442.9,36.9,452.7,33.7,457.9,39.9,454.1,45.6,464.6,37.7],[524.1,250.1,468.5,244.4,478.8,179.8,435.4,161.6,427.9,147.9,416.6,144.3,385.2,89.6,395.8,67.8,421.5,92.7,423.1,99.1,413.6,105.1,427.8,112.5,442.4,112.0,449.0,120.2,452.3,140.2,453.6,117.9,468.7,108.9,451.3,109.6,467.6,103.7,474.1,118.6,485.5,126.1,504.7,128.9,507.6,123.7,513.8,131.3,507.9,119.3,515.2,117.8,518.5,125.2,523.1,122.3,522.5,147.7,526.0,125.6,537.7,117.2,535.7,111.2,531.3,114.0,537.6,104.0,522.0,91.7,523.7,75.8,532.8,64.6,548.2,93.3,541.1,101.1,554.3,103.9,550.1,107.1,556.2,122.9,560.8,107.1,566.9,112.1,573.7,138.8,585.8,112.8,580.5,96.7,596.3,97.1,604.2,103.7,606.0,111.7,599.4,116.1,609.0,136.2,598.9,148.6,587.5,141.6,596.3,151.5,578.6,148.3,583.5,154.3,575.1,167.1,549.4,158.5,578.1,171.0,571.9,185.2,558.7,186.6,557.0,194.5,534.3,186.2,554.8,203.0,543.1,207.0,541.9,217.0,537.1,214.0,524.1,250.1],[472.9,9.5,485.8,-19.3,484.5,-2.9,494.1,-2.9,490.6,8.5,472.9,9.5],[415.2,75.2,416.2,69.7,451.6,82.3,464.6,37.7,467.8,59.3,472.1,58.3,474.8,34.5,483.9,43.4,485.0,78.2,498.3,95.4,484.4,95.6,485.0,102.7,490.9,99.3,492.1,104.4,485.2,108.9,473.3,105.0,466.7,95.3,450.5,102.6,429.4,100.1,428.8,87.9,415.2,75.2],[647.6,116.2,644.7,112.5,651.8,111.6,647.6,116.2],[591.4,166.8,593.8,163.5,611.3,173.9,613.9,183.1,625.1,185.3,620.9,190.8,604.1,182.5,591.7,200.0,588.1,191.2,578.8,193.9,584.4,184.9,584.9,158.6,591.4,166.8],[643.1,187.0,643.2,191.9,638.1,188.1,643.1,187.0],[615.5,204.3,605.3,213.3,606.2,201.6,615.3,199.3,615.5,204.3],[634.2,204.8,634.7,217.5,630.0,210.3,634.2,204.8],[739.4,183.1,740.9,187.8,735.2,185.3,739.4,183.1],[657.8,297.2,657.0,303.6,655.8,298.4,649.8,304.8,652.5,294.0,652.8,299.6,653.9,292.7,657.8,297.2],[652.0,354.4,639.2,351.4,647.1,347.9,652.0,354.4],[539.6,-12.8,540.4,-5.3,548.9,-8.9,556.3,-3.1,548.4,-1.6,558.3,10.3,591.7,3.6,597.4,14.0,594.9,19.9,584.8,22.4,580.8,17.0,578.4,23.5,547.9,23.2,542.1,-3.5,533.8,-2.6,528.3,-10.6,532.4,-15.6,539.6,-12.8],[524.9,-5.8,523.1,14.6,512.8,15.5,511.5,8.9,518.0,5.0,504.4,6.1,507.0,0.6,511.3,2.5,508.3,-6.4,515.8,1.2,513.5,-8.7,521.6,-10.4,524.9,-5.8],[505.5,1.4,499.6,-5.6,506.2,-6.3,505.5,1.4],[539.8,17.1,535.3,23.1,527.3,16.5,534.8,7.5,539.8,17.1],[542.7,31.7,552.7,37.3,545.4,53.0,535.8,52.7,538.7,58.1,531.5,64.2,530.0,37.8,542.7,31.7],[514.7,35.9,523.3,34.8,516.6,48.5,525.2,55.4,523.5,66.5,515.3,65.5,513.4,73.8,496.6,48.3,499.7,44.2,506.9,49.9,510.7,43.4,503.8,37.9,508.1,39.5,511.4,32.0,514.7,35.9],[577.9,76.5,582.0,78.4,582.1,69.1,575.5,63.1,583.0,62.0,575.5,52.1,581.6,49.5,575.8,45.8,590.1,34.3,600.0,47.9,599.3,61.6,603.3,52.5,610.6,59.9,608.5,52.9,614.6,54.2,610.6,47.0,621.5,46.3,623.8,59.6,630.8,53.3,630.2,65.8,633.5,55.9,633.3,61.9,638.7,62.4,638.2,56.0,647.7,58.5,643.4,68.3,651.8,61.9,652.7,76.9,656.3,63.6,666.0,66.1,660.0,75.6,665.6,70.9,667.1,74.7,668.3,67.9,673.4,70.5,675.8,74.9,666.9,81.9,681.9,81.5,670.2,87.6,676.6,85.5,678.0,89.8,670.0,91.5,686.1,92.0,687.2,97.9,689.7,93.3,690.7,100.1,692.4,95.7,697.8,99.9,697.9,93.8,706.8,97.9,703.6,102.9,713.4,100.4,712.5,107.7,719.6,100.4,726.3,103.2,721.6,110.4,727.3,114.2,726.3,121.4,720.2,120.6,725.6,133.9,709.7,127.1,711.7,116.8,706.3,124.8,695.4,118.6,695.9,123.8,691.1,122.7,697.3,129.7,687.7,128.8,728.7,153.3,730.1,160.5,723.5,154.8,731.1,170.5,706.8,162.3,709.6,166.4,700.3,165.2,729.4,183.4,688.5,180.4,668.2,161.9,664.0,165.7,657.9,160.8,659.5,165.7,647.3,173.0,638.5,171.7,639.2,155.6,653.2,161.9,649.2,155.6,662.4,149.1,654.2,140.4,662.1,120.1,640.4,97.9,631.8,105.8,634.1,95.6,612.3,79.9,615.4,88.7,600.8,89.6,605.1,95.0,562.3,87.4,558.8,79.2,570.5,79.3,556.6,72.6,558.6,47.2,565.9,36.6,576.7,35.3,570.7,51.9,580.6,72.9,573.4,79.1,577.9,76.5],[601.5,33.7,611.4,33.8,618.3,42.8,601.9,46.5,594.8,33.7,601.5,33.7],[485.4,43.9,482.2,30.8,490.4,33.7,485.4,43.9],[516.7,100.3,527.6,113.7,520.9,118.7,504.3,109.5,512.7,97.3,516.7,100.3],[638.2,110.2,644.3,122.4,635.5,128.2,631.3,119.4,638.2,110.2],[512.5,416.2,515.3,361.7,571.4,298.9,584.7,311.1,602.4,317.1,604.6,324.1,617.2,318.9,632.1,321.9,643.1,364.4,655.5,369.6,655.4,379.9,660.5,375.8,669.0,380.6,679.5,435.5,689.4,448.8,720.0,458.0,739.6,450.7,744.1,456.3,728.6,474.8,712.5,482.7,720.5,481.3,719.2,485.3,692.1,495.4,689.6,501.3,698.0,499.8,700.7,505.8,685.9,510.7,688.2,514.1,672.4,515.6,655.5,528.6,653.5,523.9,660.8,521.7,659.4,511.3,666.4,503.9,668.4,482.8,662.0,474.0,682.4,483.0,681.3,477.9,686.3,477.6,680.1,468.7,670.0,461.2,628.1,458.6,621.8,435.9,610.2,435.5,603.6,424.4,585.8,421.8,571.5,438.3,550.4,438.0,517.7,426.5,512.5,416.2],[646.4,466.7,661.9,465.2,659.2,469.7,646.4,466.7],[847.8,396.0,865.9,388.0,864.2,396.8,851.1,398.7,840.8,396.2,841.9,388.3,847.8,396.0],[808.8,386.1,795.1,392.0,794.3,401.3,786.7,404.5,782.7,440.7,775.9,450.3,741.1,460.9,776.0,415.5,795.5,377.3,812.6,363.0,827.6,363.0,823.0,380.0,808.8,386.1],[749.2,201.7,759.7,218.9,756.3,221.7,767.4,219.9,765.0,231.9,773.6,234.7,779.1,256.7,793.5,266.3,793.2,279.1,776.5,284.2,763.8,279.8,767.8,288.0,760.0,285.9,764.9,290.9,763.3,302.0,774.3,309.0,776.7,318.1,780.8,312.1,786.0,323.9,797.6,319.5,805.9,325.3,803.4,300.2,810.7,316.0,867.6,285.5,872.1,292.9,860.9,303.0,855.7,324.1,797.5,353.0,794.3,369.1,784.6,377.9,779.3,393.7,763.5,395.9,777.9,396.8,777.6,403.0,769.4,421.8,743.0,451.4,747.6,453.3,744.1,456.3,738.0,450.8,720.0,458.0,691.0,449.7,679.5,435.5,667.1,371.0,674.2,375.0,675.1,357.7,655.9,323.0,670.9,310.0,677.6,291.3,670.6,272.1,653.7,260.2,659.5,244.2,653.5,226.0,649.0,226.8,651.5,214.7,644.6,204.1,648.9,199.1,669.8,201.0,674.6,194.0,696.1,208.2,710.7,205.3,714.7,219.1,707.8,223.2,714.4,222.0,721.2,230.2,718.0,240.3,731.5,235.6,734.9,243.9,731.0,249.7,735.6,238.2,741.0,244.4,746.2,228.8,751.0,232.8,749.2,201.7],[848.7,348.8,818.3,349.6,832.8,345.0,848.7,348.8],[751.4,450.0,747.2,451.6,750.7,446.3,751.4,450.0],[359.5,396.3,408.1,230.7,468.5,244.4,447.6,415.7,359.5,396.3],[309.4,189.7,241.9,145.1,213.8,121.2,217.3,117.0,206.0,107.4,307.0,3.9,317.6,29.4,300.1,52.7,310.0,60.9,302.4,75.0,308.8,79.8,296.7,93.4,301.1,115.9,291.9,139.9,298.9,156.7,295.4,168.0,311.5,174.1,309.4,189.7]],"villes":[{"n":"Halifax","x":862.8,"y":421.5,"g":35.6,"mtl":false},{"n":"Montréal","x":751.2,"y":449.5,"g":33.8,"mtl":true},{"n":"Gatineau","x":728.0,"y":456.3,"g":24.1,"mtl":false},{"n":"Québec","x":770.0,"y":421.5,"g":18.7,"mtl":false},{"n":"Saguenay","x":763.1,"y":396.4,"g":null,"mtl":false},{"n":"Sherbrooke","x":769.9,"y":445.4,"g":35.4,"mtl":false},{"n":"Grand Sudbury","x":666.6,"y":452.9,"g":38.6,"mtl":false},{"n":"Kingston","x":724.2,"y":478.2,"g":10.9,"mtl":false},{"n":"Kitchener - Cambridge - Waterloo","x":680.8,"y":500.5,"g":23.3,"mtl":false},{"n":"London","x":673.2,"y":509.6,"g":23.1,"mtl":false},{"n":"Toronto","x":693.1,"y":494.8,"g":22.7,"mtl":false},{"n":"Winnipeg","x":492.7,"y":406.4,"g":7.1,"mtl":false},{"n":"Regina","x":418.9,"y":387.1,"g":-6.3,"mtl":false},{"n":"Saskatoon","x":404.7,"y":356.8,"g":10.2,"mtl":false},{"n":"Calgary","x":330.3,"y":352.3,"g":-2.1,"mtl":false},{"n":"Edmonton","x":348.9,"y":317.1,"g":0.0,"mtl":false},{"n":"Vancouver","x":235.0,"y":340.4,"g":22.7,"mtl":false}]}</script>
+<script id="scene-data" type="application/json">{"villes":[{"n":"Halifax","e":630,"mtl":false},{"n":"Vancouver","e":560,"mtl":false},{"n":"Grand Sudbury","e":540,"mtl":false},{"n":"Toronto","e":490,"mtl":false},{"n":"Montréal","e":460,"mtl":true},{"n":"Kitchener","e":400,"mtl":false},{"n":"London","e":360,"mtl":false},{"n":"Sherbrooke","e":340,"mtl":false},{"n":"Gatineau","e":330,"mtl":false},{"n":"Québec","e":230,"mtl":false},{"n":"Kingston","e":190,"mtl":false},{"n":"Saskatoon","e":150,"mtl":false},{"n":"Winnipeg","e":110,"mtl":false},{"n":"Edmonton","e":0,"mtl":false},{"n":"Calgary","e":-40,"mtl":false},{"n":"Regina","e":-100,"mtl":false}]}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 const DATA = JSON.parse(document.getElementById("data").textContent);
 const K = DATA.insights;
+/* scène de défilement : nombre de régions où les deux loyers sont publiés, et où l'annonce dépasse le loyer payé */
+const SCN = (() => { const v = JSON.parse(document.getElementById("scene-data").textContent).villes; return { n: v.length, pos: v.filter(d => d.e > 0).length }; })();
 const qs = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
 
 const state = {
@@ -1025,8 +1026,11 @@ const T = {
     fia3: `<li><b>BI, TI et analyse de données</b> : une question d'affaires, un modèle en étoile, une chaîne contrôlée, et les mêmes chiffres recoupés entre la base SQL et le classeur Excel — le métier de l'intelligence d'affaires, démontré de bout en bout.</li><li><b>Immobilier</b> : l'écart entre loyer en place et loyer de marché chiffre le revenu qu'une rotation libère ; le taux d'effort borne ce que la demande peut payer. Deux entrées directes pour le pricing, la souscription et l'investissement.</li><li><b>Décision</b> : citer 7,2 % ou 14,5 % pour « la hausse de 2025 » mène à deux conclusions opposées. Départager les deux, c'est exactement le rôle d'une analyse.</li>`,
     scnH: "Défile pour traverser les données",
     scn1: "34 ans de loyers à Montréal : en 2019, <b>la courbe casse</b>.",
-    scn2: "Et l'écart entre annonces et loyers payés se retrouve <b>partout au pays</b>.",
-    scn3: "Pourquoi ? <b>Place à l'analyse.</b>",
+    scn2: `La facture tombe sur ceux qui déménagent : <b>${K.mtl_ecart_dernier}\u00a0$ de plus par mois</b>. Un point, un dollar.`,
+    scn3: `Montréal n'est pas seule : l'annonce dépasse le loyer payé dans <b>${SCN.pos} régions sur ${SCN.n}</b>.`,
+    scn4: "Pourquoi ? <b>Place à l'analyse.</b>",
+    scnS1: "Loyer moyen d'un 2 chambres à Montréal, en dollars de 2025 · SCHL et Statistique Canada",
+    scnS2: `Loyer demandé moins loyer payé, 2 chambres, ${K.periode_derniere} · Statistique Canada 46-10-0092-01`,
     units: { studio: "Studio", "1ch": "1 chambre", "2ch": "2 chambres", "3ch": "3 chambres" },
     geo: { Montreal: "Montréal", Quebec: "Québec", "Ottawa-Gatineau": "Ottawa-Gatineau", Toronto: "Toronto", Calgary: "Calgary", Vancouver: "Vancouver" },
   },
@@ -1063,8 +1067,11 @@ const T = {
     fia3: `<li><b>BI, IT and data analytics</b>: a business question, a star schema, a controlled chain, and the same figures cross-checked between the SQL database and the Excel workbook — the business-intelligence craft, demonstrated end to end.</li><li><b>Real estate</b>: the gap between in-place and market rent prices the income a turnover unlocks; the effort ratio bounds what demand can pay. Two direct inputs for pricing, underwriting and investment.</li><li><b>Decisions</b>: quoting 7.2% or 14.5% for "the 2025 increase" leads to opposite conclusions. Telling the two apart is exactly what an analysis is for.</li>`,
     scnH: "Scroll to travel through the data",
     scn1: "34 years of Montreal rents: in 2019, <b>the curve breaks</b>.",
-    scn2: "And the gap between listings and rents paid shows up <b>across the country</b>.",
-    scn3: "Why? <b>On to the analysis.</b>",
+    scn2: `The bill lands on people who move: <b>$${K.mtl_ecart_dernier} more per month</b>. One dot, one dollar.`,
+    scn3: `Montreal is not alone: listings exceed rent paid in <b>${SCN.pos} of ${SCN.n} metro areas</b>.`,
+    scn4: "Why? <b>On to the analysis.</b>",
+    scnS1: "Average two-bedroom rent in Montreal, in 2025 dollars · CMHC and Statistics Canada",
+    scnS2: `Asking rent minus rent paid, two-bedroom, Q${String(K.periode_derniere).slice(-1)} ${String(K.periode_derniere).slice(0, 4)} · Statistics Canada 46-10-0092-01`,
     units: { studio: "Bachelor", "1ch": "1 bedroom", "2ch": "2 bedrooms", "3ch": "3 bedrooms" },
     geo: { Montreal: "Montreal", Quebec: "Quebec City", "Ottawa-Gatineau": "Ottawa-Gatineau", Toronto: "Toronto", Calgary: "Calgary", Vancouver: "Vancouver" },
   }
@@ -1105,6 +1112,7 @@ function renderText() {
   const fr = state.lang === "fr";
   const heroTag = document.querySelector("#hero-curve text.tag");
   if (heroTag) heroTag.textContent = fr ? "2019 · la courbe casse" : "2019 · the curve breaks";
+  document.dispatchEvent(new Event("langchange"));   /* la scène de défilement réécrit son montant dans la langue */
   // textes fixes sans clé dans T (data-en) et attributs (aria-label) : le français est gardé au premier passage
   document.querySelectorAll("[data-en]").forEach(el => {
     if (el.dataset.fr == null) el.dataset.fr = el.textContent;
@@ -1656,102 +1664,340 @@ new ResizeObserver(() => { const w = document.body.clientWidth; if (Math.abs(w -
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawCharts); } catch (e) {}
 new MutationObserver(drawCharts).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-/* ------------------------------ scène de défilement : graphique -> carte -> analyse */
+/* ------------------------------ scène de défilement : la courbe casse, devient un montant, puis une ligne d'horizon
+   Un seul canevas, piloté par la position de défilement (aucune animation autonome : la scène est réversible).
+   Les mêmes points traversent trois états :
+     1. la courbe du loyer réel d'un 2 chambres à Montréal (autant de points que de dollars d'écart à Montréal) ;
+     2. le montant de cet écart, écrit avec ces points : un point = un dollar de plus par mois ;
+     3. la tour de Montréal dans une « ligne d'horizon » des régions, où chaque tour compte un point par dollar
+        d'écart entre loyer demandé et loyer payé (écarts négatifs sous la ligne de sol). */
 (() => {
   const scene = document.getElementById("voyage");
   if (!scene) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-  const SC = JSON.parse(document.getElementById("scene-data").textContent);
-  const clamp01 = v => Math.min(1, Math.max(0, v));
-  const ease = k => 1 - Math.pow(1 - k, 3);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;      /* masquée par la feuille de style */
+  const pin = scene.querySelector(".scene-pin"), cv = document.getElementById("sc-canvas");
+  const ctx = cv && cv.getContext ? cv.getContext("2d") : null;
+  if (!ctx || typeof d3 === "undefined") return;
+  const cities = JSON.parse(document.getElementById("scene-data").textContent).villes;
+  const mtl = cities.find(v => v.mtl);
+  const NM = mtl ? mtl.e : 0;                                             /* un point par dollar d'écart à Montréal */
+  if (NM < 60 || NM > 1500) return;
 
-  /* --- couche graphique : loyer réel d'un 2 chambres, 1992-2026 */
-  const CW = 980, CH = 560, M = { t: 70, r: 80, b: 70, l: 80 };
-  const xs = d3.scaleLinear().domain(d3.extent(twoReal, d => d.year)).range([M.l, CW - M.r]);
-  const ysc = d3.scaleLinear().domain(d3.extent(twoReal, d => d.v)).nice().range([CH - M.b, M.t]);
-  const chartEl = document.getElementById("sc-chart");
-  const csvg = d3.select(chartEl).append("svg").attr("viewBox", `0 0 ${CW} ${CH}`);
-  const lastT = twoReal[twoReal.length - 1];
-  csvg.append("path").attr("d", d3.area().x(d => xs(d.year)).y0(CH - M.b).y1(d => ysc(d.v)).curve(d3.curveMonotoneX)(twoReal))
-    .attr("fill", "url(#scgrad)").attr("opacity", 0.18);
-  const defs = csvg.append("defs");
-  const grad = defs.append("linearGradient").attr("id", "scgrad").attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 1);
-  grad.append("stop").attr("offset", "0%").attr("stop-color", "var(--warm)");
-  grad.append("stop").attr("offset", "100%").attr("stop-color", "transparent");
-  [1992, 2019, 2026].forEach(y => csvg.append("text").attr("class", "scax").attr("x", xs(y)).attr("y", CH - M.b + 26).attr("text-anchor", "middle").text(y));
-  const brk = csvg.append("g").attr("opacity", 0);
-  brk.append("line").attr("x1", xs(2019)).attr("x2", xs(2019)).attr("y1", M.t - 8).attr("y2", CH - M.b)
-    .attr("stroke", "var(--warm)").attr("stroke-dasharray", "5 5").attr("stroke-width", 1.6);
-  brk.append("text").attr("class", "scbreak").attr("x", xs(2019)).attr("y", M.t - 18).attr("text-anchor", "middle").text("2019");
-  const cpath = csvg.append("path").attr("d", d3.line().x(d => xs(d.year)).y(d => ysc(d.v)).curve(d3.curveMonotoneX)(twoReal))
-    .attr("fill", "none").attr("stroke", "var(--mtl)").attr("stroke-width", 4).attr("stroke-linecap", "round").node();
-  const dot = csvg.append("circle").attr("r", 7).attr("fill", "var(--warm)")
-    .attr("stroke", "var(--bg)").attr("stroke-width", 2.5).node();
-  const L = cpath.getTotalLength();
-  cpath.style.strokeDasharray = L;
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const seg = (p, a, b) => clamp01((p - a) / (b - a));
+  const easeOut = k => 1 - Math.pow(1 - k, 3);
+  const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  let sd = 1;
+  const rnd = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296;  /* aléa reproductible */
+  const R1 = new Float32Array(NM), R2 = new Float32Array(NM);
+  sd = 2019; for (let i = 0; i < NM; i++) { R1[i] = rnd(); R2[i] = rnd(); }
+  const BLUE = [150, 200, 250], PINK = [255, 94, 148], CORAL = [255, 166, 128];
+  const FAM = '"Inter", "Helvetica Neue", Arial, sans-serif', FAMD = '"Inter Tight", "Inter", "Helvetica Neue", Arial, sans-serif';
+  const dollars = v => { const a = fmtNum(Math.abs(v)), sg = v < 0 ? "−" : ""; return state.lang === "en" ? sg + "$" + a : sg + a + " $"; };
 
-  /* --- couche carte : contours + régions où le loyer payé est publié */
-  const mapEl = document.getElementById("sc-map");
-  const msvg = d3.select(mapEl).append("svg").attr("viewBox", `0 0 ${SC.w} ${SC.h}`);
-  const gm = msvg.append("g");
-  SC.rings.forEach(r => {
-    let d = "M" + r[0] + "," + r[1];
-    for (let i = 2; i < r.length; i += 2) d += "L" + r[i] + "," + r[i + 1];
-    gm.append("path").attr("class", "ring").attr("d", d + "Z");
-  });
-  const gv = [...SC.villes].sort((a, b) => ((a.mtl ? 1 : 0) - (b.mtl ? 1 : 0)) || (a.x - b.x));
-  const gmax = d3.max(gv, d => Math.abs(d.g)) || 1;
-  const refill = () => {
-    const ramp = ["--map-2", "--map-3", "--map-4", "--map-5"].map(c => css(c));
-    const colv = d3.scaleQuantize().domain([0, gmax]).range(ramp);
-    circles.forEach((c, i) => c.setAttribute("fill", gv[i].mtl ? (css("--warm") || "#e0457b") : colv(Math.abs(gv[i].g))));
-  };
-  const circles = gv.map(v => msvg.append("circle")
-    .attr("cx", v.x).attr("cy", v.y).attr("r", v.mtl ? 16 : 8 + 7 * Math.abs(v.g) / gmax).node());
-  refill();
-  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refill); } catch (e) {}
-  new MutationObserver(refill).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  const mtl = gv.find(v => v.mtl);
-  const fmtG = () => (state.lang === "en" ? "Montreal " : "Montréal ") + (mtl.g > 0 ? "+" : "") +
-    new Intl.NumberFormat(state.lang === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(mtl.g) + (state.lang === "en" ? "%" : " %");
-  const mlbl = msvg.append("text").attr("class", "sclbl").attr("x", mtl.x + 22).attr("y", mtl.y - 14).text(fmtG()).node();
-  document.addEventListener("langchange", () => { mlbl.textContent = fmtG(); });
+  let W = 0, H = 0, L = null;
+  function build() {
+    W = pin.clientWidth; H = pin.clientHeight;
+    if (W < 200 || H < 300) { L = null; return; }
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const mobile = W < 700;
+
+    /* --- 1. courbe : loyer réel d'un 2 chambres, NM points répartis le long du tracé */
+    const cw = Math.min(W * (mobile ? .84 : .78), 980), x0 = (W - cw) / 2, x1 = x0 + cw;
+    const yT = H * (mobile ? .27 : .3), yB = H * (mobile ? .6 : .64);
+    const xs = d3.scaleLinear().domain(d3.extent(twoReal, d => d.year)).range([x0, x1]);
+    const ys = d3.scaleLinear().domain(d3.extent(twoReal, d => d.v)).range([yB, yT]);
+    /* la même courbe lissée que les graphiques de la page (curveMonotoneX), aplatie en segments puis
+       rééchantillonnée à pas constant le long du tracé (bien plus rapide que getPointAtLength sur un chemin SVG) */
+    const poly = [];
+    d3.line().x(d => xs(d.year)).y(d => ys(d.v)).curve(d3.curveMonotoneX).context({
+      moveTo(x, y) { poly.push(x, y); }, lineTo(x, y) { poly.push(x, y); }, closePath() {},
+      bezierCurveTo(x1, y1, x2, y2, x, y) {
+        const m = poly.length, px = poly[m - 2], py = poly[m - 1];
+        for (let k = 1; k <= 16; k++) {
+          const t = k / 16, u = 1 - t;
+          poly.push(u * u * u * px + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x, u * u * u * py + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y);
+        }
+      }
+    })(twoReal);
+    const np = poly.length / 2, cum = new Float32Array(np);
+    for (let k = 1; k < np; k++) cum[k] = cum[k - 1] + Math.hypot(poly[2 * k] - poly[2 * k - 2], poly[2 * k + 1] - poly[2 * k - 1]);
+    const len = cum[np - 1];
+    const ax = new Float32Array(NM), ay = new Float32Array(NM);
+    const x19 = xs(2019);
+    let i19 = NM;
+    for (let i = 0, k = 1; i < NM; i++) {
+      const d = len * (i + .5) / NM;
+      while (k < np - 1 && cum[k] < d) k++;
+      const t = (d - cum[k - 1]) / (cum[k] - cum[k - 1] || 1);
+      ax[i] = poly[2 * k - 2] + (poly[2 * k] - poly[2 * k - 2]) * t; ay[i] = poly[2 * k - 1] + (poly[2 * k + 1] - poly[2 * k - 1]) * t;
+      if (i19 === NM && ax[i] >= x19) i19 = i;
+    }
+    const first = twoReal[0], last = twoReal[twoReal.length - 1];
+    const rA = Math.max(1.3, Math.min(2.6, len / NM * .62));
+
+    /* --- 2. montant : NM points bien répartis à l'intérieur des chiffres (échantillonnage « meilleur candidat ») */
+    const txt = dollars(NM);
+    const oc = document.createElement("canvas");
+    oc.width = W; oc.height = H;
+    const o = oc.getContext("2d", { willReadFrequently: true });
+    o.font = `600 200px ${FAMD}`;
+    const fs = Math.min(200 * Math.min(W * (mobile ? .86 : .6), 880) / o.measureText(txt).width, H * .36);
+    o.font = `600 ${fs}px ${FAMD}`; o.textAlign = "center"; o.textBaseline = "middle";
+    o.fillText(txt, W / 2, H * .43);
+    const img = o.getImageData(0, 0, W, H).data;
+    const cand = [];
+    for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) if (img[(y * W + x) * 4 + 3] > 128) cand.push(x, y);
+    const nc = cand.length / 2;
+    if (nc < NM) { L = null; return; }
+    const nx = new Float32Array(NM), ny = new Float32Array(NM);
+    sd = 460;
+    for (let i = 0; i < NM; i++) {
+      let best = 0, bd = -1;
+      for (let k = 0, kn = i ? 16 : 1; k < kn; k++) {
+        const c = (rnd() * nc) | 0, cx = cand[2 * c], cy = cand[2 * c + 1];
+        let dm = 1e12;
+        for (let j = 0; j < i; j++) { const dx = nx[j] - cx, dy = ny[j] - cy, d = dx * dx + dy * dy; if (d < dm) dm = d; }
+        if (dm > bd) { bd = dm; best = c; }
+      }
+      nx[i] = cand[2 * best]; ny[i] = cand[2 * best + 1];
+    }
+    const rN = Math.max(1.5, Math.sqrt(nc * 4 / NM) * .36);
+    /* le point i de la courbe (ordonné de gauche à droite) rejoint la i-ième cible, elle aussi de gauche à droite */
+    const ordN = Array.from({ length: NM }, (_, i) => i).sort((a, b) => nx[a] - nx[b] || ny[a] - ny[b]);
+    const tx = new Float32Array(NM), ty = new Float32Array(NM);
+    ordN.forEach((t, i) => { tx[i] = nx[t]; ty[i] = ny[t]; });
+    const txMin = nx[ordN[0]], txMax = nx[ordN[NM - 1]];
+
+    /* --- 3. ligne d'horizon : une tour par région, un point par dollar d'écart */
+    const n = cities.length, pw = Math.min(W * .94, 1040), px0 = (W - pw) / 2, slot = pw / n;
+    const gy = Math.round(H * (mobile ? .58 : .63)), top = Math.max(H * .15, 98), hAvail = gy - top;
+    const maxE = d3.max(cities, d => d.e);
+    let cols = 4, s = 0;
+    for (let c = 4; c <= 24; c++) { const v = Math.min(slot * .74 / c, hAvail / Math.ceil(maxE / c)); if (v > s) { s = v; cols = c; } }
+    const rS = Math.max(.75, s * .36), maxRows = Math.ceil(maxE / cols);
+    const mx = new Float32Array(NM), my = new Float32Array(NM);
+    const pos = [], neg = [], labels = [];
+    cities.forEach((c, j) => {
+      const cx = px0 + slot * (j + .5), cnt = Math.abs(c.e), rows = Math.ceil(cnt / cols);
+      for (let k = 0; k < cnt; k++) {
+        const col = k % cols, row = (k / cols) | 0;
+        const x = cx + (col - (cols - 1) / 2) * s;
+        if (c.mtl) { mx[k] = x; my[k] = gy - (row + .5) * s; }
+        else if (c.e > 0) pos.push(x, gy - (row + .5) * s, .62 + .08 * j / (n - 1) + .07 * row / maxRows);
+        else neg.push(x, gy + 3 + (row + .5) * s, .66 + .08 * j / (n - 1) + .05 * row / maxRows);
+      }
+      labels.push({ c, cx, topY: c.e > 0 ? gy - rows * s : gy, botY: c.e < 0 ? gy + 3 + rows * s : gy });
+    });
+    /* du montant à la tour : les points les plus bas du montant prennent les rangées du bas */
+    const ordT = Array.from({ length: NM }, (_, i) => i).sort((a, b) => ty[b] - ty[a] || tx[a] - tx[b]);
+    const sx = new Float32Array(NM), sy = new Float32Array(NM), q = new Float32Array(NM);
+    ordT.forEach((i, r) => { sx[i] = mx[r]; sy[i] = my[r]; q[i] = r / (NM - 1); });
+
+    L = { dpr, cache: null, mobile, x0, x1, yT, yB, x19, i19, ax, ay, rA, first, last, xs, ys, tx, ty, txMin, txMax, rN,
+          px0, pw, slot, gy, s, rS, sx, sy, q, pos: Float32Array.from(pos), neg: Float32Array.from(neg), labels };
+  }
+
+  /* fenêtres qui scintillent : à chaque seconde, environ une fenêtre sur cent s'éclaire puis s'éteint en douceur */
+  function twinkle(ctx, pr, tm, dim) {
+    const tick = (tm / 1000) | 0, aT = Math.sin(Math.PI * (tm % 1000) / 1000) * .85 * dim, arr = L.pos, r = Math.max(1.1, L.rS * 1.35);
+    ctx.fillStyle = `rgba(255,255,255,${aT})`; ctx.beginPath();
+    for (let k = 0, i = 0; k < arr.length; k += 3, i++) {
+      let hsh = Math.imul(i + 1, 0x9E3779B1) ^ Math.imul(tick + 7, 0x85EBCA6B);
+      hsh = Math.imul(hsh ^ (hsh >>> 15), 0x2C1B3C6D) >>> 0;
+      if (hsh % 101 || pr - arr[k + 2] < .035) continue;
+      ctx.moveTo(arr[k] + r, arr[k + 1]); ctx.arc(arr[k], arr[k + 1], r, 0, 6.2832);
+    }
+    ctx.fill();
+  }
+  function draw(pr, pre, tm) {
+    ctx.clearRect(0, 0, W, H);
+    if (!L) return;
+    /* ligne d'horizon terminée : plus rien ne bouge sauf le scintillement, l'image est donc dessinée une fois puis réutilisée */
+    if (pr >= .86) {
+      if (!L.cache) {
+        L.cache = document.createElement("canvas"); L.cache.width = cv.width; L.cache.height = cv.height;
+        const c2 = L.cache.getContext("2d"); c2.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
+        paint(c2, .9, 1, 0);
+      }
+      const dim = 1 - .45 * seg(pr, .93, 1);
+      ctx.globalAlpha = dim; ctx.drawImage(L.cache, 0, 0, W, H); ctx.globalAlpha = 1;
+      if (tm) twinkle(ctx, pr, tm, dim);
+      return;
+    }
+    paint(ctx, pr, pre, tm);
+  }
+  function paint(ctx, pr, pre, tm) {
+    const { mobile, ax, ay, tx, ty, sx, sy, q, i19 } = L;
+    const dp = easeOut(clamp01(pre * .3 + pr / .17));          /* tracé de la courbe, amorcé avant l'épinglage */
+    const turn = seg(pr, .17, .24);                              /* l'après-2019 passe au rose */
+    const bump = Math.sin(Math.PI * seg(pr, .19, .30));
+    const mono = `${mobile ? 11 : 12.5}px "IBM Plex Mono", ui-monospace, Menlo, monospace`;
+
+    /* --- repères du graphique (acte 1) */
+    const aAx = Math.min(seg(pre + pr * 20, .25, .7), 1 - seg(pr, .30, .335));
+    if (aAx > 0) {
+      ctx.font = mono; ctx.textBaseline = "alphabetic";
+      ctx.strokeStyle = `rgba(214,226,244,${.2 * aAx})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L.x0, L.yB + 14.5); ctx.lineTo(L.x1, L.yB + 14.5); ctx.stroke();
+      ctx.fillStyle = `rgba(214,226,244,${.72 * aAx})`;
+      ctx.textAlign = "left"; ctx.fillText(L.first.year, L.x0, L.yB + 36);
+      ctx.textAlign = "right"; ctx.fillText(L.last.year, L.x1, L.yB + 36);
+      if (dp > .04) { ctx.textAlign = "left"; ctx.fillText(dollars(Math.round(L.first.v)), L.x0, ay[0] - 14); }
+      if (dp >= .995) { ctx.textAlign = "right"; ctx.fillText(dollars(Math.round(L.last.v)), L.x1, ay[NM - 1] - 16); }
+      const aB = aAx * seg(pr, .14, .2);
+      if (aB > 0) {
+        ctx.strokeStyle = `rgba(255,94,148,${.8 * aB})`; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(L.x19, L.yT - 8); ctx.lineTo(L.x19, L.yB + 14); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = `rgba(255,140,178,${aB})`; ctx.textAlign = "center";
+        ctx.font = `600 ${mobile ? 12 : 13.5}px "IBM Plex Mono", ui-monospace, Menlo, monospace`;
+        ctx.fillText("2019", L.x19, L.yB + 36);
+      }
+    }
+
+    /* --- ligne de sol et tours des autres régions (acte 3) */
+    const aG = seg(pr, .6, .66), dim = 1 - .45 * seg(pr, .93, 1);
+    if (aG > 0) {
+      ctx.strokeStyle = `rgba(214,226,244,${.34 * aG * dim})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L.px0, L.gy + 1.5); ctx.lineTo(L.px0 + L.pw, L.gy + 1.5); ctx.stroke();
+      for (const [arr, col] of [[L.pos, `rgba(206,224,252,${.92 * dim})`], [L.neg, `rgba(118,150,204,${.9 * dim})`]]) {
+        ctx.fillStyle = col; ctx.beginPath();
+        for (let k = 0; k < arr.length; k += 3) {
+          const a = (pr - arr[k + 2]) / .035;
+          if (a <= 0) continue;
+          const r = L.rS * (a < 1 ? back(a) : 1), x = arr[k], y = arr[k + 1];
+          if (L.rS < 1.5) ctx.rect(x - r * .9, y - r * .9, r * 1.8, r * 1.8);
+          else { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 6.2832); }
+        }
+        ctx.fill();
+      }
+      if (tm && pr > .7) twinkle(ctx, pr, tm, dim);
+    }
+
+    /* --- les NM points de Montréal : courbe -> montant -> tour */
+    const flying = pr >= .3, burst = Math.min(W, H);
+    for (let pass = 0; pass < 2; pass++) {                       /* passe 0 : halo, passe 1 : point */
+      for (let i = 0; i < NM; i++) {
+        const f = i / (NM - 1);
+        const vis = flying ? 1 : clamp01(dp * NM - i);
+        if (vis <= 0) continue;
+        const d1 = .3 + .05 * (1 - f), d2 = .6 + .07 * q[i];
+        const t1 = easeIO(seg(pr, d1, d1 + .11)), t2 = easeIO(seg(pr, d2, d2 + .09));
+        let x, y;
+        if (t2 > 0) {
+          const cx = lerp(tx[i], sx[i], .5) + (R1[i] - .5) * W * .1, cy = Math.min(ty[i], sy[i]) - (.03 + .09 * R2[i]) * H;
+          const u = 1 - t2;
+          x = u * u * tx[i] + 2 * u * t2 * cx + t2 * t2 * sx[i]; y = u * u * ty[i] + 2 * u * t2 * cy + t2 * t2 * sy[i];
+        } else if (t1 > 0) {
+          const ang = R1[i] * 6.2832, mag = (.1 + .24 * R2[i]) * burst;
+          const cx = (ax[i] + tx[i]) / 2 + Math.cos(ang) * mag, cy = (ay[i] + ty[i]) / 2 + Math.sin(ang) * mag;
+          const u = 1 - t1;
+          x = u * u * ax[i] + 2 * u * t1 * cx + t1 * t1 * tx[i]; y = u * u * ay[i] + 2 * u * t1 * cy + t1 * t1 * ty[i];
+        } else { x = ax[i]; y = ay[i]; }
+        const wob = tm ? t1 * (1 - t2) * 1.15 : 0;                /* le montant frémit légèrement au repos */
+        if (wob) { x += Math.sin(tm / 900 + R1[i] * 6.2832) * wob; y += Math.cos(tm / 1150 + R2[i] * 6.2832) * wob; }
+        const after = i >= i19;
+        let r = L.rA * (after ? 1 + .55 * bump * (1 - t1) : 1);
+        r = lerp(lerp(r, L.rN, t1), L.rS, t2) * (vis < 1 ? back(vis) : 1);
+        const g = (tx[i] - L.txMin) / (L.txMax - L.txMin || 1), k0 = after ? turn : 0;
+        let cr = lerp(lerp(BLUE[0], PINK[0], k0), lerp(PINK[0], CORAL[0], g), t1);
+        let cg = lerp(lerp(BLUE[1], PINK[1], k0), lerp(PINK[1], CORAL[1], g), t1);
+        let cb = lerp(lerp(BLUE[2], PINK[2], k0), lerp(PINK[2], CORAL[2], g), t1);
+        cr = lerp(cr, PINK[0], t2); cg = lerp(cg, PINK[1], t2); cb = lerp(cb, PINK[2], t2);
+        if (pass === 0) {
+          const ah = .15 * (1 - t2) * vis;
+          if (ah < .01) continue;
+          ctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${ah})`;
+          ctx.beginPath(); ctx.arc(x, y, r * 2.7, 0, 6.2832); ctx.fill();
+        } else {
+          ctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${t2 >= 1 ? dim : 1})`;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+        }
+      }
+    }
+    /* tête du tracé : un point plus lumineux tant que la courbe se dessine */
+    if (!flying && dp > 0 && dp < 1) {
+      const i = Math.min(NM - 1, (dp * NM) | 0);
+      const gr = ctx.createRadialGradient(ax[i], ay[i], 0, ax[i], ay[i], 22);
+      gr.addColorStop(0, "rgba(255,255,255,.75)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(ax[i], ay[i], 22, 0, 6.2832); ctx.fill();
+    }
+
+    /* --- étiquettes de la ligne d'horizon */
+    const aL = seg(pr, .74, .8) * dim;
+    if (aL > 0) {
+      const ang = mobile ? 1.08 : .72, fsz = mobile ? 10 : 12;
+      const lblY = d3.max(L.labels, d => d.botY) > L.gy ? null : L.gy;
+      L.labels.forEach((d, j) => {
+        const c = d.c, name = c.mtl && state.lang === "en" ? "Montreal" : c.n;
+        ctx.save();
+        ctx.translate(d.cx + 4, (lblY === null ? d.botY : lblY) + 14); ctx.rotate(-ang);
+        ctx.font = `${c.mtl ? 700 : 500} ${fsz}px ${FAM}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        ctx.fillStyle = c.mtl ? `rgba(255,140,178,${aL})` : `rgba(214,226,244,${.82 * aL})`;
+        ctx.fillText(name, 0, 0);
+        ctx.restore();
+        const showVal = c.mtl || !mobile || j === 0 || j === L.labels.length - 1;
+        if (showVal) {
+          ctx.font = `${c.mtl ? 700 : 500} ${mobile ? 10.5 : 12}px ${FAM}`; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+          ctx.fillStyle = c.mtl ? `rgba(255,140,178,${aL})` : `rgba(214,226,244,${.82 * aL})`;
+          ctx.fillText(dollars(c.e), d.cx, d.topY - 8);
+        }
+      });
+    }
+  }
 
   /* --- pilotage par le défilement */
-  const caps = [1, 2, 3].map(i => document.getElementById("sc-cap" + i));
+  const caps = [1, 2, 3, 4].map(i => document.getElementById("sc-cap" + i));
+  const srcs = [1, 2].map(i => document.getElementById("sc-src" + i));
   const hint = scene.querySelector(".scene-hint");
-  let ticking = false;
+  let ticking = false, lastP = 0, lastPre = 0;
   function upd() {
     const r = scene.getBoundingClientRect();
     const total = r.height - innerHeight;
-    if (total <= 0) return;
-    const pr = clamp01(-r.top / total);
-    if (r.bottom < -40 || r.top > innerHeight + 40) return;
-    const draw = ease(clamp01(pr / 0.3));
-    cpath.style.strokeDashoffset = L * (1 - draw);
-    const pt = cpath.getPointAtLength(L * draw);
-    dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
-    dot.setAttribute("opacity", draw > 0.01 && pr < 0.36 ? 1 : 0);
-    brk.attr("opacity", clamp01((pr - 0.2) / 0.08));
-    const zoom = ease(clamp01((pr - 0.32) / 0.2));
-    chartEl.style.transformOrigin = `${xs(2019) / CW * 100}% 42%`;
-    chartEl.style.transform = `scale(${1 + zoom * 5.2})`;
-    chartEl.style.opacity = String(1 - zoom);
-    chartEl.style.visibility = zoom >= 1 ? "hidden" : "visible";
-    const mapIn = clamp01((pr - 0.46) / 0.2);
-    const mapOut = ease(clamp01((pr - 0.94) / 0.06));
-    mapEl.style.opacity = String(Math.min(ease(mapIn), 1 - 0.6 * mapOut));
-    mapEl.style.transform = `scale(${0.78 + 0.22 * ease(mapIn) + 0.3 * mapOut})`;
-    circles.forEach((c, i) => c.classList.toggle("on", pr > 0.5 + i * 0.016));
-    mlbl.classList.toggle("on", pr > 0.52 + circles.length * 0.016);
-    caps[0].classList.toggle("on", pr > 0.02 && pr < 0.36);
-    caps[1].classList.toggle("on", pr >= 0.52 && pr < 0.88);
-    caps[2].classList.toggle("on", pr >= 0.88);
-    hint.style.opacity = pr < 0.04 ? 1 : 0;
+    if (total <= 0 || r.bottom < -40 || r.top > innerHeight + 40) return;
+    const pr = clamp01(-r.top / total), pre = clamp01(1 - r.top / innerHeight);
+    lastP = pr; lastPre = pre;
+    draw(pr, pre, performance.now());
+    caps[0].classList.toggle("on", pre > .55 && pr < .3);
+    caps[1].classList.toggle("on", pr >= .41 && pr < .6);
+    caps[2].classList.toggle("on", pr >= .7 && pr < .91);
+    caps[3].classList.toggle("on", pr >= .93);
+    srcs[0].classList.toggle("on", pre > .55 && pr < .3);
+    srcs[1].classList.toggle("on", pr >= .41 && pr < .91);
+    hint.style.opacity = pr < .02 ? 1 : 0;
   }
+  const rebuild = () => { build(); upd(); };
   addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { upd(); ticking = false; }); } }, { passive: true });
-  addEventListener("resize", upd, { passive: true });
-  upd();
+  /* redimensionnement : sur téléphone, la barre d'adresse fait varier la hauteur à chaque défilement ;
+     la mise en page n'est recalculée que si la largeur change ou si la hauteur change nettement */
+  let rt = 0;
+  addEventListener("resize", () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (pin.clientWidth !== W || Math.abs(pin.clientHeight - H) > 120) rebuild(); else upd(); }, 140);
+  }, { passive: true });
+  document.addEventListener("langchange", rebuild);               /* le montant s'écrit « 460 $ » ou « $460 » */
+  /* au repos, la scène reste vivante : une trentaine d'images par seconde, seulement quand elle est à l'écran
+     et que les points ont quitté la courbe (la courbe, elle, ne bouge pas : c'est une donnée) */
+  if ("IntersectionObserver" in window) {
+    let onScreen = false, lastT = 0;
+    const loop = t => {
+      if (!onScreen) return;
+      if (lastP > .3 && !document.hidden && t - lastT > 38) { lastT = t; draw(lastP, lastPre, t); }
+      requestAnimationFrame(loop);
+    };
+    new IntersectionObserver(es => {
+      const v = es[es.length - 1].isIntersecting;
+      if (v && !onScreen) { onScreen = true; requestAnimationFrame(loop); } else if (!v) onScreen = false;
+    }).observe(pin);
+  }
+  scene.classList.add("ready");                                   /* la scène prend sa place : tout est prêt */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild).catch(() => {});
+  rebuild();
 })();
 </script>
 

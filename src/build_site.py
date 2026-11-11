@@ -130,28 +130,15 @@ N_BOTH = sum(1 for v in _REG if v["demande"] and v["paye"])    # les deux : base
 
 
 def scene_json():
-    """Données de la scène de défilement de l'accueil : contours projetés du Canada
-    (geo.py, projection de Statistique Canada) et régions où le loyer payé est publié."""
-    import geo
-    rings, (bx0, by0, bx1, by1) = geo.outlines((-141.0, 41.7, -52.6, 70.0), 0.004)
-    W = 1000.0
-    sx = W / (bx1 - bx0)
-    H = (by1 - by0) * sx
-    def px(x, y):
-        return round((x - bx0) * sx, 1), round(H - (y - by0) * sx, 1)
-    out_rings = []
-    for _, r in rings:
-        out_rings.append([c for xy in r for c in px(xy[0], xy[1])])
+    """Données de la scène de défilement de l'accueil : écart en dollars entre loyer demandé et loyer payé
+    dans chaque région où les deux sont publiés au dernier trimestre, du plus grand au plus petit.
+    La scène dessine un point par dollar."""
     C = json.loads(carte_json.replace("<\\/", "</"))
-    villes = []
-    for v in C["villes"]:
-        if not v.get("paye") or v.get("lat") is None:
-            continue
-        x, y = geo.proj(v["lon"], v["lat"])
-        x, y = px(float(x), float(y))
-        villes.append({"n": v["nom"].split(" (")[0], "x": x, "y": y, "g": v["ecart_pct"], "mtl": v["id"] == 7})
-    return json.dumps({"w": 1000, "h": round(H, 1), "rings": out_rings, "villes": villes},
-                      ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    villes = [{"n": v["nom"].split(" (")[0].split(" - ")[0], "e": int(round(v["ecart"])), "mtl": v["id"] == 7}
+              for v in C["villes"] if v.get("paye") and v.get("ecart") is not None]
+    villes.sort(key=lambda v: -v["e"])
+    assert sum(v["mtl"] for v in villes) == 1 and len(villes) >= 10, "scène : Montréal ou régions manquantes"
+    return json.dumps({"villes": villes}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 def package_program():
     """Paquet public de l'évaluateur : script, données, exemple, mode d'emploi."""
