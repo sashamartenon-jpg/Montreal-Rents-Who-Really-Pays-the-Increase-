@@ -573,6 +573,44 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 .scene-src { hyphens: manual; position: absolute; left: 50%; bottom: 3.4vh; transform: translateX(-50%); width: min(92vw, 62em); margin: 0; text-align: center; font: .72rem/1.35 var(--font-mono); color: rgba(214, 226, 244, .66); opacity: 0; transition: opacity .35s; pointer-events: none; }
 .scene-src.on { opacity: 1; }
 .scene-hint { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; font: .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(214, 226, 244, .72); transition: opacity .3s; }
+/* --------- mouvements communs à toutes les pages */
+/* passage d'une page à l'autre : fondu croisé (navigateurs qui gèrent les transitions de vue) ; l'en-tête reste en place */
+@view-transition { navigation: auto; }
+.top { view-transition-name: topbar; }
+::view-transition-old(root) { animation: vtOut .2s ease both; }
+::view-transition-new(root) { animation: vtIn .36s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes vtOut { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(10px); } }
+/* motif animé des bandeaux (canevas dessiné par motion.js), sous le texte et sous le verre cannelé */
+.herofx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+@media (min-width: 1000px) { .heroband .phero > * { max-width: 44em; } .heroband .phero h1 { max-width: 11.5em; } }
+/* lignes de résultats en cascade : à l'apparition du bloc, puis à chaque nouvelle exécution */
+@keyframes rowIn { from { opacity: 0; transform: translateY(8px); } }
+.rv.in table.data tr, #sql-out table.data tr, .list.casc li, .detail.swap > * > * { animation: rowIn .45s cubic-bezier(.2, .7, .2, 1) backwards; }
+table.data tr:nth-child(2), .list li:nth-child(2) { animation-delay: 0.028s; } table.data tr:nth-child(3), .list li:nth-child(3) { animation-delay: 0.056s; } table.data tr:nth-child(4), .list li:nth-child(4) { animation-delay: 0.084s; } table.data tr:nth-child(5), .list li:nth-child(5) { animation-delay: 0.112s; } table.data tr:nth-child(6), .list li:nth-child(6) { animation-delay: 0.140s; } table.data tr:nth-child(7), .list li:nth-child(7) { animation-delay: 0.168s; } table.data tr:nth-child(8), .list li:nth-child(8) { animation-delay: 0.196s; } table.data tr:nth-child(9), .list li:nth-child(9) { animation-delay: 0.224s; } table.data tr:nth-child(10), .list li:nth-child(10) { animation-delay: 0.252s; } table.data tr:nth-child(11), .list li:nth-child(11) { animation-delay: 0.280s; } table.data tr:nth-child(12), .list li:nth-child(12) { animation-delay: 0.308s; } table.data tr:nth-child(13), .list li:nth-child(13) { animation-delay: 0.336s; } table.data tr:nth-child(14), .list li:nth-child(14) { animation-delay: 0.364s; }
+table.data tr:nth-child(n+15), .list li:nth-child(n+15) { animation-delay: .39s; }
+/* le code se dévoile de gauche à droite */
+@keyframes codeIn { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+pre.code.typed { animation: codeIn .75s cubic-bezier(.3, .6, .2, 1) backwards; }
+/* le soulignement des titres de section se trace */
+.block h2.rv::before { transform: scaleX(0); transform-origin: 0 50%; transition: transform .7s cubic-bezier(.2, .7, .2, 1) .25s; }
+.block h2.rv.in::before { transform: scaleX(1); }
+/* captures : la feuille se déroule, puis réagit au survol */
+.figure.rv img { clip-path: inset(0 0 100% 0); transition: clip-path 1s cubic-bezier(.2, .7, .2, 1) .15s, transform .5s ease; }
+.figure.rv.in img { clip-path: inset(0 0 0 0); }
+.figure a.zoom { overflow: hidden; }
+.figure a.zoom:hover img { transform: scale(1.02); }
+/* éléments cliquables : léger soulèvement */
+.btn, .pager a, .pill { transition: translate .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease; }
+.btn:hover, .pager a:hover { translate: 0 -1px; box-shadow: 0 6px 18px rgba(19, 35, 58, .12); }
+.btn:active, .pager a:active { translate: 0 0; box-shadow: none; }
+/* accueil : cartes de verre inclinées vers le pointeur */
+.glass-stack .gcard { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  .figure.rv img { clip-path: none; }
+  .block h2.rv::before { transform: none; }
+}
 @media (prefers-reduced-motion: reduce) { .scene, .scene.ready { display: none; } }
 @media (max-height: 500px) { .scene, .scene.ready { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
@@ -586,7 +624,7 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
   </div>
 </header>
 <main id="main">
-  <div class="heroband"><div class="wrap phero">
+  <div class="heroband"><canvas class="herofx" data-fx="cells" data-n="1 272" aria-hidden="true"></canvas><div class="wrap phero">
     <p class="eyebrow hero-in" data-i18n="ey">Compétence · Excel</p>
     <h1 class="hero-in" style="--d:.08s" data-i18n="h1">Un classeur qui <mark>répond à la question</mark>, avec ses propres cartes</h1>
     <p class="hero-in" style="--d:.16s" data-i18n="lede">Huit feuilles — six d'analyse, une feuille « Excel 365 » et un mode d'emploi — plus cinq tableaux sources, 1 272 formules, aucune macro, aucune cellule vide. Le classeur existe en français et en anglais : mêmes formules, mêmes chiffres. Choisis une année : la carte du Canada se recolore. Choisis une ville : sa fiche, son rang et sa courbe suivent. Des fonctions simples (SOMME.SI.ENS, SI.CONDITIONS) portent l'essentiel ; les plus avancées (CENTILE, NPM, séries à NA()) font les cartes et les scénarios.</p>
@@ -924,8 +962,12 @@ window.PAGE_EN = {
   const cio = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { drawChart(e.target); cio.unobserve(e.target); }
   }), { threshold: 0.25 });
+  const kio = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("typed"); kio.unobserve(e.target); }
+  }), { threshold: 0.15 });
   all().forEach(e => io.observe(e));
   document.querySelectorAll(".chart").forEach(c => cio.observe(c));
+  document.querySelectorAll("pre.code").forEach(c => kio.observe(c));
   document.querySelectorAll(".heroband .num").forEach(n => setTimeout(() => count(n), 500));
   new MutationObserver(ms => {
     ms.forEach(m => m.addedNodes.forEach(n => {
@@ -933,8 +975,200 @@ window.PAGE_EN = {
       mark(n.parentElement || n);
       if (n.classList && n.classList.contains("rv") && !n.classList.contains("in")) io.observe(n);
       n.querySelectorAll && n.querySelectorAll(".rv:not(.in)").forEach(x => io.observe(x));
+      n.querySelectorAll && n.querySelectorAll("pre.code:not(.typed)").forEach(x => kio.observe(x));
     }));
   }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* Motifs animés des bandeaux des pages de compétences : un canevas par page, dessiné avec les vraies données.
+     cells  (Excel) : une cellule par formule du classeur ; une vague de recalcul part d'une cellule « modifiée »
+     schema (SQL)   : les tables de la base et leurs clés étrangères ; une impulsion parcourt chaque jointure
+     cities (Carte) : les régions métropolitaines à leur position ; l'onde est d'autant plus large que l'écart est grand
+   Le motif se place à droite du texte s'il reste de la place, sinon en filigrane derrière lui (téléphone).
+   Avec « réduire les animations », une seule image fixe est dessinée. */
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const TAU = Math.PI * 2, clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const MONO = '"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace', SANS = '"Inter", "Helvetica Neue", Arial, sans-serif';
+  const FX = {};
+
+  FX.cells = {
+    faint: .5,
+    build(a, cv) {
+      const n = parseInt((cv.dataset.n || "").replace(/\D/g, ""), 10) || 0;
+      if (n < 1) return null;
+      const cols = Math.max(4, Math.round(Math.sqrt(n * a.w / a.h))), rows = Math.ceil(n / cols), s = Math.min(a.w / cols, a.h / rows);
+      return { n, cols, s, gx: a.x + (a.w - cols * s) / 2, gy: a.y + (a.h - rows * s) / 2, waves: [], next: 0 };
+    },
+    draw(c, m, t, a, ptr) {
+      const at = (x, y) => { const cx = Math.floor((x - m.gx) / m.s), cy = Math.floor((y - m.gy) / m.s), i = cy * m.cols + cx; return cx >= 0 && cx < m.cols && cy >= 0 && i < m.n ? i : -1; };
+      if (ptr.down) { ptr.down = false; const i = at(ptr.dx, ptr.dy); if (i >= 0) m.waves.push({ i, t0: t }); }
+      if (t >= m.next) { m.waves.push({ i: (Math.random() * m.n) | 0, t0: t }); m.next = t + 2600 + Math.random() * 1600; }
+      m.waves = m.waves.filter(w => t - w.t0 < 3800).slice(-5);
+      const B = [[], [], [], [], []];
+      const px = ptr.x == null ? -99 : (ptr.x - m.gx) / m.s - .5, py = ptr.x == null ? -99 : (ptr.y - m.gy) / m.s - .5;
+      for (let i = 0; i < m.n; i++) {
+        const cx = i % m.cols, cy = (i / m.cols) | 0;
+        let v = 0;
+        for (const w of m.waves) {
+          const age = (t - w.t0) / 1000, k = (Math.hypot(cx - w.i % m.cols, cy - ((w.i / m.cols) | 0)) - age * 13) / 1.7;
+          v += Math.exp(-k * k) * (1 - age / 3.8);
+        }
+        const d = Math.hypot(cx - px, cy - py);
+        if (d < 3.2) v += (1 - d / 3.2) * .9;
+        B[v > .75 ? 4 : v > .45 ? 3 : v > .22 ? 2 : v > .08 ? 1 : 0].push(i);
+      }
+      const al = [.17, .3, .46, .66, .92], q = m.s * .84;
+      B.forEach((arr, b) => {
+        c.fillStyle = `rgba(255,255,255,${al[b] * a.k})`; c.beginPath();
+        for (const i of arr) c.rect(m.gx + (i % m.cols) * m.s, m.gy + ((i / m.cols) | 0) * m.s, q, q);
+        c.fill();
+      });
+      for (const w of m.waves) {                 /* cellule « modifiée » : le jaune des cellules de saisie du classeur */
+        const age = (t - w.t0) / 1000;
+        if (age < 1.2) { c.fillStyle = `rgba(255,232,130,${(1 - age / 1.2) * (a.faint ? .45 : 1)})`; c.fillRect(m.gx + (w.i % m.cols) * m.s, m.gy + ((w.i / m.cols) | 0) * m.s, q, q); }
+      }
+    }
+  };
+
+  FX.schema = {
+    faint: .55,
+    build(a, cv) {
+      let S; try { S = JSON.parse(cv.dataset.schema); } catch (e) { return null; }
+      const dims = S.t.filter(n => n.startsWith("dim_")), facts = S.t.filter(n => !n.startsWith("dim_"));
+      const cx = a.x + a.w / 2, cy = a.y + a.h / 2, rx = a.w * (a.faint ? .44 : .36), ry = a.h * .4, pos = {};
+      dims.forEach((n, i) => { const an = -Math.PI / 2 + TAU * (i + .5) / dims.length; pos[n] = { n, x: cx + Math.cos(an) * rx, y: cy + Math.sin(an) * ry, an, dim: true }; });
+      /* chaque table de faits se place du côté de ses dimensions (moyenne circulaire), puis l'ensemble est réparti régulièrement */
+      const fa = facts.map(n => { let sx = 0, sy = 0; S.l.forEach(([f, d]) => { if (f === n && pos[d]) { sx += Math.cos(pos[d].an); sy += Math.sin(pos[d].an); } }); return { n, an: Math.atan2(sy, sx) }; })
+        .sort((p, q) => p.an - q.an);
+      fa.forEach((f, i) => { const an = fa[0].an + TAU * i / fa.length; pos[f.n] = { n: f.n, x: cx + Math.cos(an) * rx * .4, y: cy + Math.sin(an) * ry * .4, an }; });
+      const links = S.l.filter(([f, d]) => pos[f] && pos[d]).map(([f, d], i) => ({ a: pos[d], b: pos[f], per: 2600 + (i * 977) % 2400, ph: (i * .37) % 1 }));
+      return { nodes: Object.values(pos), links, t0: null };
+    },
+    draw(c, m, t, a, ptr) {
+      if (m.t0 == null) m.t0 = reduce ? t - 1e5 : t;
+      const intro = (t - m.t0) / 1600;
+      let hot = null;
+      if (ptr.x != null) { let bd = 46; m.nodes.forEach(n => { const d = Math.hypot(n.x - ptr.x, n.y - ptr.y); if (d < bd) { bd = d; hot = n; } }); }
+      c.lineWidth = 1;
+      m.links.forEach((l, i) => {
+        const p = clamp01(intro * 1.4 - i * .06), on = hot && (l.a === hot || l.b === hot);
+        if (p <= 0) return;
+        c.strokeStyle = `rgba(255,255,255,${(on ? .95 : hot ? .22 : .5) * a.k})`;
+        c.beginPath(); c.moveTo(l.a.x, l.a.y); c.lineTo(l.a.x + (l.b.x - l.a.x) * p, l.a.y + (l.b.y - l.a.y) * p); c.stroke();
+        if (p >= 1 && !reduce) {                  /* une impulsion va de la dimension vers la table de faits : une jointure */
+          const u = (t / l.per + l.ph) % 1, x = l.a.x + (l.b.x - l.a.x) * u, y = l.a.y + (l.b.y - l.a.y) * u, f = Math.sin(Math.PI * u);
+          c.fillStyle = `rgba(255,232,214,${.95 * f * a.k})`; c.beginPath(); c.arc(x, y, 2.4, 0, TAU); c.fill();
+          c.fillStyle = `rgba(255,232,214,${.22 * f * a.k})`; c.beginPath(); c.arc(x, y, 6, 0, TAU); c.fill();
+        }
+      });
+      c.font = `500 11.5px ${MONO}`; c.textBaseline = "middle";
+      m.nodes.forEach((n, i) => {
+        const p = clamp01(intro * 1.6 - i * .05), k = (hot && hot !== n ? .55 : 1) * a.k * p;
+        if (p <= 0) return;
+        if (n.dim) { c.strokeStyle = `rgba(255,255,255,${.9 * k})`; c.lineWidth = 1.5; c.beginPath(); c.arc(n.x, n.y, 5.5 * p, 0, TAU); c.stroke(); c.fillStyle = `rgba(255,255,255,${.22 * k})`; c.fill(); }
+        else { c.fillStyle = `rgba(255,255,255,${.92 * k})`; c.fillRect(n.x - 5 * p, n.y - 5 * p, 10 * p, 10 * p); }
+        if (!a.faint) {
+          c.fillStyle = `rgba(255,255,255,${.96 * k})`;
+          if (n.dim) { const r = Math.cos(n.an) >= -.01; c.textAlign = r ? "left" : "right"; c.fillText(n.n, n.x + (r ? 11 : -11), n.y); }
+          else { const r = Math.cos(n.an) >= 0; c.textAlign = r ? "left" : "right"; c.fillText(n.n, n.x + (r ? 11 : -11), n.y + (Math.sin(n.an) >= 0 ? 9 : -9)); }
+        }
+      });
+    }
+  };
+
+  let villes = null;
+  FX.cities = {
+    faint: .7, full: true,
+    build(a) {
+      const el = document.getElementById("carte");
+      if (!el || typeof d3 === "undefined") return null;
+      try { villes = villes || JSON.parse(el.textContent).villes.filter(v => v.lat != null && v.lon != null); } catch (e) { return null; }
+      const proj = d3.geoConicConformal().parallels([49, 77]).rotate([96, 0])
+        .fitExtent([[a.x + 16, a.y + 16], [a.x + a.w - 16, a.y + a.h - 16]], { type: "MultiPoint", coordinates: villes.map(v => [v.lon, v.lat]) });
+      const pts = villes.map((v, i) => { const xy = proj([v.lon, v.lat]); return { x: xy[0], y: xy[1], v, mtl: v.id === 7, ph: (i * .618) % 1 }; });
+      const links = [], seen = new Set();          /* chaque région reliée à ses deux plus proches voisines */
+      pts.forEach((p, i) => {
+        pts.map((q, j) => [j, Math.hypot(p.x - q.x, p.y - q.y)]).filter(d => d[0] !== i).sort((x, y) => x[1] - y[1]).slice(0, 2).forEach(([j]) => {
+          const key = i < j ? i + "-" + j : j + "-" + i;
+          if (!seen.has(key)) { seen.add(key); links.push([p, pts[j]]); }
+        });
+      });
+      return { pts, links };
+    },
+    draw(c, m, t, a, ptr) {
+      c.strokeStyle = `rgba(255,255,255,${.24 * a.k})`; c.lineWidth = 1; c.beginPath();
+      m.links.forEach(([p, q]) => { c.moveTo(p.x, p.y); c.lineTo(q.x, q.y); }); c.stroke();
+      let hot = null;
+      if (ptr.x != null) { let bd = 26; m.pts.forEach(p => { const d = Math.hypot(p.x - ptr.x, p.y - ptr.y); if (d < bd) { bd = d; hot = p; } }); }
+      m.pts.forEach(p => {
+        const e = p.v.ecart, col = p.mtl ? "255,150,186" : "255,255,255", k = a.k * (p.x < a.textRight + 20 ? .5 : 1);
+        if (e > 0) {                                /* onde : rayon proportionnel à l'écart entre loyer demandé et loyer payé */
+          const u = reduce ? .55 : (t / 3400 + p.ph) % 1, R = (7 + e / 15) * (1 - Math.pow(1 - u, 2));
+          c.strokeStyle = `rgba(${col},${(1 - u) * .6 * k})`; c.lineWidth = p.mtl ? 2 : 1.2; c.beginPath(); c.arc(p.x, p.y, R, 0, TAU); c.stroke();
+        }
+        c.fillStyle = `rgba(${col},${(p.v.paye ? .95 : .5) * k})`; c.beginPath(); c.arc(p.x, p.y, 1.6 + (p.v.demande || 1300) / 900, 0, TAU); c.fill();
+      });
+      if (hot && !a.faint && hot.x > a.textRight + 20) {
+        const en = window.LANG === "en", e = hot.v.ecart, nf = new Intl.NumberFormat(en ? "en-CA" : "fr-CA");
+        const amt = e == null ? "" : "  " + (e > 0 ? "+" : e < 0 ? "−" : "") + (en ? "$" + nf.format(Math.abs(e)) : nf.format(Math.abs(e)) + " $");
+        c.font = `600 12px ${SANS}`; c.textBaseline = "middle"; c.textAlign = hot.x > a.x + a.w * .6 ? "right" : "left";
+        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText(hot.v.nom.split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
+      }
+    }
+  };
+
+  document.querySelectorAll("canvas.herofx").forEach(cv => {
+    const host = cv.closest(".heroband"), fx = FX[cv.dataset.fx], c = cv.getContext ? cv.getContext("2d") : null;
+    if (!host || !fx || !c) return;
+    let W = 0, H = 0, a = null, m = null, on = false, last = 0, rt = 0;
+    const ptr = { x: null, y: null, down: false, dx: 0, dy: 0 };
+    const size = () => {
+      const hr = host.getBoundingClientRect();
+      W = Math.round(hr.width); H = Math.round(hr.height);
+      if (W < 200 || H < 160) { m = null; return; }
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      let right = 0;                               /* bord droit réel du texte du bandeau */
+      host.querySelectorAll(".phero > *").forEach(e => { const rg = document.createRange(); rg.selectNodeContents(e); right = Math.max(right, rg.getBoundingClientRect().right - hr.left); });
+      const room = W - 28 - (right + 44);
+      a = fx.full ? { x: 14, y: 84, w: W - 28, h: H - 84 - 22, k: W < 700 ? fx.faint : .9, faint: W < 700, textRight: W < 700 ? W : right }
+        : room >= 300 ? { x: right + 44, y: 86, w: Math.min(room, 560), h: H - 86 - 30, k: 1, faint: false }
+                      : { x: 14, y: 72, w: W - 28, h: H - 72 - 16, k: fx.faint || .3, faint: true, textRight: W };
+      m = a.h > 80 ? fx.build(a, cv) : null;
+      c.clearRect(0, 0, W, H);
+      if (m) fx.draw(c, m, performance.now(), a, ptr);
+    };
+    const tick = t => {
+      if (!on) return;
+      if (m && !document.hidden && t - last > 33) { last = t; c.clearRect(0, 0, W, H); fx.draw(c, m, t, a, ptr); }
+      requestAnimationFrame(tick);
+    };
+    size();
+    const resize = () => { clearTimeout(rt); rt = setTimeout(size, 160); };
+    if ("ResizeObserver" in window) new ResizeObserver(resize).observe(host); else addEventListener("resize", resize);
+    document.addEventListener("langchange", resize);            /* le texte change de longueur : le motif se replace */
+    if (reduce || !("IntersectionObserver" in window)) return;
+    new IntersectionObserver(es => {
+      const v = es[es.length - 1].isIntersecting;
+      if (v && !on) { on = true; requestAnimationFrame(tick); } else if (!v) on = false;
+    }).observe(host);
+    host.addEventListener("pointermove", e => { const r = host.getBoundingClientRect(); ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top; }, { passive: true });
+    host.addEventListener("pointerleave", () => { ptr.x = ptr.y = null; }, { passive: true });
+    host.addEventListener("pointerdown", e => { const r = host.getBoundingClientRect(); ptr.dx = e.clientX - r.left; ptr.dy = e.clientY - r.top; ptr.down = true; }, { passive: true });
+  });
+
+  /* accueil : les cartes de verre s'inclinent légèrement vers le pointeur (souris seulement) */
+  const glass = document.querySelector(".glass-stack");
+  if (glass && !reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const zone = glass.closest(".heroband") || glass.parentElement;
+    zone.addEventListener("pointermove", e => {
+      const r = glass.getBoundingClientRect();
+      glass.style.setProperty("--ry", (clamp01((e.clientX - r.left) / r.width * .5 + .25) * 10 - 5).toFixed(2) + "deg");
+      glass.style.setProperty("--rx", (5 - clamp01((e.clientY - r.top) / r.height * .5 + .25) * 10).toFixed(2) + "deg");
+    }, { passive: true });
+    zone.addEventListener("pointerleave", () => { glass.style.setProperty("--rx", "0deg"); glass.style.setProperty("--ry", "0deg"); }, { passive: true });
+  }
 })();
 </script>
 <script>/* Langue du site : FR par défaut, EN au choix. Le choix est mémorisé (localStorage)

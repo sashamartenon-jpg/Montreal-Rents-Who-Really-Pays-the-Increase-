@@ -140,6 +140,17 @@ def scene_json():
     assert sum(v["mtl"] for v in villes) == 1 and len(villes) >= 10, "scène : Montréal ou régions manquantes"
     return json.dumps({"villes": villes}, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
+def schema_json():
+    """Tables et clés étrangères lues dans sql/schema/01_tables.sql, pour le motif animé du bandeau de la page SQL."""
+    src = (ROOT / "sql" / "schema" / "01_tables.sql").read_text(encoding="utf-8")
+    tables, links = [], []
+    for name, body in re.findall(r"CREATE TABLE (\w+)\s*\((.*?)\n\);", src, flags=re.S):
+        tables.append(name)
+        links += [[name, ref] for ref in re.findall(r"REFERENCES (\w+)", body)]
+    assert len(tables) == N_TABLES and links, "schéma : tables ou clés étrangères non lues"
+    return json.dumps({"t": tables, "l": links}, separators=(",", ":"))
+
+
 def package_program():
     """Paquet public de l'évaluateur : script, données, exemple, mode d'emploi."""
     import subprocess
@@ -237,6 +248,7 @@ common = {
     "__SQL_VOLUMES__": SQL_VOL_FR, "__SQL_VOLUMES_EN__": SQL_VOL_EN,
     "__N_PAYE__": str(N_PAYE), "__N_BOTH__": str(N_BOTH), "__N_DEMANDE__": str(N_DEMANDE), "__N_REG__": str(N_REG),
     "__N_SQL__": str(len(SQL_FILES)), "__N_TABLES__": str(N_TABLES), "__N_VUES__": str(N_VUES),
+    "__SCHEMA_JSON__": schema_json(),
     "__XL_SHEETS__": str(n_sheets - 1), "__XL_VISIBLE__": str(n_visible),
     "__PERIODE__": INS["periode_derniere"],
     "__CHOW_RUPT__": str(stats["chow_rupture"]), "__CHOW_F__": fr_num(stats["chow_f_2019"], 1),
