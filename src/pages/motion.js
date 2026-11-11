@@ -233,7 +233,7 @@
         const en = window.LANG === "en", e = hot.v.ecart, nf = new Intl.NumberFormat(en ? "en-CA" : "fr-CA");
         const amt = e == null ? "" : "  " + (e > 0 ? "+" : e < 0 ? "−" : "") + (en ? "$" + nf.format(Math.abs(e)) : nf.format(Math.abs(e)) + " $");
         c.font = `600 12px ${SANS}`; c.textBaseline = "middle"; c.textAlign = hot.x > a.x + a.w * .6 ? "right" : "left";
-        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText(hot.v.nom.split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
+        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText((window.placeName ? window.placeName(hot.v.nom) : hot.v.nom).split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
       }
     }
   };

@@ -832,6 +832,14 @@ const GEO = JSON.parse(document.getElementById("geo").textContent);
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const EN = () => window.LANG === "en";
 const tr = (fr, en) => EN() ? en : fr;
+/* Noms de lieux en anglais : les provinces, et les régions dont le nom anglais diffère (mêmes formes que le classeur anglais ;
+   « Quebec City » pour la ville, comme sur la page d'accueil, pour la distinguer de la province). */
+const PROV_EN = { "Québec": "Quebec", "Colombie-Britannique": "British Columbia", "Île-du-Prince-Édouard": "Prince Edward Island", "Nouveau-Brunswick": "New Brunswick",
+  "Nouvelle-Écosse": "Nova Scotia", "Terre-Neuve-et-Labrador": "Newfoundland and Labrador" };
+const CITY_EN = { "Montréal": "Montreal", "Québec": "Quebec City", "Grand Sudbury": "Greater Sudbury", "Gatineau (Ottawa-Gatineau, partie québécoise)": "Gatineau (Ottawa-Gatineau, Quebec part)",
+  "Ottawa (Ottawa-Gatineau, partie ontarienne)": "Ottawa (Ottawa-Gatineau, Ontario part)" };
+const provName = n => EN() ? (PROV_EN[n] || n) : n, cityName = n => EN() ? (CITY_EN[n] || n) : n;
+window.placeName = cityName;                 /* utilisé par le motif animé du bandeau */
 const nf = (v, d = 0) => new Intl.NumberFormat(EN() ? "en-CA" : "fr-CA", { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
 const money = v => EN() ? "$" + nf(v) : nf(v) + " $";
 const pct = (v, d = 1, s = true) => (s && v > 0 ? "+" : "") + nf(v, d) + (EN() ? "%" : " %");
@@ -869,7 +877,7 @@ const METRICS = () => ({
     { k: "annuelle", label: tr("Hausse annuelle de l'IPC du loyer", "Annual rent CPI increase"), fmt: v => pct(v), title: () => tr(`Hausse des loyers en ${S.year}, par province`, `Rent increase in ${S.year}, by province`),
       sub: () => { const top = [...C.provinces].filter(p => p.code !== "CA").sort((a, b) => annual(b, S.year) - annual(a, S.year))[0];
         return tr(`IPC du loyer, ${S.year} contre ${S.year - 1} · plus forte hausse : ${top.nom} (${pct(annual(top, S.year))}) · échelle commune à 2020-2025`,
-                  `Rent CPI, ${S.year} vs ${S.year - 1} · strongest increase: ${top.nom} (${pct(annual(top, S.year))}) · common scale for 2020-2025`); } },
+                  `Rent CPI, ${S.year} vs ${S.year - 1} · strongest increase: ${provName(top.nom)} (${pct(annual(top, S.year))}) · common scale for 2020-2025`); } },
     { k: "hausse_loyer", label: tr("Hausse de l'IPC du loyer, 2019-2025", "Rent CPI increase, 2019-2025"), fmt: v => pct(v), title: tr("Hausse des loyers depuis 2019, par province", "Rent increase since 2019, by province"), sub: tr("Indice des prix du loyer, 2025 contre 2019", "Rent price index, 2025 vs 2019") },
     { k: "hausse_reelle", label: tr("Hausse réelle du loyer, 2019-2025", "Real rent increase, 2019-2025"), fmt: v => pct(v), title: tr("Hausse des loyers au-delà de l'inflation", "Rent increases beyond inflation"), sub: tr("IPC du loyer rapporté à l'IPC d'ensemble, 2025 contre 2019", "Rent CPI against all-items CPI, 2025 vs 2019") },
   ]
@@ -882,8 +890,8 @@ const txt = x => typeof x === "function" ? x() : x;
 
 function itemsFor() {
   const m = S.metric;
-  if (S.view === "villes") return C.villes.filter(v => v.lat != null).map(v => ({ id: v.id, nom: v.nom, sub: v.prov, v: v[m], raw: v, mtl: v.id === 7 }));
-  return C.provinces.filter(p => p.code !== "CA").map(p => ({ id: p.code, nom: p.nom, sub: p.code, v: m === "annuelle" ? annual(p, S.year) : p[m], raw: p, mtl: p.code === "QC" }));
+  if (S.view === "villes") return C.villes.filter(v => v.lat != null).map(v => ({ id: v.id, nom: cityName(v.nom), sub: v.prov, v: v[m], raw: v, mtl: v.id === 7 }));
+  return C.provinces.filter(p => p.code !== "CA").map(p => ({ id: p.code, nom: provName(p.nom), sub: p.code, v: m === "annuelle" ? annual(p, S.year) : p[m], raw: p, mtl: p.code === "QC" }));
 }
 function colorScale(items) {
   // animation : une seule échelle pour toutes les années, sinon les couleurs ne seraient pas comparables d'une année à l'autre
@@ -940,7 +948,7 @@ function draw() {
     .on("pointermove", (ev, f) => {
       if (S.view !== "prov") return;
       const it = byId.get(f.properties.code);
-      showTip(`<div class="t">${f.properties.nom}</div><div class="r"><span>${M.label}</span><b>${it && it.v != null ? M.fmt(it.v) : ND()}</b></div>`, ev);
+      showTip(`<div class="t">${provName(f.properties.nom)}</div><div class="r"><span>${M.label}</span><b>${it && it.v != null ? M.fmt(it.v) : ND()}</b></div>`, ev);
     })
     .on("pointerleave", hideTip)
     .on("click", (ev, f) => { if (S.view === "prov" && byId.get(f.properties.code)) select(f.properties.code); });
@@ -993,7 +1001,7 @@ function draw() {
 }
 function cityTip(v) {
   const row = (l, x) => `<div class="r"><span>${l}</span><b>${x}</b></div>`;
-  return `<div class="t">${v.nom}</div>` + row(tr("Loyer demandé", "Asking rent"), v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()) +
+  return `<div class="t">${cityName(v.nom)}</div>` + row(tr("Loyer demandé", "Asking rent"), v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()) +
     row(tr("Loyer payé", "Rent paid"), v.paye ? money(v.paye) : ND()) + row(tr("Écart", "Gap"), v.ecart != null ? `${money(v.ecart)} (${pct(v.ecart_pct)})` : ND()) +
     row(tr("Demandé sur un an", "Asking, year over year"), v.var_demande != null ? pct(v.var_demande) : ND());
 }
@@ -1034,7 +1042,7 @@ function drawDetail() {
   d.classList.toggle("swap", FXM === "sel" || FXM === "full");
   if (S.view === "villes") {
     const v = C.villes.find(x => x.id === S.sel); if (!v) { d.innerHTML = ""; return; }
-    d.innerHTML = `<div class="dgrid"><div><h3>${v.nom}</h3><p class="sub">${v.prov} · ${tr("appartements de 2 chambres", "two-bedroom apartments")}</p>
+    d.innerHTML = `<div class="dgrid"><div><h3>${cityName(v.nom)}</h3><p class="sub">${v.prov} · ${tr("appartements de 2 chambres", "two-bedroom apartments")}</p>
       <dl><dt>${tr("Loyer demandé", "Asking rent")}, ${per(last)}</dt><dd>${v.demande ? money(v.demande) + (v.cote === "E" ? "*" : "") : ND()}</dd>
       <dt>${tr("Loyer payé", "Rent paid")}, ${per(last)}</dt><dd>${v.paye ? money(v.paye) : ND()}</dd>
       <dt>${tr("Écart", "Gap")}</dt><dd>${v.ecart != null ? money(v.ecart) + " (" + pct(v.ecart_pct) + ")" : ND()}</dd>
@@ -1045,11 +1053,11 @@ function drawDetail() {
   } else {
     const p = C.provinces.find(x => x.code === S.sel); if (!p) { d.innerHTML = ""; return; }
     const yrs = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
-    d.innerHTML = `<div class="dgrid"><div><h3>${p.nom}</h3><p class="sub">${tr("Indice des prix du loyer (2002 = 100)", "Rent price index (2002 = 100)")}</p>
+    d.innerHTML = `<div class="dgrid"><div><h3>${provName(p.nom)}</h3><p class="sub">${tr("Indice des prix du loyer (2002 = 100)", "Rent price index (2002 = 100)")}</p>
       <dl>${+S.year === 2025 ? "" : `<dt>${tr("Hausse en", "Increase in")} ${S.year}</dt><dd>${pct(annual(p, S.year))}</dd>`}<dt>${tr("Hausse en 2025", "Increase in 2025")}</dt><dd>${pct(p.hausse_loyer_2025)}</dd><dt>${tr("Hausse 2019-2025", "Increase 2019-2025")}</dt><dd>${pct(p.hausse_loyer)}</dd>
       <dt>${tr("Inflation 2019-2025", "Inflation 2019-2025")}</dt><dd>${pct(p.hausse_inflation)}</dd><dt>${tr("Hausse réelle", "Real increase")}</dt><dd>${pct(p.hausse_reelle)}</dd></dl></div>
       <div>${spark([p.serie_loyer, C.provinces.find(x => x.code === "CA").serie_loyer], yrs, ["--warm", "--other"], S.metric === "annuelle" ? String(S.year) : null)}
-      <div class="legend"><span><i style="--c:var(--warm)"></i>${p.nom}</span><span><i style="--c:var(--other)"></i>Canada</span></div></div></div>`;
+      <div class="legend"><span><i style="--c:var(--warm)"></i>${provName(p.nom)}</span><span><i style="--c:var(--other)"></i>Canada</span></div></div></div>`;
   }
 }
 function select(id) { S.sel = id; FXM = "sel"; draw(); }
@@ -1084,7 +1092,7 @@ renderKpis();
 let rw = document.getElementById("map").clientWidth;
 new ResizeObserver(() => { const w = document.getElementById("map").clientWidth; if (Math.abs(w - rw) > 4) { rw = w; draw(); } }).observe(document.getElementById("map"));
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw); } catch (e) {}
-document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect(); draw(); });
+document.addEventListener("langchange", () => { hideTip(); renderKpis(); fillMetricSelect(); draw(); });
 </script>
 
 <script>/* Animations au défilement, communes à toutes les pages : barre de progression, apparition des blocs,
@@ -1322,7 +1330,7 @@ document.addEventListener("langchange", () => { renderKpis(); fillMetricSelect()
         const en = window.LANG === "en", e = hot.v.ecart, nf = new Intl.NumberFormat(en ? "en-CA" : "fr-CA");
         const amt = e == null ? "" : "  " + (e > 0 ? "+" : e < 0 ? "−" : "") + (en ? "$" + nf.format(Math.abs(e)) : nf.format(Math.abs(e)) + " $");
         c.font = `600 12px ${SANS}`; c.textBaseline = "middle"; c.textAlign = hot.x > a.x + a.w * .6 ? "right" : "left";
-        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText(hot.v.nom.split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
+        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText((window.placeName ? window.placeName(hot.v.nom) : hot.v.nom).split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
       }
     }
   };

@@ -832,30 +832,32 @@ function drawQlist() {
 }
 drawQlist();
 
-const st = { i: 0, db: null, loading: null };
+const st = { i: 0, db: null, loading: null, stat: null, out: null };
+/* L'état et le dernier résultat sont mémorisés sous une forme indépendante de la langue (une fonction, des lignes brutes) :
+   au changement de langue, la ligne d'état et le tableau se réécrivent, format des nombres compris. */
+function setStat(f) { st.stat = f; document.getElementById("sql-stat").textContent = f(); }
+function setOut(cols, rows) { st.out = cols ? [cols, rows] : null; document.getElementById("sql-out").innerHTML = cols ? resultTable(cols, rows) : ""; }
 function loadSQL() {
   if (st.loading) return st.loading;
-  const stat = document.getElementById("sql-stat");
-  stat.textContent = tr("Chargement de SQLite…", "Loading SQLite…");
+  setStat(() => tr("Chargement de SQLite…", "Loading SQLite…"));
   st.loading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); })
     .then(() => initSqlJs({ locateFile: f => "assets/" + f }))
     .then(SQL => fetch("assets/loyers.sqlite").then(r => { if (!r.ok) throw new Error("db"); return r.arrayBuffer(); }).then(b => { st.db = new SQL.Database(new Uint8Array(b)); }))
-    .then(() => { stat.textContent = tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run"); })
-    .catch(() => { stat.textContent = tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown."); });
+    .then(() => { setStat(() => tr("SQLite prêt · Ctrl+Entrée pour exécuter", "SQLite ready · Ctrl+Enter to run")); })
+    .catch(() => { setStat(() => tr("SQLite n'a pas pu se charger ici : résultats précalculés affichés.", "SQLite could not load here: precomputed results shown.")); });
   return st.loading;
 }
 async function runSQL() {
   const err = document.getElementById("sql-err"); err.hidden = true;
   await loadSQL();
-  if (!st.db) { const q = SQLRES[st.i]; document.getElementById("sql-out").innerHTML = resultTable(q.columns, q.rows); return; }
+  if (!st.db) { const q = SQLRES[st.i]; setOut(q.columns, q.rows); return; }
   try {
     const t0 = performance.now();
     const res = st.db.exec(document.getElementById("sql-editor").value);
     const last = res[res.length - 1];
-    document.getElementById("sql-out").innerHTML = last ? resultTable(last.columns, last.values.slice(0, 500)) : "";
-    document.getElementById("sql-stat").textContent = last
-      ? `${last.values.length} ${tr("ligne(s)", "row(s)")} · ${Math.round(performance.now() - t0)} ms`
-      : tr("Requête exécutée, aucun résultat.", "Query ran, no result set.");
+    const ms = Math.round(performance.now() - t0), n = last ? last.values.length : 0;
+    if (last) setOut(last.columns, last.values.slice(0, 500)); else setOut(null);
+    setStat(() => last ? `${n} ${tr("ligne(s)", "row(s)")} · ${ms} ms` : tr("Requête exécutée, aucun résultat.", "Query ran, no result set."));
   } catch (e) { err.textContent = e.message; err.hidden = false; }
 }
 function drawTabs() {
@@ -870,13 +872,13 @@ function drawSchema() {
   document.getElementById("schema").innerHTML = `<p style='margin:0 0 6px;font-family:var(--font-body)'>${tr("Tables", "Tables")}</p>` + SCHEMA_TXT.map(([n, c]) => `<b>${n}</b>${c}`).join("<br>");
 }
 drawSchema();
-document.getElementById("sql-out").innerHTML = resultTable(SQLRES[0].columns, SQLRES[0].rows);
+setOut(SQLRES[0].columns, SQLRES[0].rows);
 document.getElementById("sql-run").onclick = runSQL;
 document.getElementById("sql-editor").addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSQL(); }
   if (e.key === "Tab") { e.preventDefault(); const el = e.target; el.setRangeText("  ", el.selectionStart, el.selectionEnd, "end"); }
 });
-document.addEventListener("langchange", () => { drawQlist(); drawTabs(); drawSchema(); });
+document.addEventListener("langchange", () => { drawQlist(); drawTabs(); drawSchema(); if (st.stat) setStat(st.stat); if (st.out) setOut(st.out[0], st.out[1]); });
 loadSQL();
 </script>
 
@@ -1115,7 +1117,7 @@ loadSQL();
         const en = window.LANG === "en", e = hot.v.ecart, nf = new Intl.NumberFormat(en ? "en-CA" : "fr-CA");
         const amt = e == null ? "" : "  " + (e > 0 ? "+" : e < 0 ? "−" : "") + (en ? "$" + nf.format(Math.abs(e)) : nf.format(Math.abs(e)) + " $");
         c.font = `600 12px ${SANS}`; c.textBaseline = "middle"; c.textAlign = hot.x > a.x + a.w * .6 ? "right" : "left";
-        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText(hot.v.nom.split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
+        c.fillStyle = "rgba(255,255,255,.96)"; c.fillText((window.placeName ? window.placeName(hot.v.nom) : hot.v.nom).split(" (")[0] + amt, hot.x + (c.textAlign === "right" ? -12 : 12), hot.y - 12);
       }
     }
   };

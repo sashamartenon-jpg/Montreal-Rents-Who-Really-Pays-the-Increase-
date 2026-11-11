@@ -1957,7 +1957,7 @@ new MutationObserver(drawCharts).observe(document.documentElement, { attributes:
       const ang = mobile ? 1.08 : .72, fsz = mobile ? 10 : 12;
       const lblY = d3.max(L.labels, d => d.botY) > L.gy ? null : L.gy;
       L.labels.forEach((d, j) => {
-        const c = d.c, name = c.mtl && state.lang === "en" ? "Montreal" : c.n;
+        const c = d.c, name = state.lang === "en" ? ({ "Montréal": "Montreal", "Québec": "Quebec City", "Grand Sudbury": "Greater Sudbury" }[c.n] || c.n) : c.n;
         ctx.save();
         ctx.translate(d.cx + 4, (lblY === null ? d.botY : lblY) + 14); ctx.rotate(-ang);
         ctx.font = `${c.mtl ? 700 : 500} ${fsz}px ${FAM}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
