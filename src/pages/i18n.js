@@ -18,12 +18,9 @@
   const saved = new Map();
   let frTitle = document.title;
 
-  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
-    const br = document.querySelector("a.brand");
-    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];

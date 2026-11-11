@@ -86,8 +86,6 @@ a { color: var(--link); }
 /* barre du haut */
 .top { border-bottom: 1px solid var(--line); background: var(--surface); }
 .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
-.brand { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: .01em; }
-.brand span { color: var(--ink-3); font-weight: 500; }
 .top-actions { display: flex; gap: 8px; align-items: center; }
 .btn { font: 500 .85rem var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 .btn:hover { border-color: var(--ink-3); }
@@ -183,13 +181,12 @@ details.more summary { cursor: pointer; font-size: .85rem; color: var(--ink-2); 
 
 /* navigation */
 .topbar { flex-wrap: wrap; }
-.brand { color: var(--ink); text-decoration: none; }
 .nav { display: flex; gap: 2px; }
 .nav a { font: 500 .88rem var(--font-body); color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
 .nav a:hover { color: var(--ink); background: var(--bg); }
 .nav a[aria-current="page"] { background: var(--ink); color: var(--bg); }
 @media (max-width: 760px) {
-  .nav { order: 3; width: 100%; overflow-x: auto; margin: 0 -4px; padding-bottom: 2px; }
+  .nav { flex: 0 1 auto; min-width: 0; overflow-x: auto; }
 }
 /* bandeau compétences (accueil) */
 .skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-block: 0 32px; }
@@ -317,7 +314,6 @@ main .note, main figcaption, main .kpi small, main .skill small, main .flow smal
   .flow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .hero { padding-block: 28px 20px; }
 }
-@media (max-width: 420px) { .brand span { display: none; } }
 
 /* ===================== identité visuelle : dégradé flou bleu, rose et corail, verre dépoli ===================== */
 :root {
@@ -369,14 +365,19 @@ h1, h2, h3 { font-family: var(--font-display); }
 .top .wrap { padding-block: 10px; }
 .top { transition: background .3s; }
 .top.solid { background: rgba(19, 35, 58, .88); }
-.top .brand { color: #fff; font: 600 1.08rem var(--font-display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
-.top .brand::before { content: ""; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, #8ec2ea, var(--warm) 60%, var(--coral)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
-.top .brand span { color: rgba(255, 255, 255, .78); font-weight: 400; }
 .top .nav { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; padding: 4px; }
 .top .nav a { color: rgba(255, 255, 255, .92); border-radius: 999px; padding: 6px 14px; }
 .top .nav a:hover { background: rgba(255, 255, 255, .16); color: #fff; }
 .top .nav a[aria-current="page"] { background: rgba(255, 255, 255, .95); color: #17325e; font-weight: 600; }
 .top .nav a[aria-current="page"]::before { content: "• "; color: var(--warm); }
+/* téléphone : liens resserrés pour que navigation et langue tiennent sur une ligne dès 360 px */
+@media (max-width: 760px) {
+  .top .wrap { gap: 8px; }
+  .top .nav a { padding: 6px 9px; font-size: .84rem; }
+  .top .nav a[aria-current="page"]::before { content: none; }   /* la pastille blanche suffit à marquer la page */
+  .top .seg button { padding-inline: 9px; }
+}
+@media (min-width: 360px) and (max-width: 760px) { .top .wrap { flex-wrap: nowrap; } }
 .top .btn { background: rgba(255, 255, 255, .14); color: #fff; border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
 .top .btn:hover { background: rgba(255, 255, 255, .24); border-color: rgba(255, 255, 255, .6); }
 .top .seg { border-color: rgba(255, 255, 255, .3); border-radius: 999px; }
@@ -595,7 +596,6 @@ select.sel { font: 500 .84rem var(--font-body); color: var(--ink); background: v
 <a class="skip" href="#main">Aller au contenu</a>
 <header class="top">
   <div class="wrap topbar">
-    <a class="brand" href="index.html">Loyers Montréal <span>· 1992–2026</span></a>
     <nav class="nav" aria-label="Pages du projet" data-en-aria="Project pages"><a href="index.html" aria-current="page">Analyse</a><a href="carte.html">Carte</a><a href="excel.html">Excel</a><a href="sql.html">SQL</a></nav>
     <div class="top-actions"><div class="seg" role="group" aria-label="Langue / Language"><button type="button" id="lang-fr" aria-pressed="true">FR</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div></div>
   </div>
@@ -1103,6 +1103,8 @@ function renderText() {
   document.getElementById("lang-fr").setAttribute("aria-pressed", state.lang === "fr");
   document.getElementById("lang-en").setAttribute("aria-pressed", state.lang === "en");
   const fr = state.lang === "fr";
+  const heroTag = document.querySelector("#hero-curve text.tag");
+  if (heroTag) heroTag.textContent = fr ? "2019 · la courbe casse" : "2019 · the curve breaks";
   // textes fixes sans clé dans T (data-en) et attributs (aria-label) : le français est gardé au premier passage
   document.querySelectorAll("[data-en]").forEach(el => {
     if (el.dataset.fr == null) el.dataset.fr = el.textContent;
@@ -1870,12 +1872,9 @@ new MutationObserver(drawCharts).observe(document.documentElement, { attributes:
   const saved = new Map();
   let frTitle = document.title;
 
-  const BRAND = { fr: "Loyers Montréal", en: "Montreal Rents" };
   function apply() {
     const L = window.LANG, en = L === "en";
     document.documentElement.lang = L;
-    const br = document.querySelector("a.brand");
-    if (br && br.firstChild && br.firstChild.nodeType === 3) br.firstChild.textContent = BRAND[L] + " ";
     document.querySelectorAll(".nav a").forEach(a => {
       const d = NAV[a.getAttribute("href")];
       if (d) a.textContent = d[L];
