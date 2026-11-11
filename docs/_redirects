@@ -1,0 +1,7 @@
+/assets/modele_loyers_montreal_en.xlsx /assets/montreal_rents_workbook.xlsx 301
+/assets/loyers_sqlserver.sql /assets/rents_database_sqlserver.sql 301
+/assets/requetes_sqlserver.sql /assets/rents_queries_sqlserver.sql 301
+/assets/loyers_postgres.sql /assets/rents_database_postgres.sql 301
+/assets/requetes_postgres.sql /assets/rents_queries_postgres.sql 301
+/assets/loyers.sql /assets/rents_database_sqlite.sql 301
+/assets/requetes_loyers_montreal.sql /assets/rents_queries_sqlite.sql 301

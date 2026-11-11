@@ -227,7 +227,16 @@ def en_num(x, d=2):
   Content-Type: application/sql
   Content-Disposition: attachment
 """, encoding="utf-8")
-(DOCS / "_redirects").unlink(missing_ok=True)
+# Anciens noms de téléchargements (avant le passage des noms de fichiers à l'anglais) : redirigés
+# vers les nouveaux, sinon Cloudflare Pages sert la page d'accueil à la place d'une erreur claire.
+(DOCS / "_redirects").write_text("""/assets/modele_loyers_montreal_en.xlsx /assets/montreal_rents_workbook.xlsx 301
+/assets/loyers_sqlserver.sql /assets/rents_database_sqlserver.sql 301
+/assets/requetes_sqlserver.sql /assets/rents_queries_sqlserver.sql 301
+/assets/loyers_postgres.sql /assets/rents_database_postgres.sql 301
+/assets/requetes_postgres.sql /assets/rents_queries_postgres.sql 301
+/assets/loyers.sql /assets/rents_database_sqlite.sql 301
+/assets/requetes_loyers_montreal.sql /assets/rents_queries_sqlite.sql 301
+""", encoding="utf-8")
 def ko(rel):
     """Taille d'un fichier de docs/ en Ko (KB en anglais, clé « ko » de PAGE_EN), affichée à côté du lien de téléchargement."""
     return f"{(DOCS / rel).stat().st_size / 1024:.0f} <span data-i18n=\"ko\">Ko</span>"
